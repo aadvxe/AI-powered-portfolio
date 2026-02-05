@@ -71,7 +71,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                         <div className="space-y-4">
                             <h3 className="font-bold text-neutral-900 flex items-center gap-2 text-lg">
                                 <Bot size={20} className="text-brand-cyan" />
-                                Interactive AI Assistant
+                                Interactive Portfolio
                             </h3>
                             <p className="text-sm text-neutral-600 leading-relaxed">
                                 This portfolio is not just a static website; it is an AI-powered application that uses <strong>Retrieval-Augmented Generation (RAG)</strong> to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
@@ -148,12 +148,12 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                         </div>
 
                          {/* Source Code Link */}
-                         <div className="mt-8 flex justify-center">
+                         <div className="mt-0 flex justify-center">
                             <a 
                                 href="https://github.com/aadvxe/AI-powered-portfolio" 
                                 target="_blank" 
                                 rel="noopener noreferrer"
-                                className="flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                className="flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all font-medium"
                             >
                                 <Github size={20} />
                                 <span>View Source Code on GitHub</span>
