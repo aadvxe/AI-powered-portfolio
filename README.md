@@ -34,7 +34,7 @@ graph TD
 - **LLM**: Google Gemini 2.5 Flash-Lite
 - **Embeddings**: Google `text-embedding-004`
 - **Orchestration**: LangChain.js
-- **Styling**: TailwindCSS + Framer Motion (Glassmorphism UI)
+- **Styling**: TailwindCSS + Framer Motion
 
 ## 🧩 RAG Implementation Details
 
