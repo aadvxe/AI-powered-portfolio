@@ -128,22 +128,12 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                 Technical Stack
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8">
-                                <div className="flex justify-between items-center text-sm border-b border-neutral-200/50 pb-2">
-                                    <span className="text-neutral-500">LLM</span>
-                                    <span className="font-medium text-neutral-800">Gemini 2.5 Flash-Lite</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm border-b border-neutral-200/50 pb-2">
-                                    <span className="text-neutral-500">Vector DB</span>
-                                    <span className="font-medium text-neutral-800">Supabase pgvector</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm border-b border-neutral-200/50 pb-2">
-                                    <span className="text-neutral-500">Embeddings</span>
-                                    <span className="font-medium text-neutral-800">Google Embeddings</span>
-                                </div>
-                                <div className="flex justify-between items-center text-sm border-b border-neutral-200/50 pb-2">
-                                    <span className="text-neutral-500">Framework</span>
-                                    <span className="font-medium text-neutral-800">Next.js 14 (App Router)</span>
-                                </div>
+                                {stack.map((item) => (
+                                    <div key={item.name} className="flex justify-between items-center text-sm border-b border-neutral-200/50 pb-2">
+                                        <span className="text-neutral-500">{item.name}</span>
+                                        <span className="font-medium text-neutral-800">{item.val}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
