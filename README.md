@@ -12,7 +12,7 @@ graph TD
     Frontend --> HybridRouter{Local vs Cloud?}
 
     HybridRouter -- Simple Intent --> Local[Local Regex Matcher]
-    Local --> Response[Instant Response]
+    Local --> Response[Response]
 
     HybridRouter -- Complex Query --> API[Next.js API Route /api/chat]
 
