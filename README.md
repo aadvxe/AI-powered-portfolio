@@ -15,15 +15,21 @@ graph TD
     Local --> Response[Instant Response]
 
     HybridRouter -- Complex Query --> API[Next.js API Route /api/chat]
+
+    subgraph RAG Orchestration
     API --> Embed[Google text-embedding-004]
-    Embed --> VectorDB[(Supabase pgvector)]
-    VectorDB -- Retrieve Context --> LLM[Gemini 2.5 Flash-Lite]
+    Embed -.->|Vector| API
+    API --> VectorDB[(Supabase pgvector)]
+    VectorDB -.->|Context| API
+    API --> LLM[Gemini 2.5 Flash-Lite]
+    end
+
     LLM --> Response
 ```
 
 ## 🛠️ Technology Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
 - **LLM**: Google Gemini 2.5 Flash-Lite
 - **Embeddings**: Google `text-embedding-004`
