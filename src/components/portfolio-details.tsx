@@ -2,7 +2,7 @@
 
 import { GlassCard } from "./ui/glass-card";
 import { motion } from "framer-motion";
-import { X, Code2, Droplets, Sparkles, Database, Bot } from "lucide-react";
+import { X, Code2, Droplets, Sparkles, Database, Bot, Github } from "lucide-react";
 import { useEffect } from "react";
 
 export function PortfolioDetails({ onClose }: { onClose: () => void }) {
@@ -146,6 +146,19 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                 </div>
                             </div>
                         </div>
+
+                         {/* Source Code Link */}
+                         <div className="mt-8 flex justify-center">
+                            <a 
+                                href="https://github.com/aadvxe/AI-powered-portfolio" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                            >
+                                <Github size={20} />
+                                <span>View Source Code on GitHub</span>
+                            </a>
+                         </div>
 
                     </div>
                 </div>
