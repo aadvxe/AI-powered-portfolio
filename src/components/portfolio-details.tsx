@@ -14,13 +14,6 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
     { name: "AI", val: "LangChain + Google Gemini" },
   ];
 
-  const capabilities = [
-    '"Show me projects using Tensorflow"',
-    '"Do you have experience with AI?"',
-    '"How can I contact you?"',
-    '"Tell me about your background"'
-  ];
-
   // Prevent background scrolling when modal is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -84,11 +77,18 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                 This portfolio is not just a static website; it is an AI-powered application that uses <strong>Retrieval-Augmented Generation (RAG)</strong> to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                                {capabilities.map((text, i) => (
-                                    <div key={i} className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
-                                        {text}
-                                    </div>
-                                ))}
+                                <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
+                                    "Show me projects using Tensorflow"
+                                </div>
+                                <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
+                                    "Do you have experience with AI?"
+                                </div>
+                                <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
+                                    "How can I contact you?"
+                                </div>
+                                <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
+                                    "Tell me about your background"
+                                </div>
                             </div>
                         </div>
 

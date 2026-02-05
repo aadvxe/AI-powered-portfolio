@@ -16,36 +16,6 @@ import { PortfolioDetails } from "@/components/portfolio-details";
 import { LoopingTypewriter } from "@/components/ui/looping-typewriter";
 import { QuickAction } from "@/components/ui/quick-action";
 
-const ACTION_ITEMS = [
-  { icon: Smile, label: "About Me", prompt: "Tell me about yourself" },
-  { icon: Briefcase, label: "Projects", prompt: "Show me your projects" },
-  { icon: Layers, label: "Skills", prompt: "What are your skills?" },
-  { icon: User, label: "Contact", prompt: "How can I contact you?" }
-];
-
-const checkLocalIntent = (query: string) => {
-  const lower = query.toLowerCase();
-  
-  // Safety check: if query is complex question, skip local
-  if (lower.length > 50 || lower.includes("what is") || lower.includes("how does") || lower.includes("explain")) return null;
-
-  if (lower.includes("project") && (lower.includes("show") || lower.includes("see") || lower.includes("list"))) return "projects";
-  if (lower.includes("skill") && (lower.includes("what") || lower.includes("show") || lower.includes("see"))) return "skills";
-  if (lower.includes("contact") || lower.includes("reach")) return "contact";
-  
-  // Stricter 'About' check
-  if (lower === "about" || lower === "about me" || lower.includes("who are you") || lower.includes("tell me about yourself")) return "about";
-  
-  return null;
-}
-
-const LOCAL_RESPONSES: Record<string, string[]> = {
-  projects: ["Here are some of my recent projects 🚀", "Check out what I've been working on! 💻", "My project deck, coming right up!", "Here you go, my portfolio highlights."],
-  skills: ["Here is my technical arsenal 🛠️", "These are the tools I work with.", "My skills and tech stack.", "Here is what I am good at."],
-  contact: ["Let's connect! 📬", "Here is how you can reach me.", "Don't be a stranger, say hi!", "My contact channels:"],
-  about: ["Here is my professional profile 👨‍💻", "A little bit about me.", "Here is my bio and background.", "Allow me to introduce myself."]
-};
-
 export default function Home() {
   const [viewState, setViewState] = useState<"landing" | "chat">("landing");
   const [input, setInput] = useState("");
@@ -107,8 +77,21 @@ export default function Home() {
     }
   }, [messages, viewState]);
 
-    }
-  }, [messages, viewState]);
+  const checkLocalIntent = (query: string) => {
+    const lower = query.toLowerCase();
+    
+    // Safety check: if query is complex question, skip local
+    if (lower.length > 50 || lower.includes("what is") || lower.includes("how does") || lower.includes("explain")) return null;
+
+    if (lower.includes("project") && (lower.includes("show") || lower.includes("see") || lower.includes("list"))) return "projects";
+    if (lower.includes("skill") && (lower.includes("what") || lower.includes("show") || lower.includes("see"))) return "skills";
+    if (lower.includes("contact") || lower.includes("reach")) return "contact";
+    
+    // Stricter 'About' check
+    if (lower === "about" || lower === "about me" || lower.includes("who are you") || lower.includes("tell me about yourself")) return "about";
+    
+    return null;
+  }
 
   const sendMessage = async (query: string) => {
     // Optimistic update
@@ -120,7 +103,12 @@ export default function Home() {
         // Simulate network delay for natural feel
         setStreaming(true);
 
-        const responses = LOCAL_RESPONSES;
+        const responses: Record<string, string[]> = {
+            projects: ["Here are some of my recent projects 🚀", "Check out what I've been working on! 💻", "My project deck, coming right up!", "Here you go, my portfolio highlights."],
+            skills: ["Here is my technical arsenal 🛠️", "These are the tools I work with.", "My skills and tech stack.", "Here is what I am good at."],
+            contact: ["Let's connect! 📬", "Here is how you can reach me.", "Don't be a stranger, say hi!", "My contact channels:"],
+            about: ["Here is my professional profile 👨‍💻", "A little bit about me.", "Here is my bio and background.", "Allow me to introduce myself."]
+        };
 
         const randomResponse = (type: string) => {
             const list = responses[type] || ["Here you go!"];
@@ -262,6 +250,14 @@ export default function Home() {
       sendMessage(input);
       setInput("");
   }
+
+
+  const ACTION_ITEMS = [
+    { icon: Smile, label: "About Me", prompt: "Tell me about yourself" },
+    { icon: Briefcase, label: "Projects", prompt: "Show me your projects" },
+    { icon: Layers, label: "Skills", prompt: "What are your skills?" },
+    { icon: User, label: "Contact", prompt: "How can I contact you?" }
+  ];
 
   return (
     <motion.main 
