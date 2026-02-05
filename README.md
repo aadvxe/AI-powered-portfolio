@@ -66,13 +66,13 @@ The "Knowledge Base" is not static text. It is a living reflection of the databa
 
 To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hybrid Router**:
 
-1.  **Local Intent (The "Reflex" System)**:
+1.  **Local Intent**:
     - High-speed, zero-cost.
     - Uses Regex/Keyword matching locally in the browser.
     - Handles navigational queries like "Show me projects", "Contact info", or "What determines your skills?".
     - **Latency**: < 50ms.
 
-2.  **Remote RAG (The "Brain" System)**:
+2.  **Remote RAG**:
     - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
     - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 5 chunks.
     - **Latency**: ~800ms - 1.5s.
