@@ -1,5 +1,3 @@
-# 🧠 about.md - Technical Deep Dive
-
 ## Overview
 
 This portfolio is an AI-powered application that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
