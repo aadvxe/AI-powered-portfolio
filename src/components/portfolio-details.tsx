@@ -105,7 +105,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                             <div className="space-y-6">
                                 {/* Architecture */}
                                 <div className="space-y-2">
-                                    <h4 className="font-semibold text-neutral-800 text-sm">Hybrid Performance System</h4>
+                                    <h4 className="font-semibold text-neutral-800 text-sm">Hybrid Approach</h4>
                                     <p className="text-sm text-neutral-600 leading-relaxed">
                                         Designed for optimal user experience, the system uses a dual-engine approach. Standard requests (like navigation) are processed instantly in the browser for zero latency, while complex analytical questions are securely routed to the Cloud AI for processing.
                                     </p>

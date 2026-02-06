@@ -17,7 +17,7 @@ graph TD
     HybridRouter -- Complex Query --> API[Next.js API Route /api/chat]
 
     subgraph RAG Orchestration
-    API --> Embed[Google text-embedding-004]
+    API --> Embed[Google gemini-embedding-001]
     Embed -.->|Vector| API
     API --> VectorDB[(Supabase pgvector)]
     VectorDB -.->|Context| API
@@ -32,7 +32,7 @@ graph TD
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
 - **LLM**: Google Gemini 2.5 Flash-Lite
-- **Embeddings**: Google `text-embedding-004`
+- **Embeddings**: Google `gemini-embedding-001`
 - **Orchestration**: LangChain.js
 - **Styling**: TailwindCSS + Framer Motion
 
@@ -59,7 +59,7 @@ The "Knowledge Base" is not static text. It is a living reflection of the databa
 1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
 2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
 3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
-4.  **Vectorization**: Documents are sent to Google's `text-embedding-004` model to generate 768-dimensional vectors.
+4.  **Vectorization**: Documents are sent to Google's `gemini-embedding-001` model to generate 768-dimensional vectors.
 5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase.
 
 ### 3. Hybrid Retrieval Logic
