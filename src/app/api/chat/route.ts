@@ -137,6 +137,12 @@ export async function POST(req: Request) {
       - "What awards did you win?" -> "... [SHOW_ACHIEVEMENTS]"
       
       Do NOT invent other tags.
+      
+      CRITICAL NEGATIVE CONSTRAINTS (Prevent Hallucination):
+      - DO NOT claim experience with a tool/language unless it is EXPLICITLY mentioned in the Context.
+      - DO NOT infer skills (e.g., do NOT assume "React" experience just because "Next.js" is mentioned, unless "React" is also strictly present in the text).
+      - IF the Context does not contain the exact keyword requested (e.g. "React"), YOU MUST TREAT IT AS MISSING information.
+      - NEVER say "I have extensive experience" if the evidence in Context is thin or non-existent.
 
       CRITICAL INTENT DISTINCTION:
       - QUESTION: "Do you know [Tech]?" or "What are your skills?" (CAPABILITY) 
