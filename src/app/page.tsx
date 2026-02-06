@@ -64,13 +64,6 @@ export default function Home() {
     linear-gradient(to bottom right, #ffffff, #f8f9fa)
   `;
 
-  // Focus input when switching to chat
-  useEffect(() => {
-    if (viewState === "chat" && inputRef.current && !selectedProject) {
-        inputRef.current.focus();
-    }
-  }, [viewState, selectedProject]);
-
   // Scroll to bottom on new messages
   useEffect(() => {
     if (viewState === "chat") {
