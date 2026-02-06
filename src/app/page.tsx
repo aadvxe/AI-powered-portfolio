@@ -443,7 +443,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="absolute bottom-6 left-0 right-0 z-20 flex flex-col items-center gap-4 px-4"
+            className="absolute bottom-4 md:bottom-6 left-0 right-0 z-20 flex flex-col items-center gap-2 md:gap-4 px-2 md:px-4"
           >
               {/* Quick Actions (Chat Mode) */}
               <AnimatePresence>
@@ -490,12 +490,12 @@ export default function Home() {
                  <motion.div layout className="flex-1 min-w-0">
                     <LiquidGlass type="input" className="w-full rounded-[1.5rem] shadow-2xl">
                      <form onSubmit={handleSubmit} className="relative flex items-center p-2">
-                         <div className="pl-4 text-neutral-400">
+                         <div className="pl-2 md:pl-4 text-neutral-400">
                             <Search size={20} />
                          </div>
                          <input 
                             ref={inputRef}
-                            className="flex-1 bg-transparent px-4 py-3 text-neutral-800 placeholder-neutral-400 outline-none font-medium"
+                            className="flex-1 bg-transparent px-2 md:px-4 py-3 text-neutral-800 placeholder-neutral-400 outline-none font-medium min-w-0"
                             placeholder={viewState === 'landing' ? "Ask anything..." : "Reply..."}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}

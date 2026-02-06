@@ -57,7 +57,7 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
             key={project.id}
             type="project-card"
             onClick={() => onSelect(project)}
-            className="group relative h-[550px] w-[360px] flex-none cursor-pointer snap-center flex-col overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 !p-0"
+            className="group relative h-[65vh] w-[85vw] md:h-[550px] md:w-[360px] flex-none cursor-pointer snap-center flex-col overflow-hidden rounded-2xl bg-white shadow-sm hover:shadow-xl transition-shadow duration-300 !p-0"
             initial="idle"
             whileHover="hover"
             variants={{
