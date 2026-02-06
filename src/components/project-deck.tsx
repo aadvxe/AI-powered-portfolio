@@ -23,7 +23,8 @@ const SEMANTIC_MAP: Record<string, string[]> = {
   "frontend": ["frontend", "react", "next.js", "typescript", "tailwind", "ui", "ux"],
   "backend": ["backend", "node", "express", "supabase", "database", "sql", "api", "server"],
   "mobile": ["mobile", "react native", "ios", "android", "flutter"],
-  "iot": ["iot", "embedded", "arduino", "raspberry", "esp32", "hardware", "sensor"],
+  "iot": ["iot", "internet of things", "mqtt", "cloud", "sensor", "azure", "aws"],
+  "embedded": ["embedded", "arduino", "stm32", "microcontroller", "esp32", "hardware", "firmware", "c++", "rtos"],
 };
 
 export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps) {
