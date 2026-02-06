@@ -266,7 +266,7 @@ export default function Home() {
 
   return (
     <motion.main 
-        className="relative flex min-h-screen flex-col items-center overflow-hidden text-neutral-900 selection:bg-brand-cyan/30"
+        className="relative flex h-[100dvh] w-full flex-col items-center overflow-hidden text-neutral-900 selection:bg-brand-cyan/30"
         style={{ background: backgroundStyle }}
     >
       <LiquidFilters />
