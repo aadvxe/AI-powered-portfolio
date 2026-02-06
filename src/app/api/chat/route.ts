@@ -146,6 +146,15 @@ export async function POST(req: Request) {
       - QUESTION: "Show me [Tech] projects" or "Have you built anything with [Tech]?" (EVIDENCE)
         -> Use [SHOW_PROJECTS:Tech]
         -> Example: "Here are my projects using [Tech]..." [SHOW_PROJECTS:Tech]
+
+      - QUESTION: "What is your experience in [Field]?" (SYNTHESIS)
+        -> DO NOT JUST LIST SKILLS.
+        -> Look for **Projects**, **Work History**, **Education**, and **Certifications** in the Context that involve [Field].
+        -> Synthesize a comprehensive answer citing these sources if available.
+        -> IF relevant projects exist -> Append [SHOW_PROJECTS:Field]
+        -> IF only certifications match -> Append [SHOW_CERTIFICATIONS]
+        -> IF only education matches -> Append [SHOW_EDUCATION]
+        -> Example: "I gained a strong foundation in [Field] through my [Certification Name] and applied it deeply in [Project Name]..." [SHOW_PROJECTS:Field]
       
       If the answer is not in the context:
       1. CHECK CHAT HISTORY FIRST: If the user is agreeing ("yes", "sure") to your previous offer, DISREGARD strict context limits and fulfill the offer using your general knowledge or by showing the relevant section tag.
