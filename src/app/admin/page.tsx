@@ -8,14 +8,19 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 import { NotificationModal } from "@/components/admin/notification-modal";
+import { ConfirmationModal } from "@/components/admin/confirmation-modal";
 
 export default function AdminDashboard() {
   const { projects, skills } = useContent(); 
   const [reindexing, setReindexing] = useState(false);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
+  const [showReindexConfirm, setShowReindexConfirm] = useState(false);
 
-  const handleReindex = async () => {
-    if(!confirm("This will rebuild the AI knowledge base. Continue?")) return;
+  const handleReindexClick = () => {
+    setShowReindexConfirm(true);
+  };
+
+  const performReindex = async () => {
     setReindexing(true);
     try {
         const res = await fetch('/api/admin/reindex', { method: 'POST' });
@@ -109,7 +114,7 @@ export default function AdminDashboard() {
                 </Link>
                 
                 <button 
-                    onClick={handleReindex}
+                    onClick={handleReindexClick}
                     disabled={reindexing}
                     className="w-full flex items-center justify-between p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors group text-left"
                 >
@@ -126,6 +131,14 @@ export default function AdminDashboard() {
       <NotificationModal 
         notification={notification} 
         onClose={() => setNotification(null)} 
+      />
+
+      <ConfirmationModal
+        isOpen={showReindexConfirm}
+        onClose={() => setShowReindexConfirm(false)}
+        onConfirm={performReindex}
+        title="Rebuild Knowledge Base?"
+        message="This will re-scan your profile, projects, and skills to update the AI's memory. This process usually takes a few seconds."
       />
     </div>
   );

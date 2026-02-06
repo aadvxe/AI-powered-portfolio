@@ -179,6 +179,7 @@ export default function AdminProfile() {
       if (id === 'experiences' || id === 'experience') return 'Experience';
       if (id === 'education') return 'Education';
       if (id === 'achievements') return 'Achievements';
+      if (id === 'certifications' || id === 'certification') return 'Certifications';
       const custom = profile.custom_sections?.find(s => s.id === id);
       return custom ? custom.title : 'Unknown Section';
   };
