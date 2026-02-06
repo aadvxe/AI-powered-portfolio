@@ -359,7 +359,7 @@ export default function Home() {
 
 
               {/* Messages Area */}
-              <div className="flex-1 overflow-y-auto px-4 custom-scrollbar pt-4">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden px-4 custom-scrollbar pt-4">
                   <div className="mx-auto flex max-w-2xl flex-col gap-8 pb-48">
                       {messages.map((msg, i) => (
                           <motion.div 
@@ -376,22 +376,22 @@ export default function Home() {
                                     <div className={`relative max-w-[100%] ${msg.type === "component" ? "w-full" : ""}`}>
                                         {msg.type === "component" ? (
                                             msg.componentType === "about" ? (
-                                                <div className="-ml-4 w-[100vw] md:w-full md:ml-0 px-4 md:px-0">
+                                                <div className="-ml-4 w-[calc(100%+2rem)] md:w-full md:ml-0 px-4 md:px-0">
                                                     <AboutDeck 
                                                         profile={profile} 
                                                         visibleSections={msg.componentFilter ? [msg.componentFilter] : undefined} 
                                                     />
                                                 </div>
                                             ) : msg.componentType === "skills" ? (
-                                                <div className="-ml-4 w-[100vw] md:w-full md:ml-0 px-4 md:px-0">
+                                                <div className="-ml-4 w-[calc(100%+2rem)] md:w-full md:ml-0 px-4 md:px-0">
                                                     <SkillsDeck skills={skills} />
                                                 </div>
                                             ) : msg.componentType === "contact" ? (
-                                                <div className="-ml-4 w-[100vw] md:w-full md:ml-0 px-4 md:px-0">
+                                                <div className="-ml-4 w-[calc(100%+2rem)] md:w-full md:ml-0 px-4 md:px-0">
                                                     <ContactDeck profile={profile} />
                                                 </div>
                                             ) : (
-                                                <div className="-ml-4 w-[100vw] md:w-full md:ml-0">
+                                                <div className="-ml-4 w-[calc(100%+2rem)] md:w-full md:ml-0">
                                                     <ProjectDeck 
                                                         id={`deck-${i}`} 
                                                         projects={projects}
