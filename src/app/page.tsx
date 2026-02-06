@@ -30,14 +30,14 @@ export default function Home() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const [streaming, setStreaming] = useState(false);
 
-  // --- CONTENT HOOK ---
+  // Data Hooks
   const { projects, skills, profile } = useContent();
 
-  // --- MODAL STATE ---
+  // Modal State
   const [selectedProject, setSelectedProject] = useState<{ project: ProjectData; deckId: string } | null>(null);
   const [showPortfolioInfo, setShowPortfolioInfo] = useState(false);
 
-  // --- MOUSE FOLLOWER LOGIC ---
+  // Mouse Follower Animation
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const springX = useSpring(mouseX, { stiffness: 50, damping: 20 });
@@ -64,7 +64,7 @@ export default function Home() {
     linear-gradient(to bottom right, #ffffff, #f8f9fa)
   `;
 
-  // Scroll to bottom on new messages
+  // Auto-scroll to bottom
   useEffect(() => {
     if (viewState === "chat") {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -74,27 +74,27 @@ export default function Home() {
   const checkLocalIntent = (query: string) => {
     const lower = query.toLowerCase();
     
-    // Safety check: if query is complex question, skip local
+    // Skip local logic for complex queries
     if (lower.length > 50 || lower.includes("what is") || lower.includes("how does") || lower.includes("explain")) return null;
 
     if (lower.includes("project") && (lower.includes("show") || lower.includes("see") || lower.includes("list"))) return "projects";
     if (lower.includes("skill") && (lower.includes("what") || lower.includes("show") || lower.includes("see"))) return "skills";
     if (lower.includes("contact") || lower.includes("reach")) return "contact";
     
-    // Stricter 'About' check
+    // Strict match for 'About'
     if (lower === "about" || lower === "about me" || lower.includes("who are you") || lower.includes("tell me about yourself")) return "about";
     
     return null;
   }
 
   const sendMessage = async (query: string) => {
-    // Optimistic update
+    // Optimistic UI Update
     setMessages(prev => [...prev, { role: "user", content: query }]);
     
-    // --- 1. CHECK LOCAL INTENTS (Hybrid Mode) ---
+    // 1. Local Intent Check
     const localIntent = checkLocalIntent(query);
     if (localIntent) {
-        // Simulate network delay for natural feel
+        // Simulate network latency
         setStreaming(true);
 
         const responses: Record<string, string[]> = {
@@ -114,9 +114,9 @@ export default function Home() {
                 
             setMessages(prev => [
                 ...prev, 
-                // 1. Natural Text Bubble
+                // Response Text
                 { role: "ai", content: naturalText },
-                // 2. Component Card
+                // Component Render
                 { role: "ai", content: "", type: "component", componentType: localIntent as Message['componentType'] }
             ]);
             setStreaming(false);
@@ -124,7 +124,7 @@ export default function Home() {
         return; 
     }
 
-    // --- 2. REMOTE RAG FALLBACK ---
+    // 2. RAG Fallback
     setStreaming(true);
 
     try {
@@ -139,7 +139,7 @@ export default function Home() {
             throw new Error(errorMessage || "Failed to fetch response");
         }
         
-        // Add placeholder for AI response
+        // Placeholder for streaming response
         setMessages(prev => [...prev, { role: "ai", content: "" }]);
 
         if (!response.body) return;
@@ -158,20 +158,20 @@ export default function Home() {
                 const newMessages = [...prev];
                 const lastMsg = newMessages[newMessages.length - 1];
                 if (lastMsg.role === 'ai') {
-                    // Filter tags from display
+                    // Filter control tags
                     lastMsg.content = fullContent.replace(/\[SHOW_.*?\]/g, "");
                 }
                 return newMessages;
             });
         }
 
-        // --- POST STREAMING TAG CHECK (Enhanced for Parameters) ---
-        // Regex matches: [SHOW_TAG] or [SHOW_TAG:param]
+        // Post-Stream Action Check
+        // Matches: [SHOW_TAG] or [SHOW_TAG:param]
         const tagMatch = fullContent.match(/\[SHOW_([A-Z]+)(?::(.*))?\]/i);
         
         if (tagMatch) {
-            const tagType = tagMatch[1].toUpperCase(); // e.g. PROJECTS
-            const tagParam = tagMatch[2]?.trim();      // e.g. React (or undefined)
+            const tagType = tagMatch[1].toUpperCase();
+            const tagParam = tagMatch[2]?.trim();
             
             let componentType: Message["componentType"] = undefined;
             let componentFilter: string | undefined = undefined;
@@ -184,10 +184,10 @@ export default function Home() {
             if (tagType === "CONTACT") componentType = "contact";
             if (tagType === "ABOUT") componentType = "about";
             
-            // About Deck Sub-Sections (Experience, Education)
+            // About Deck Sub-Sections
             if (tagType === "EXPERIENCE") {
                 componentType = "about";
-                componentFilter = "experiences"; // Pass as filter/section
+                componentFilter = "experiences";
             }
             if (tagType === "EDUCATION") {
                 componentType = "about";
@@ -210,7 +210,7 @@ export default function Home() {
                         content: `Here is the ${tagType.toLowerCase()} section${tagParam ? ` for "${tagParam}"` : ''}:`, 
                         type: "component", 
                         componentType,
-                        componentFilter // Storing the filter param here
+                        componentFilter
                     }
                 ]);
             }
@@ -270,9 +270,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- LANDING VIEW --- */}
-
-      {/* --- LANDING VIEW --- */}
+      {/* Landing View */}
       <AnimatePresence mode="wait">
         {viewState === "landing" && (
           <motion.div
@@ -334,7 +332,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- CHAT VIEW --- */}
+      {/* Chat View */}
       <AnimatePresence>
         {viewState === "chat" && (
            <motion.div 
@@ -428,7 +426,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- BOTTOM CONTROLS (Fixed Liquid Bar) --- */}
+      {/* Bottom Controls */}
       <AnimatePresence>
         {!selectedProject && (
           <motion.div 
@@ -510,7 +508,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- Global Modal Root (Stacking Context Management) --- */}
+      {/* Global Modal Root */}
       <AnimatePresence>
         {selectedProject && (
           <>
