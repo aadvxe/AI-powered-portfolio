@@ -29,6 +29,17 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
       }
   }, []);
 
+  // Mobile Check to disable drag (restores native scrolling)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+      if (typeof window !== "undefined") {
+          const checkMobile = () => setIsMobile(window.innerWidth < 768);
+          checkMobile();
+          window.addEventListener('resize', checkMobile);
+          return () => window.removeEventListener('resize', checkMobile);
+      }
+  }, []);
+
   return (
     <motion.div
       className={cn("liquidGlass-wrapper", type, className)}
@@ -37,10 +48,10 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
         scaleX, scaleY,
         ...style
       }}
-      drag
+      drag={!isMobile}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
       dragElastic={0.1}
-      whileHover={props.whileHover ?? { scale: 1.02 }}
+      whileHover={!isMobile ? (props.whileHover ?? { scale: 1.02 }) : undefined}
       whileTap={props.whileTap ?? { cursor: "default", scale: 0.98 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       {...props}

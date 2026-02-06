@@ -529,7 +529,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="pointer-events-auto relative flex h-[80vh] w-full max-w-4xl flex-col overflow-hidden !border-neutral-200 !bg-white/95 shadow-2xl"
+                className="pointer-events-auto relative flex h-[80vh] w-full max-w-4xl flex-col overflow-y-auto md:overflow-hidden !border-neutral-200 !bg-white/95 shadow-2xl"
               >
                 {/* Close Button */}
                 <button
@@ -540,7 +540,7 @@ export default function Home() {
                 </button>
 
                 {/* Content */}
-                <div className="flex flex-1 flex-col md:flex-row min-h-0 overflow-hidden">
+                <div className="flex flex-col md:flex-1 md:flex-row md:min-h-0 md:overflow-hidden">
                     {/* Visual Side */}
                     <div className={`relative w-full h-64 md:h-auto md:w-1/2 ${selectedProject.project.gradient} shrink-0`}>
                          {selectedProject.project.image_url ? (
@@ -559,15 +559,15 @@ export default function Home() {
                     </div>
 
                     {/* Info Side */}
-                    <div className="flex w-full flex-col h-full md:w-1/2 min-h-0 bg-white">
+                    <div className="flex w-full flex-col md:h-full md:w-1/2 md:min-h-0 bg-white">
                         {/* Fixed Header */}
                         <div className="p-8 pb-4 shrink-0 border-b border-neutral-100">
-                            <h2 className="text-2xl font-bold text-neutral-900">{selectedProject.project.title}</h2>
+                            <h2 className="text-2xl font-bold text-neutral-900 pr-12">{selectedProject.project.title}</h2>
                             <span className="mt-2 text-brand-cyan text-sm">{selectedProject.project.category}</span>
                         </div>
                         
                         {/* Scrollable Content */}
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-8 pt-6">
+                        <div className="md:flex-1 md:overflow-y-auto custom-scrollbar p-8 pt-6">
                             <div className="text-sm leading-relaxed text-neutral-600">
                                 {selectedProject.project.description?.split('\n').map((line: string, idx: number) => {
                                     const trimmed = line.trim();
