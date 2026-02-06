@@ -38,16 +38,18 @@ export async function POST(req: Request) {
     // Origin validation (CSRF protection)
     const origin = req.headers.get("origin");
     const referer = req.headers.get("referer");
-    const allowedOrigins = [
-      "http://localhost:3000",
-      "https://localhost:3000",
-      process.env.NEXT_PUBLIC_SITE_URL, // Add your production URL to .env.local
-    ].filter(Boolean);
     
-    const isValidOrigin = origin && allowedOrigins.some(allowed => origin.startsWith(allowed as string));
-    const isValidReferer = referer && allowedOrigins.some(allowed => referer.startsWith(allowed as string));
-    
-    if (!isValidOrigin && !isValidReferer) {
+    // Allow requests if they are from:
+    // 1. Localhost
+    // 2. The defined Site URL
+    // 3. Vercel Preview/Production URLs
+    const isLocalhost = origin?.includes("localhost") || referer?.includes("localhost");
+    const isSiteUrl = (origin && process.env.NEXT_PUBLIC_SITE_URL && origin.includes(process.env.NEXT_PUBLIC_SITE_URL)) || 
+                      (referer && process.env.NEXT_PUBLIC_SITE_URL && referer.includes(process.env.NEXT_PUBLIC_SITE_URL));
+    const isVercel = origin?.endsWith(".vercel.app") || referer?.includes(".vercel.app");
+
+    if (!isLocalhost && !isSiteUrl && !isVercel && !process.env.DISABLE_ORIGIN_CHECK) {
+      console.error(`[Security] Blocked request from Origin: ${origin}, Referer: ${referer}`);
       return new Response(JSON.stringify({ error: "Unauthorized request origin" }), { status: 403 });
     }
 
