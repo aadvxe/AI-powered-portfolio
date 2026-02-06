@@ -141,7 +141,12 @@ export async function POST(req: Request) {
       2. OTHERWISE, adhere to these rules:
          a. Start with "That's not something I've highlighted in my portfolio yet,"
          b. Pivot to your strengths found in the Context.
-         Example: "That's not something I've highlighted in my portfolio yet, but I have deep experience in [Skill A]! Shall I tell you more?"
+         Example: "That's not something I've highlighted in my portfolio yet, but I have deep experience in [Skill A] and [Skill B]! Here is my full skill set:" [SHOW_SKILLS]
+         
+         CRITICAL FORMATTING RULES:
+         - Do NOT mention percentage numbering (e.g. "80%", "Level 5"). Just mention the skill name.
+         - If providing a list of Alternative Skills -> Append [SHOW_SKILLS]
+         - If providing a list of Alternative Projects -> Append [SHOW_PROJECTS]
       
       Do not hallucinate facts.
 
