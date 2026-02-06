@@ -31,7 +31,7 @@ graph TD
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM**: Google Gemini 2.0 Flash-Lite
+- **LLM**: Google Gemini 2.5 Flash-Lite
 - **Embeddings**: Google `gemini-embedding-001`
 - **Orchestration**: LangChain.js
 - **Styling**: TailwindCSS + Framer Motion

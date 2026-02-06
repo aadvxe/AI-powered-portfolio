@@ -102,7 +102,7 @@ export async function POST(req: Request) {
 
     // 4. Setup Gemini Chat Model
     const model = new ChatGoogleGenerativeAI({
-      model: "gemini-2.0-flash-lite", 
+      model: "gemini-2.5-flash-lite", 
       streaming: true,
       apiKey: process.env.GOOGLE_API_KEY,
     });
