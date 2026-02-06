@@ -15,7 +15,7 @@ interface ProjectDeckProps {
     filter?: string; // Optional keyword filter
 }
 
-// Semantic mapping for smarter filtering
+// Semantic mapping
 const SEMANTIC_MAP: Record<string, string[]> = {
   "ai": ["ai", "artificial intelligence", "ml", "machine learning", "llm", "rag", "langchain", "gemini", "gpt", "nlp", "chatbot"],
   "machine learning": ["machine learning", "ml", "ai", "deep learning", "neural", "sci-kit", "tensorflow", "pytorch"],
