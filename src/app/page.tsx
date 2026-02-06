@@ -14,6 +14,7 @@ import { SkillsDeck } from "@/components/skills-deck";
 import { ContactDeck } from "@/components/contact-deck";
 import { PortfolioDetails } from "@/components/portfolio-details";
 import { LoopingTypewriter } from "@/components/ui/looping-typewriter";
+import ReactMarkdown from "react-markdown";
 import { QuickAction } from "@/components/ui/quick-action";
 
 export default function Home() {
@@ -405,7 +406,17 @@ export default function Home() {
                                         ) : (
                                             <LiquidGlass type="button" className="rounded-2xl rounded-tl-sm">
                                                <div className="p-4 text-sm font-medium text-neutral-700 leading-relaxed">
-                                                 {msg.content}
+                                                 <ReactMarkdown 
+                                                    components={{
+                                                        p: ({children}) => <p className="mb-2 last:mb-0">{children}</p>,
+                                                        strong: ({children}) => <span className="font-bold text-neutral-900">{children}</span>,
+                                                        ul: ({children}) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
+                                                        li: ({children}) => <li>{children}</li>,
+                                                        a: ({children, href}) => <a href={href} className="text-brand-cyan hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>
+                                                    }}
+                                                 >
+                                                    {msg.content}
+                                                 </ReactMarkdown>
                                                </div>
                                             </LiquidGlass>
                                         )}

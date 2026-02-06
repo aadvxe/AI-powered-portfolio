@@ -134,7 +134,12 @@ export async function POST(req: Request) {
       
       Do NOT invent other tags.
       
-      If the answer is not in the context, politely say: "I couldn't find that specific detail in my knowledge base, but feel free to ask about my projects, skills, or experience!"
+      If the answer is not in the context, adhere to these rules:
+      1. Be warm, enthusiastic, and conversational.
+      2. Avoid robotic phrases like "I can't find" or "I don't know".
+      3. Instead, start with "That's not something I've highlighted in my portfolio yet," and then pivot to your strengths *found in the provided Context*.
+         Example: "That's not something I've highlighted in my portfolio yet, but I have deep experience in [Skill A from Context] and [Skill B from Context]! Shall I tell you more about those?"
+      
       Do not hallucinate facts.
 
       Chat History:
