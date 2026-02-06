@@ -74,12 +74,12 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 2.  **Remote RAG**:
     - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
-    - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 5 chunks.
+    - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 8 chunks.
     - **Latency**: ~800ms - 1.5s.
 
 ### 4. Generation & Streaming
 
-The retrieved context is fed into **Geneini 2.5 Flash-Lite** with a strict system prompt:
+The retrieved context is fed into **Gemini 2.5 Flash-Lite** with a strict system prompt:
 
 > "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
 
