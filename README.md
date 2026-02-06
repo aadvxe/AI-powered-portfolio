@@ -40,7 +40,7 @@ graph TD
 
 ### 1. Chunking Strategy (Structure-Based)
 
-Unlike generic RAG systems that blindly split text into fixed character windows (e.g., 500 chars), this system uses **Semantic Structure-Based Chunking**.
+Unlike generic RAG systems that blindly split text into fixed character windows, this system uses **Semantic Structure-Based Chunking**.
 
 I realized that professional data is highly structured. Splitting a project description in half destroys context. Instead, the ingestion pipeline (`src/lib/rag.ts`) treats each logical entity as a discrete document:
 
