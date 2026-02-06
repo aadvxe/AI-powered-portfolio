@@ -12,7 +12,7 @@ interface ProjectDeckProps {
     id: string;
     projects: Project[];
     onSelect: (project: Project) => void;
-    filter?: string; // e.g. "React", "Next.js"
+    filter?: string; // Optional keyword filter
 }
 
 export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps) {
@@ -25,7 +25,7 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
 
   return (
     <div className="relative w-full py-0">
-      {/* Scroll Container */}
+      {/* Horizontal scroll wrapper */}
       <div className="flex w-full snap-x snap-mandatory gap-6 overflow-x-auto px-6 py-8 no-scrollbar">
         {filteredProjects.map((project) => (
           <LiquidGlass
@@ -41,7 +41,7 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-             {/* Top Half: Image or Gradient */}
+             {/* Thumbnail Container */}
              <div className="h-[57%] w-full relative overflow-hidden">
                 {project.image_url ? (
                     <div className="relative w-full h-full">
@@ -57,7 +57,7 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
                 )}
              </div>
 
-             {/* Bottom Half: Text Content */}
+             {/* Metadata Container */}
              <div className="h-[43%] w-full bg-white p-7 pt-2.5 flex flex-col justify-between">
                 <div>
                    <span className="mb-3 inline-block rounded-full bg-brand-cyan/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-cyan">

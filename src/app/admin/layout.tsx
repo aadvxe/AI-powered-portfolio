@@ -21,7 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/login"); // Middleware will handle protection, but good to force
+    router.push("/login"); // Force client-side redirect after logout
     router.refresh();
   };
 
@@ -34,7 +34,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-neutral-50 text-neutral-800">
-      {/* Sidebar */}
+      {/* Navigation Sidebar */}
       <motion.aside 
         initial={false}
         animate={{ width: isSidebarOpen ? 260 : 80 }}
@@ -82,7 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </div>
       </motion.aside>
 
-      {/* Main Content */}
+      {/* Content Area */}
       <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "md:ml-[260px]" : "md:ml-[80px]"}`}>
         <div className="p-8 max-w-7xl mx-auto">
             {children}

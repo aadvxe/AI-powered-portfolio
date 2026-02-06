@@ -10,14 +10,14 @@ interface AboutDeckProps {
 }
 
 export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
-  // Safe defaults
+  // Initialize fallback values
   const experiences = profile?.experiences || [];
   const education = profile?.education || [];
   const achievements = profile?.achievements || [];
   const customSections = profile?.custom_sections || [];
   let sectionOrder = visibleSections || profile?.section_order || ["about", "experiences", "education", "certifications", "achievements"];
 
-  // Fallback: If using saved order but it's old (missing certifications), force add it before achievements if possible.
+  // Legacy compatibility: Ensure certifications section exists
   if (!visibleSections && profile?.section_order && !profile.section_order.includes('certifications')) {
       const achIndex = sectionOrder.indexOf('achievements');
       if (achIndex !== -1) {
@@ -30,7 +30,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
   const Sections = {
       about: (
         <div key="about" className="flex flex-col md:flex-row gap-6">
-            {/* Photo Block */}
+            {/* Avatar container */}
             <GlassCard className="w-full md:w-[300px] shrink-0 relative overflow-hidden group">
                 {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
@@ -41,7 +41,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                 )}
             </GlassCard>
 
-            {/* Content Block */}
+            {/* Biography container */}
             <GlassCard className="flex-1 p-8 flex flex-col justify-center">
                 <div className="mb-6">
                     <h3 className="text-3xl font-bold text-neutral-800 mb-2">Hi, I'm {profile?.name || "Your Name"}👋</h3>
@@ -52,7 +52,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                 <p className="text-neutral-600 leading-relaxed pr-2">
                     {profile?.bio || "I am a passionate Creative Technologist with a knack for building fluid, intuitive, and beautiful web experiences. I bridge the gap between design and engineering."}
                 </p>
-                {/* Resume Link */}
+                {/* Downloadable CV */}
                 {profile?.resume_url && (
                     <div className="mt-4 pt-4 border-t border-neutral-100">
                         <a href={profile.resume_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-cyan hover:underline flex items-center gap-1">
@@ -87,7 +87,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                             </span>
                         </div>
                         
-                        {/* Description with Bullet Point Support */}
+                        {/* Render unordered list from plain text */}
                         <div className="text-sm text-neutral-600 leading-relaxed mt-3">
                             {exp.description?.split('\n').map((line: string, idx: number) => {
                                 const trimmed = line.trim();
@@ -103,7 +103,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                             })}
                         </div>
 
-                        {/* Skills Section */}
+                        {/* Skills keywords */}
                         {exp.skills && (
                             <div className="flex flex-wrap gap-2 mt-4 pt-3 border-t border-neutral-100">
                                 {exp.skills.split(',').map((skill: string, idx: number) => (
@@ -218,7 +218,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             </div>
         </motion.div>
       ),
-      // Alias for legacy support
+      // Backward compatibility alias
       experience: (
         <motion.div 
             key="experiences"

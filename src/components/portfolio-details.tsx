@@ -14,7 +14,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
     { name: "AI", val: "LangChain + Google Gemini" },
   ];
 
-  // Prevent background scrolling when modal is open
+  // Body scroll lock management
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -24,7 +24,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {/* Backdrop - Delayed Fade In */}
+        {/* Modal Overlay */}
         <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -34,7 +34,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
             onClick={onClose}
         />
 
-        {/* Card - Immediate Pop */}
+        {/* Modal Content Container */}
         <motion.div
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                     <X size={18} />
                 </button>
 
-                {/* Fixed Header */}
+                {/* Header Section */}
                 <div className="flex-none text-center mb-8">
                      <div className="mx-auto w-12 h-12 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-4">
                          <Sparkles size={24} />
@@ -63,11 +63,11 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                      <p className="text-neutral-500 mt-2">An interactive, AI-powered Portfolio</p>
                 </div>
 
-                {/* Scrollable Content */}
+                {/* Main Content Scroll Area */}
                 <div className="flex-1 overflow-y-auto no-scrollbar pr-2 -mr-2">
                     <div className="flex flex-col gap-8 pb-4">
                         
-                        {/* Capabilities Section (What it can do) */}
+                        {/* System Capabilities Overview */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-neutral-900 flex items-center gap-2 text-lg">
                                 <Bot size={20} className="text-brand-cyan" />
@@ -103,7 +103,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                             </h3>
                             
                             <div className="space-y-6">
-                                {/* Architecture */}
+                                {/* Architectural Overview */}
                                 <div className="space-y-2">
                                     <h4 className="font-semibold text-neutral-800 text-sm">Hybrid Approach</h4>
                                     <p className="text-sm text-neutral-600 leading-relaxed">
@@ -111,7 +111,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                     </p>
                                 </div>
 
-                                {/* Chunking */}
+                                {/* Data Structuring & Retrieval */}
                                 <div className="space-y-2">
                                     <h4 className="font-semibold text-neutral-800 text-sm">Intelligent Data Retrieval</h4>
                                     <p className="text-sm text-neutral-600 leading-relaxed">
@@ -137,7 +137,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                             </div>
                         </div>
 
-                         {/* Source Code Link */}
+                         {/* Repository Link */}
                          <div className="mt-0 flex justify-center">
                             <a 
                                 href="https://github.com/aadvxe/AI-powered-portfolio" 

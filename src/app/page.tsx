@@ -513,7 +513,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* --- TOP-LEVEL MODAL (Solves Stacking Context) --- */}
+      {/* --- Global Modal Root (Stacking Context Management) --- */}
       <AnimatePresence>
         {selectedProject && (
           <>

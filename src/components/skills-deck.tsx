@@ -12,7 +12,7 @@ interface SkillsDeckProps {
 }
 
 export function SkillsDeck({ skills }: SkillsDeckProps) {
-  // Group skills by category
+  // Skill Categorization Logic
   const skillCategories = useMemo(() => {
     if (!skills || skills.length === 0) return [];
     
@@ -23,8 +23,8 @@ export function SkillsDeck({ skills }: SkillsDeckProps) {
     });
 
     return Object.entries(groups).map(([title, skillsList]) => {
-        // Expanded icon mapping logic
-        let Icon = Layers; // Default generic icon
+        // Icon mapping strategy
+        let Icon = Layers; // Default Icon
         const lowerTitle = title.toLowerCase();
         
         if (lowerTitle.includes("nlp") || lowerTitle.includes("language system")) Icon = MessageSquare;
@@ -48,7 +48,7 @@ export function SkillsDeck({ skills }: SkillsDeckProps) {
     });
   }, [skills]);
 
-  // Fallback for empty state
+  // Loading state handler
   if (skillCategories.length === 0) {
       return (
           <GlassCard className="p-6 w-full max-w-2xl text-center">
@@ -81,7 +81,7 @@ export function SkillsDeck({ skills }: SkillsDeckProps) {
         className="grid grid-cols-1 md:grid-cols-12 gap-6"
       >
         {(() => {
-            // Process layout distribution
+            // Grid Layout Algorithm
             const elements = [];
             let i = 0;
             
@@ -89,35 +89,35 @@ export function SkillsDeck({ skills }: SkillsDeckProps) {
                 const current = skillCategories[i];
                 const next = skillCategories[i + 1];
 
-                // Calculate Weight (Char count + Item bonus)
+                // Visual weight calculation for bento grid
                 const getWeight = (cat: typeof current) => 
                      cat.skills.reduce((acc, s) => acc + s.length, 0) + (cat.skills.length * 5);
                 
                 const w1 = getWeight(current);
                 const isHuge = w1 > 150 || current.skills.length > 12;
 
-                // Case 1: Huge item or Last single item -> Full Width
+                // Layout Case: Full width
                 if (isHuge || !next) {
                     elements.push({ ...current, span: "md:col-span-12" });
                     i++;
                     continue;
                 }
 
-                // Case 2: Pair with next item
+                // Layout Case: Split row
                 const w2 = getWeight(next);
                 const total = w1 + w2;
                 const ratio = w1 / total; // 0.0 to 1.0
 
                 if (ratio > 0.6) {
-                    // Current is much larger -> 8/4 split
+                    // Asymmetric 2:1 split
                     elements.push({ ...current, span: "md:col-span-8" });
                     elements.push({ ...next, span: "md:col-span-4" });
                 } else if (ratio < 0.4) {
-                    // Next is much larger -> 4/8 split
+                    // Asymmetric 1:2 split
                     elements.push({ ...current, span: "md:col-span-4" });
                     elements.push({ ...next, span: "md:col-span-8" });
                 } else {
-                    // Balanced -> 6/6 split
+                    // Symmetric split
                     elements.push({ ...current, span: "md:col-span-6" });
                     elements.push({ ...next, span: "md:col-span-6" });
                 }

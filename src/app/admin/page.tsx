@@ -44,13 +44,13 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Page Header */}
       <div>
         <h1 className="text-3xl font-bold text-neutral-800">Dashboard</h1>
         <p className="text-neutral-500 mt-1">Portfolio</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Statistics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
             <GlassCard key={stat.label} className="p-6 flex items-center gap-4">
@@ -65,9 +65,9 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      {/* Shortcuts */}
+      {/* Quick Access Panel */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {/* Recent Projects */}
+         {/* Recent Projects Feed */}
          <GlassCard className="p-6">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-neutral-800 flex items-center gap-2">
@@ -97,7 +97,7 @@ export default function AdminDashboard() {
             </div>
          </GlassCard>
 
-         {/* Quick Actions */}
+         {/* Action Shortcuts */}
          <GlassCard className="p-6">
             <h3 className="font-bold text-neutral-800 flex items-center gap-2 mb-6">
                 <User size={20} className="text-neutral-400" />

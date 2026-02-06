@@ -27,7 +27,7 @@ export default function LoginPage() {
 
       if (error) throw error;
       
-      // Force hard refresh to update middleware/session state
+      // Trigger full page reload to refresh session state
       window.location.href = "/admin"; 
     } catch (err: any) {
       setError(err.message || "Failed to login");
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-neutral-100 p-4 relative overflow-hidden">
-      {/* Background Decor */}
+      {/* Background ambient effects */}
       <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-brand-cyan/20 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-purple-500/20 blur-[120px] rounded-full" />
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
 
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase ml-1">Password</label>
-                     {/* Simplest password input for now, can add eye icon later */}
+                     {/* Password input field */}
                     <input 
                         type="password" 
                         required

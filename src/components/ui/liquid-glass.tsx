@@ -19,7 +19,7 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
   const scaleX = useTransform(x, (val) => 1 + Math.abs(val) / 250);
   const scaleY = useTransform(y, (val) => 1 + Math.abs(val) / 250);
 
-  // Safari Detection (to disable complex SVG filters that cause artifacts)
+  // Safari Compatibility: Disable complex SVG filters to prevent rendering artifacts
   const [isSafari, setIsSafari] = useState(false);
   useEffect(() => {
       if (typeof window !== "undefined") {
@@ -29,7 +29,7 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
       }
   }, []);
 
-  // Mobile Check to disable drag (restores native scrolling)
+  // Mobile Optimization: Disable drag gesture to prevent scrolljacking
   const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
       if (typeof window !== "undefined") {
@@ -57,7 +57,7 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
       {...props}
     >
       <div className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
-        {/* Safari Fallback: Remove SVG filter AND backdrop-blur to prevent blurry text */}
+        {/* Safari Fallback: Disable filters to prevent text blurring */}{/* Safari Fallback: Remove SVG filter AND backdrop-blur to prevent blurry text */}
         <motion.div 
             layout 
             className="liquidGlass-effect" 

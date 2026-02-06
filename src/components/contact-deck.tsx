@@ -13,7 +13,7 @@ interface ContactDeckProps {
 
 export function ContactDeck({ profile }: ContactDeckProps) {
   const [copied, setCopied] = useState(false);
-  const email = profile?.email || "ranggahardiyantowibowo@gmail.com"; // Fallback if not loaded yet
+  const email = profile?.email || "ranggahardiyantowibowo@gmail.com"; // Default email configuration
 
   const handleCopy = () => {
     navigator.clipboard.writeText(email);
@@ -33,7 +33,7 @@ export function ContactDeck({ profile }: ContactDeckProps) {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col gap-4 w-full"
       >
-        {/* Main Contact Card - Standard Style */}
+        {/* Primary contact interface */}
         <GlassCard className="p-6 flex flex-col justify-center">
              <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-brand-cyan/10 rounded-full text-brand-cyan">
@@ -47,7 +47,7 @@ export function ContactDeck({ profile }: ContactDeckProps) {
              </p>
 
             <div className="flex flex-col sm:flex-row gap-3">
-                {/* Email Copy Interface */}
+                {/* Clipboard interaction handler */}
                 <div className="flex items-center gap-2 p-1.5 pl-4 pr-1.5 bg-neutral-100/50 border border-neutral-200 rounded-full w-full sm:max-w-md transition-colors hover:bg-white/80 hover:border-brand-cyan/30 group">
                     <span className="flex-1 text-sm font-medium text-neutral-700 truncate select-all">
                         {email}
@@ -63,7 +63,7 @@ export function ContactDeck({ profile }: ContactDeckProps) {
             </div>
         </GlassCard>
 
-        {/* Social Links - now using simple flex layout to match general aesthetic */}
+        {/* Social media links grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {socialLinks.map((social) => (
                 <GlassCard 

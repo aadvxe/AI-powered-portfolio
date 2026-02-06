@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import { PromptTemplate } from "@langchain/core/prompts";
 
-// Simple in-memory rate limiting (per IP, resets on server restart)
+// In-memory rate limiting implementation
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 const RATE_LIMIT = 20; // requests per minute
 const RATE_WINDOW = 60 * 1000; // 1 minute
@@ -39,10 +39,10 @@ export async function POST(req: Request) {
     const origin = req.headers.get("origin");
     const referer = req.headers.get("referer");
     
-    // Allow requests if they are from:
+    // Origin Validation Policy:
     // 1. Localhost
-    // 2. The defined Site URL
-    // 3. Vercel Preview/Production URLs
+    // 2. Production Site URL
+    // 3. Vercel Preview/Production Domains
     const isLocalhost = origin?.includes("localhost") || referer?.includes("localhost");
     const isSiteUrl = (origin && process.env.NEXT_PUBLIC_SITE_URL && origin.includes(process.env.NEXT_PUBLIC_SITE_URL)) || 
                       (referer && process.env.NEXT_PUBLIC_SITE_URL && referer.includes(process.env.NEXT_PUBLIC_SITE_URL));
@@ -70,7 +70,7 @@ export async function POST(req: Request) {
       return new Response(JSON.stringify({ error: "Message too long (max 2000 characters)" }), { status: 400 });
     }
 
-    // 1. Embed the user's query REMOTE (Google AI)
+    // 1. Generate query embeddings
     const embeddings = new GoogleGenerativeAIEmbeddings({
         model: "models/gemini-embedding-001",
         taskType: TaskType.RETRIEVAL_QUERY,
@@ -79,11 +79,11 @@ export async function POST(req: Request) {
     
     const vector = await embeddings.embedQuery(currentMessage);
     
-    // Debug logging (dev only)
+    // Development logging
     const isDev = process.env.NODE_ENV !== 'production';
     if (isDev) console.log(`[RAG] Vector: ${vector.length} dims`);
 
-    // 2. Search for relevant documents
+    // 2. RAG Retrieval
     const { data: documents, error } = await supabase.rpc("match_documents", {
       query_embedding: vector,
       match_threshold: 0.0, // Return EVERYTHING (Top K) regardless of score
@@ -97,21 +97,22 @@ export async function POST(req: Request) {
     
     if (isDev) console.log(`[RAG] Retrieved ${documents?.length} documents.`);
 
-    // 3. Construct Context
+    // 3. Context Construction
     const contextText = documents
       ?.map((doc: any) => doc.content)
       .join("\n---\n") || "No relevant context found.";
 
-    // 4. Setup Gemini Chat Model
+    // 4. Model Initialization
     const model = new ChatGoogleGenerativeAI({
       model: "gemini-2.5-flash-lite", 
       streaming: true,
       apiKey: process.env.GOOGLE_API_KEY,
     });
 
-    // 5. Create Chain
+    // 5. Chain Construction
     const prompt = PromptTemplate.fromTemplate(`
       You are the AI Assistant for a Portfolio Website.
+      Today is {current_date}.
       Your goal is to answer questions about the portfolio owner based ONLY on the provided context.
       
       CRITICAL INSTRUCTION:
@@ -167,11 +168,12 @@ export async function POST(req: Request) {
     // Format chat history
     const chatHistory = messages.slice(0, -1).map((m: any) => `${m.role}: ${m.content}`).join("\n");
 
-    // 6. Stream Response
+    // 6. Stream Execution
     const stream = await chain.stream({
       chat_history: chatHistory,
       context: contextText,
       question: currentMessage,
+      current_date: new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }),
     });
 
     return new Response(new ReadableStream({
