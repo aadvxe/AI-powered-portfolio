@@ -15,6 +15,20 @@ export const metadata: Metadata = {
   icons: {
     icon: "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👨‍💻</text></svg>",
   },
+  openGraph: {
+    title: "aadvxe's Portfolio",
+    description: "AI Engineer • Web Developer • IoT Creative",
+    url: "https://aadvxe.vercel.app",
+    siteName: "aadvxe's Portfolio",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "aadvxe's Portfolio",
+    description: "AI Engineer • Web Developer • IoT Creative",
+    creator: "@aadvxe",
+  },
 };
 
 export default function RootLayout({
