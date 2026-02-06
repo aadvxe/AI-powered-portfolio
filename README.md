@@ -2,7 +2,7 @@
 
 This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
 
-## 🏗️ Architecture
+## Architecture
 
 The system follows a modern **Hybrid RAG** architecture, balancing latency, cost, and accuracy.
 
@@ -27,7 +27,7 @@ graph TD
     LLM --> Response
 ```
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
@@ -36,7 +36,7 @@ graph TD
 - **Orchestration**: LangChain.js
 - **Styling**: TailwindCSS + Framer Motion
 
-## 🧩 RAG Implementation Details
+## RAG Implementation Details
 
 ### 1. Chunking Strategy (Structure-Based)
 
@@ -85,7 +85,7 @@ The retrieved context is fed into **Geneini 2.5 Flash-Lite** with a strict syste
 
 The response is **streamed** back to the client token-by-token to ensure the interface feels responsive, even during complex generations.
 
-## 🚀 Why this approach?
+## Why this approach?
 
 - **Precision**: Structure-based chunking prevents "context bleeding" where unrelated info gets mixed into an answer.
 - **Cost Efficiency**: Local intents handle 40% of queries for free. Gemini Flash-Lite handles the rest at a fraction of the cost of GPT-4.
