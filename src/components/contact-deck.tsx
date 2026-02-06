@@ -21,6 +21,7 @@ export function ContactDeck({ profile }: ContactDeckProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+  const socialLinks = [
     { name: "GitHub", icon: GithubIcon, url: profile?.social_links?.github || "#", color: "text-neutral-700 hover:text-black" },
     { name: "LinkedIn", icon: LinkedInIcon, url: profile?.social_links?.linkedin || "#", color: "text-neutral-700 hover:text-blue-600" }
   ];
