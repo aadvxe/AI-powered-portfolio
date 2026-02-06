@@ -15,11 +15,35 @@ interface ProjectDeckProps {
     filter?: string; // Optional keyword filter
 }
 
+// Semantic mapping for smarter filtering
+const SEMANTIC_MAP: Record<string, string[]> = {
+  "ai": ["ai", "artificial intelligence", "ml", "machine learning", "llm", "rag", "langchain", "gemini", "gpt", "nlp", "chatbot"],
+  "machine learning": ["machine learning", "ml", "ai", "deep learning", "neural", "sci-kit", "tensorflow", "pytorch"],
+  "ml": ["machine learning", "ml", "ai", "deep learning"],
+  "frontend": ["frontend", "react", "next.js", "typescript", "tailwind", "ui", "ux"],
+  "backend": ["backend", "node", "express", "supabase", "database", "sql", "api", "server"],
+  "mobile": ["mobile", "react native", "ios", "android", "flutter"],
+  "iot": ["iot", "embedded", "arduino", "raspberry", "esp32", "hardware", "sensor"],
+};
+
 export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps) {
   
-  const filteredProjects = filter 
-    ? projects.filter(p => JSON.stringify(p).toLowerCase().includes(filter.toLowerCase()))
-    : projects;
+  const filteredProjects = runFilter(projects, filter);
+
+  function runFilter(allProjects: Project[], keyword?: string) {
+    if (!keyword) return allProjects;
+    
+    const lowerKey = keyword.toLowerCase().trim();
+    
+    // 1. Get related terms from map, or just use the keyword itself
+    const terms = SEMANTIC_MAP[lowerKey] || [lowerKey];
+    
+    // 2. Filter: Check if ANY of the terms are present in the project data
+    return allProjects.filter(p => {
+        const projectString = JSON.stringify(p).toLowerCase();
+        return terms.some(term => projectString.includes(term));
+    });
+  }
 
   if (filteredProjects.length === 0) return null;
 
