@@ -78,7 +78,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                                 <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
-                                    "Show me projects using Tensorflow"
+                                    "Show me projects using Machine Learning"
                                 </div>
                                 <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">
                                     "Do you have experience with AI?"

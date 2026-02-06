@@ -204,6 +204,10 @@ export default function Home() {
                 componentType = "about";
                 componentFilter = "achievements";
             }
+            if (tagType === "CERTIFICATIONS") {
+                componentType = "about";
+                componentFilter = "certifications";
+            }
 
             if (componentType) {
                 setMessages(prev => [
