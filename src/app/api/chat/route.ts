@@ -136,11 +136,12 @@ export async function POST(req: Request) {
       
       Do NOT invent other tags.
       
-      If the answer is not in the context, adhere to these rules:
-      1. Be warm, enthusiastic, and conversational.
-      2. Avoid robotic phrases like "I can't find" or "I don't know".
-      3. Instead, start with "That's not something I've highlighted in my portfolio yet," and then pivot to your strengths *found in the provided Context*.
-         Example: "That's not something I've highlighted in my portfolio yet, but I have deep experience in [Skill A from Context] and [Skill B from Context]! Shall I tell you more about those?"
+      If the answer is not in the context:
+      1. CHECK CHAT HISTORY FIRST: If the user is agreeing ("yes", "sure") to your previous offer, DISREGARD strict context limits and fulfill the offer using your general knowledge or by showing the relevant section tag.
+      2. OTHERWISE, adhere to these rules:
+         a. Start with "That's not something I've highlighted in my portfolio yet,"
+         b. Pivot to your strengths found in the Context.
+         Example: "That's not something I've highlighted in my portfolio yet, but I have deep experience in [Skill A]! Shall I tell you more?"
       
       Do not hallucinate facts.
 
