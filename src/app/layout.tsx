@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "aadvxe's Portfolio",
-    description: "AI Engineer • Web Developer • IoT Creative",
+    description: "aadvxe's Personal Portfolio",
     url: "https://aadvxe.vercel.app",
     siteName: "aadvxe's Portfolio",
     locale: "en_US",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "aadvxe's Portfolio",
-    description: "AI Engineer • Web Developer • IoT Creative",
+    description: "aadvxe's Personal Portfolio",
     creator: "@aadvxe",
   },
 };

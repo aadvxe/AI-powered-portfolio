@@ -15,40 +15,32 @@ export default async function Image() {
     (
       <div
         style={{
-          background: 'linear-gradient(to bottom right, #0a0a0a, #1a1a1a)',
+          background: 'white',
           width: '100%',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          fontFamily: 'sans-serif',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
         }}
       >
         <div
             style={{
-                fontSize: 130,
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
-                borderRadius: '50%',
-                width: 250,
-                height: 250,
+                fontSize: 160,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
-                border: '1px solid rgba(255, 255, 255, 0.1)',
+                marginBottom: 20,
             }}
         >
             👨‍💻
         </div>
         <div
           style={{
-            fontSize: 72,
+            fontSize: 64,
             fontWeight: 'bold',
-            marginTop: 40,
-            backgroundImage: 'linear-gradient(to right, #fff, #aaa)',
-            backgroundClip: 'text',
-            color: 'transparent',
+            color: '#000',
             letterSpacing: '-2px',
           }}
         >
@@ -56,11 +48,11 @@ export default async function Image() {
         </div>
         <div style={{ 
             fontSize: 32, 
-            color: '#a3a3a3', 
-            marginTop: 15,
+            color: '#666', 
+            marginTop: 10,
             fontWeight: 500 
         }}>
-          AI Engineer • Web Developer • IoT
+          aadvxe's Personal Portfolio
         </div>
       </div>
     ),
