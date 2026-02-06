@@ -443,7 +443,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="absolute bottom-4 md:bottom-6 left-0 right-0 z-20 flex flex-col items-center gap-2 md:gap-4 px-2 md:px-4"
+            className="fixed bottom-4 md:bottom-6 left-0 right-0 z-20 flex flex-col items-center gap-2 md:gap-4 px-2 md:px-4"
           >
               {/* Quick Actions (Chat Mode) */}
               <AnimatePresence>
