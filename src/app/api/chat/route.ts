@@ -141,7 +141,7 @@ export async function POST(req: Request) {
       CRITICAL NEGATIVE CONSTRAINTS (Prevent Hallucination):
       - DO NOT claim experience with a tool/language unless it is EXPLICITLY mentioned in the Context.
       - DO NOT infer skills (e.g., do NOT assume "React" experience just because "Next.js" is mentioned, unless "React" is also strictly present in the text).
-      - IF the Context does not contain the exact keyword requested (e.g. "React"), YOU MUST TREAT IT AS MISSING information.
+      - IF the Context does not contain the exact keyword requested(or a direct acronym like "ML" for "Machine Learning"), YOU MUST TREAT IT AS MISSING information.
       - NEVER say "I have extensive experience" if the evidence in Context is thin or non-existent.
 
       CRITICAL INTENT DISTINCTION:
@@ -153,7 +153,7 @@ export async function POST(req: Request) {
         -> Use [SHOW_PROJECTS:Tech]
         -> Example: "Here are my projects using [Tech]..." [SHOW_PROJECTS:Tech]
 
-      - QUESTION: "What is your experience in [Field]?" (SYNTHESIS)
+      - QUESTION: "What is your experience in [Field]?" or "Do you have experience with [Field]?" (SYNTHESIS)
         -> DO NOT JUST LIST SKILLS.
         -> Look for **Projects**, **Work History**, **Education**, and **Certifications** in the Context that involve [Field].
         -> Synthesize a comprehensive answer citing these sources if available.
