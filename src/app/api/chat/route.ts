@@ -70,7 +70,7 @@ export async function POST(req: Request) {
 
     // 1. Embed the user's query REMOTE (Google AI)
     const embeddings = new GoogleGenerativeAIEmbeddings({
-        model: "text-embedding-004",
+        model: "models/gemini-embedding-001",
         taskType: TaskType.RETRIEVAL_QUERY,
         apiKey: process.env.GOOGLE_API_KEY
     });
@@ -100,9 +100,9 @@ export async function POST(req: Request) {
       ?.map((doc: any) => doc.content)
       .join("\n---\n") || "No relevant context found.";
 
-    // 4. Setup Gemini Chat Model (Using Lite for better rate limits)
+    // 4. Setup Gemini Chat Model
     const model = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash-lite", // Use 'model' property as per linter/types
+      model: "gemini-2.5-flash-lite", 
       streaming: true,
       apiKey: process.env.GOOGLE_API_KEY,
     });

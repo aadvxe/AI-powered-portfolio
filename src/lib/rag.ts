@@ -139,7 +139,7 @@ export async function reindexKnowledgeBase(supabase: SupabaseClient) {
   await supabase.from("documents").delete().neq("id", 0); 
   
   const embeddings = new GoogleGenerativeAIEmbeddings({
-    model: "text-embedding-004", // Optimize for retrieval
+    model: "models/gemini-embedding-001", // Optimize for retrieval
     taskType: TaskType.RETRIEVAL_DOCUMENT,
     apiKey: process.env.GOOGLE_API_KEY
   });
