@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     // Origin Validation Policy:
     // 1. Localhost
     // 2. Production Site URL
-    // 3. Vercel Preview/Production Domains
+    // 3. Vercel
     const isLocalhost = origin?.includes("localhost") || referer?.includes("localhost");
     const isSiteUrl = (origin && process.env.NEXT_PUBLIC_SITE_URL && origin.includes(process.env.NEXT_PUBLIC_SITE_URL)) || 
                       (referer && process.env.NEXT_PUBLIC_SITE_URL && referer.includes(process.env.NEXT_PUBLIC_SITE_URL));
@@ -154,9 +154,9 @@ export async function POST(req: Request) {
          a. **Irrelevant / Personal / Non-Professional** (e.g. "What is your height?", "Who is the president?", "Capital of Jakarta?"):
             - You are a relentless professional advocate for the owner.
             - ACKNOWLEDGE the question briefly.
-            - IMMEDIATELY PIVOT back to "I can tell you about...".
+            - IMMEDIATELY PIVOT back to a key strength or project found in the **Context**.
             - **CRITICAL**: Do NOT append any [SHOW_TAG]. Keep it text-only interactions to avoid clutter.
-            - Example: "I'm not sure about the capital of Jakarta, but I can tell you about my experience in building scalable architectures or my work with IoT systems."
+            - Example (if context mentions React): "I don't have information on that, but I can tell you about my expertise in Frontend Development with React."
 
          b. **Professional / Technical** (e.g. "Do you know Vue?", "Experience with Ruby?", "Did you work at Google?"):
             - Start with "That's not something I've highlighted in my portfolio yet,"
@@ -164,8 +164,8 @@ export async function POST(req: Request) {
             - **VARIETY RULE**: Do NOT always default to [SHOW_SKILLS].
               - If you can relate it to a project context -> Use [SHOW_PROJECTS]
               - If it is about a programming language/tool -> Use [SHOW_SKILLS]
-            - Example 1: "...but I have built similar apps using React! Check these out:" [SHOW_PROJECTS]
-            - Example 2: "...but I have deep experience in Python! Here is my tech stack:" [SHOW_SKILLS]
+            - Example 1: "...but I have built similar apps using [Skill from Context]! Check these out:" [SHOW_PROJECTS]
+            - Example 2: "...but I have deep experience in [Skill from Context]! Here is my tech stack:" [SHOW_SKILLS]
          
          CRITICAL FORMATTING RULES:
          - Do NOT mention percentage numbering (e.g. "80%", "Level 5"). Just mention the skill name.

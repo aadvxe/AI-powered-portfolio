@@ -2,7 +2,8 @@
 
 import { GlassCard } from "./ui/glass-card";
 import { motion } from "framer-motion";
-import { Mail, Github, Linkedin, Copy, Check, ArrowUpRight } from "lucide-react";
+import { Mail, Copy, Check, ArrowUpRight } from "lucide-react";
+import { GithubIcon, LinkedInIcon } from "./ui/social-icons";
 import { useState } from "react";
 
 import { ProfileData } from "@/hooks/use-content";
@@ -20,10 +21,8 @@ export function ContactDeck({ profile }: ContactDeckProps) {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  const socialLinks = [
-    { name: "GitHub", icon: Github, url: profile?.social_links?.github || "#", color: "text-neutral-700 hover:text-black" },
-    { name: "LinkedIn", icon: Linkedin, url: profile?.social_links?.linkedin || "#", color: "text-neutral-700 hover:text-blue-600" }
+    { name: "GitHub", icon: GithubIcon, url: profile?.social_links?.github || "#", color: "text-neutral-700 hover:text-black" },
+    { name: "LinkedIn", icon: LinkedInIcon, url: profile?.social_links?.linkedin || "#", color: "text-neutral-700 hover:text-blue-600" }
   ];
 
   return (
