@@ -59,7 +59,7 @@ The "Knowledge Base" is not static text. It is a living reflection of the databa
 1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
 2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
 3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
-4.  **Vectorization**: Documents are sent to Google's `gemini-embedding-001` model to generate 768-dimensional vectors.
+4.  **Vectorization**: Documents are sent to Google's `gemini-embedding-001` model to generate 3072-dimensional vectors.
 5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase.
 
 ### 3. Hybrid Retrieval Logic
