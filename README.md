@@ -74,7 +74,7 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 2.  **Remote RAG**:
     - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
-    - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 8 chunks.
+    - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
     - **Latency**: ~800ms - 1.5s.
 
 ### 4. Generation & Streaming
