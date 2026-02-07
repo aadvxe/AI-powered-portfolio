@@ -14,6 +14,8 @@ export interface ProjectData {
   repo_link: string;
   featured: boolean;
   custom_links?: { label: string; url: string; icon?: string }[];
+  year?: number;
+  month?: string;
 }
 
 export interface SkillData {
