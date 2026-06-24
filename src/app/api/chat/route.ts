@@ -1,5 +1,6 @@
 
-import { ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
+import { ChatDeepSeek } from "@langchain/deepseek";
 import { TaskType } from "@google/generative-ai";
 import { supabase } from "@/lib/supabase";
 import { StringOutputParser } from "@langchain/core/output_parsers";
@@ -108,10 +109,10 @@ export async function POST(req: Request) {
       .join("\n---\n") || "No relevant context found.";
 
     // 4. Model Initialization
-    const model = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash-lite", 
-      streaming: true,
-      apiKey: process.env.GOOGLE_API_KEY,
+    const model = new ChatDeepSeek({
+      model: "deepseek-v4-flash", 
+      apiKey: process.env.DEEPSEEK_API_KEY,
+      temperature: 0.2,
     });
 
     // 5. Chain Construction

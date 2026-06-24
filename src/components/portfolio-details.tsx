@@ -12,7 +12,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
     { name: "Styling", val: "Tailwind CSS + Framer Motion" },
     { name: "Language", val: "TypeScript" },
     { name: "Backend", val: "Supabase (PostgreSQL)" },
-    { name: "AI", val: "LangChain + Google Gemini" },
+    { name: "AI", val: "LangChain + DeepSeek" },
   ];
 
   // Body scroll lock management
@@ -75,7 +75,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                 Interactive Portfolio
                             </h3>
                             <p className="text-sm text-neutral-600 leading-relaxed">
-                                This portfolio is an AI-powered portfolio that uses <strong>Retrieval-Augmented Generation (RAG)</strong> to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
+                                This portfolio is an AI-powered portfolio that uses <strong>Retrieval-Augmented Generation (RAG)</strong> to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using DeepSeek's v4 Flash model.
                             </p>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
                                 <div className="p-3 bg-neutral-50 rounded-lg border border-neutral-100 text-xs text-neutral-600">

@@ -1,6 +1,6 @@
 ## Overview
 
-This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google's Gemini models.
+This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using DeepSeek's v4 Flash model.
 
 ## Architecture
 
@@ -21,7 +21,7 @@ graph TD
     Embed -.->|Vector| API
     API --> VectorDB[(Supabase pgvector)]
     VectorDB -.->|Context| API
-    API --> LLM[Gemini 2.5 Flash-Lite]
+    API --> LLM[DeepSeek v4 Flash]
     end
 
     LLM --> Response
@@ -31,7 +31,7 @@ graph TD
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM**: Google Gemini 2.5 Flash-Lite
+- **LLM**: DeepSeek v4 Flash
 - **Embeddings**: Google `gemini-embedding-001`
 - **Orchestration**: LangChain.js
 - **Styling**: TailwindCSS + Framer Motion
@@ -79,7 +79,7 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 ### 4. Generation & Streaming
 
-The retrieved context is fed into **Gemini 2.5 Flash-Lite** with a strict system prompt:
+The retrieved context is fed into **DeepSeek v4 Flash** with a strict system prompt:
 
 > "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
 
@@ -88,5 +88,5 @@ The response is **streamed** back to the client token-by-token to ensure the int
 ## Why this approach?
 
 - **Precision**: Structure-based chunking prevents "context bleeding" where unrelated info gets mixed into an answer.
-- **Cost Efficiency**: Local intents handle 40% of queries for free. Gemini Flash-Lite handles the rest at a fraction of the cost of GPT-4.
+- **Cost Efficiency**: Local intents handle 40% of queries for free. DeepSeek v4 Flash handles the rest at an extremely cost-efficient rate.
 - **Dynamism**: The RAG index is updated instantly via the Admin Panel, meaning new projects added to the DB are immediately "known" by the AI without code changes.
