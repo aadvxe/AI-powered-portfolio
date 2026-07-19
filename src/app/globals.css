@@ -1,25 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  /* Light Theme */
+  /* ---- Vintage Editorial Palette ---- */
+  --paper: #efece3; /* warm cream paper */
+  --paper-raised: #f6f4ec; /* cards / panels */
+  --paper-deep: #e6e2d3; /* alternating sections */
+  --ink: #26231e; /* deep warm charcoal */
+  --ink-soft: #6b6455; /* muted ink */
+  --line: rgba(38, 35, 30, 0.16); /* hairline rules */
+  --line-strong: rgba(38, 35, 30, 0.45);
+  --clay: #b3542f; /* terracotta accent */
+  --sea: #587083; /* dusty maritime blue */
+  --moss: #6f7455; /* muted olive */
+
+  /* Legacy tokens (admin pages) */
   --background: #ffffff;
   --foreground: #171717;
-
-  /* Custom Accents (Adjusted for Light) */
-  --electric-cyan: #06b6d4; /* Darker Cyan for visibility on white */
+  --electric-cyan: #06b6d4;
   --deep-purple: #7000ff;
 }
 
 @theme inline {
+  --color-paper: var(--paper);
+  --color-paper-raised: var(--paper-raised);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-clay: var(--clay);
+  --color-sea: var(--sea);
+  --color-moss: var(--moss);
+
+  /* Legacy tokens (admin pages) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-brand-cyan: var(--electric-cyan);
   --color-brand-purple: var(--deep-purple);
 
-  --font-sans: var(--font-poppins);
-  --font-mono: var(
-    --font-geist-mono
-  ); /* Keeping mono just in case, though unused */
+  --font-sans: var(--font-archivo);
+  --font-serif: var(--font-source-serif);
+  --font-mono: var(--font-plex-mono);
 }
 
 html {
@@ -27,11 +48,49 @@ html {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans), sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Admin pages keep their plain white canvas */
+body:has(.admin-canvas) {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+::selection {
+  background: rgba(179, 84, 47, 0.22);
+}
+
+/* ---- Paper grain texture (apply .grain to a fixed overlay) ---- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.5;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+}
+
+/* ---- Editorial helpers ---- */
+.overline-label {
+  font-family: var(--font-mono), monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.plate-shadow {
+  box-shadow: 6px 6px 0 rgba(38, 35, 30, 0.1);
+}
+
+.plate-shadow-hover:hover {
+  box-shadow: 8px 8px 0 rgba(179, 84, 47, 0.2);
 }
 
 /* Custom Scrollbar */
@@ -42,11 +101,11 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1); /* Dark scrollbar for light theme */
-  border-radius: 4px;
+  background: rgba(38, 35, 30, 0.18);
+  border-radius: 0;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(38, 35, 30, 0.32);
 }
 
 /* Specific Chat Scrollbar: Hidden on Mobile */
@@ -60,7 +119,108 @@ body {
   }
 }
 
-/* --- LIQUID GLASS CORE --- */
+/* ---- Sea scene animations ---- */
+@keyframes wave-drift {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-1440px);
+  }
+}
+.wave-slow {
+  animation: wave-drift 46s linear infinite;
+}
+.wave-mid {
+  animation: wave-drift 30s linear infinite reverse;
+}
+.wave-fast {
+  animation: wave-drift 22s linear infinite;
+}
+
+@keyframes ship-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1.4deg);
+  }
+  50% {
+    transform: translateY(6px) rotate(1.6deg);
+  }
+}
+.ship-bob {
+  animation: ship-bob 7s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+}
+.ship-bob-2 {
+  animation: ship-bob 9s ease-in-out infinite;
+  animation-delay: -3s;
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+}
+.ship-bob-3 {
+  animation: ship-bob 11s ease-in-out infinite;
+  animation-delay: -6s;
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+}
+
+@keyframes cloud-drift {
+  to {
+    transform: translateX(70px);
+  }
+}
+.cloud-a {
+  animation: cloud-drift 60s ease-in-out infinite alternate;
+}
+.cloud-b {
+  animation: cloud-drift 85s ease-in-out infinite alternate-reverse;
+}
+
+/* ---- Vox-style torn highlight swatch ---- */
+.torn-swatch {
+  clip-path: polygon(
+    1% 8%,
+    6% 2%,
+    15% 6%,
+    24% 0%,
+    35% 5%,
+    47% 1%,
+    58% 6%,
+    70% 0%,
+    81% 5%,
+    91% 1%,
+    99% 7%,
+    100% 88%,
+    95% 96%,
+    86% 92%,
+    74% 99%,
+    62% 93%,
+    50% 100%,
+    38% 94%,
+    26% 99%,
+    14% 93%,
+    5% 98%,
+    0% 90%
+  );
+}
+
+/* Blinking cursor for streaming indicator */
+@keyframes ink-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.ink-cursor {
+  animation: ink-blink 1s step-end infinite;
+}
+
+/* --- LIQUID GLASS CORE (legacy, used by the admin panel) --- */
 .liquidGlass-wrapper {
   position: relative;
   display: flex;
