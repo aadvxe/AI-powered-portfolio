@@ -17,11 +17,11 @@ graph TD
     HybridRouter -- Complex Query --> API["Next.js API Route /api/chat"]
 
     subgraph RAG_Orchestration ["RAG Orchestration - GCP Vertex AI"]
-    API --> Embed["Gemini text-embedding-004"]
+    API --> Embed["Gemini gemini-embedding-001"]
     Embed -.->|Query Vector| API
     API --> VectorDB[("Supabase pgvector")]
     VectorDB -.->|Semantic Context| API
-    API --> LLM["Gemini 2.5 Flash"]
+    API --> LLM["Gemini 3.1 Flash Lite"]
     end
 
     LLM --> Response
@@ -31,8 +31,8 @@ graph TD
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-2.5-flash`)
-- **Embeddings**: Google Cloud `text-embedding-004` (via `@google/genai`)
+- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
+- **Embeddings**: Google Cloud `gemini-embedding-001` (via `@google/genai`)
 - **Orchestration**: Direct GCP Gen AI SDK
 - **Styling**: TailwindCSS + Framer Motion
 
@@ -59,7 +59,7 @@ The "Knowledge Base" is not static text. It is a living reflection of the databa
 1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
 2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
 3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
-4.  **Vectorization**: Documents are sent to Google Cloud's `text-embedding-004` model with task type `RETRIEVAL_DOCUMENT` to generate dense semantic vector representations.
+4.  **Vectorization**: Documents are sent to Google Cloud's `gemini-embedding-001` model with task type `RETRIEVAL_DOCUMENT` to generate dense semantic vector representations (3072 dimensions).
 5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase pgvector.
 
 ### 3. Hybrid Retrieval Logic
@@ -74,12 +74,12 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 2.  **Remote RAG**:
     - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
-    - Sends query to server -> Generates Query Embedding via Gemini `text-embedding-004` (`RETRIEVAL_QUERY`) -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
+    - Sends query to server -> Generates Query Embedding via Gemini `gemini-embedding-001` (`RETRIEVAL_QUERY`) -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
     - **Latency**: ~300ms - 800ms.
 
 ### 4. Generation & Streaming
 
-The retrieved context is fed into **Gemini 2.5 Flash** with a strict system prompt:
+The retrieved context is fed into **Gemini 3.1 Flash Lite** with a strict system prompt:
 
 > "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
 
