@@ -8,20 +8,20 @@ The system follows a modern **Hybrid RAG** architecture, balancing latency, cost
 
 ```mermaid
 graph TD
-    User[User Query] --> Frontend[Next.js Chat UI]
-    Frontend --> HybridRouter{Local vs Cloud?}
+    User["User Query"] --> Frontend["Next.js Chat UI"]
+    Frontend --> HybridRouter{"Local vs Cloud?"}
 
-    HybridRouter -- Simple Intent --> Local[Local Regex Matcher]
-    Local --> Response[Response]
+    HybridRouter -- Simple Intent --> Local["Local Regex Matcher"]
+    Local --> Response["Response"]
 
-    HybridRouter -- Complex Query --> API[Next.js API Route /api/chat]
+    HybridRouter -- Complex Query --> API["Next.js API Route /api/chat"]
 
-    subgraph RAG Orchestration (GCP Vertex AI)
-    API --> Embed[Gemini Embedding 2 / gemini-embedding-002]
+    subgraph RAG_Orchestration ["RAG Orchestration - GCP Vertex AI"]
+    API --> Embed["Gemini text-embedding-004"]
     Embed -.->|Query Vector| API
-    API --> VectorDB[(Supabase pgvector)]
+    API --> VectorDB[("Supabase pgvector")]
     VectorDB -.->|Semantic Context| API
-    API --> LLM[Gemini 3.1 Flash Lite]
+    API --> LLM["Gemini 2.5 Flash"]
     end
 
     LLM --> Response
@@ -31,8 +31,8 @@ graph TD
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
-- **Embeddings**: Google Cloud `gemini-embedding-002` (via `@google/genai`)
+- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-2.5-flash`)
+- **Embeddings**: Google Cloud `text-embedding-004` (via `@google/genai`)
 - **Orchestration**: Direct GCP Gen AI SDK
 - **Styling**: TailwindCSS + Framer Motion
 
@@ -79,7 +79,7 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 ### 4. Generation & Streaming
 
-The retrieved context is fed into **Gemini 2.5 Flash / 3.1 Flash Lite** with a strict system prompt:
+The retrieved context is fed into **Gemini 2.5 Flash** with a strict system prompt:
 
 > "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
 
