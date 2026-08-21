@@ -1,4 +1,6 @@
 import { supabase } from "@/lib/supabase";
+import { searchKnowledgeBase } from "@/lib/rag";
+import { streamChatCompletion } from "@/lib/gcp";
 
 // In-memory rate limiting implementation
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
@@ -20,6 +22,11 @@ function checkRateLimit(ip: string): boolean {
   
   record.count++;
   return true;
+}
+
+interface IncomingMessage {
+  role: string;
+  content: string;
 }
 
 export async function POST(req: Request) {
@@ -67,22 +74,9 @@ export async function POST(req: Request) {
 
     const isDev = process.env.NODE_ENV !== 'production';
 
-    // 1. Fetch documents directly from Supabase (Skipping vector embeddings)
-    const { data: documents, error } = await supabase
-      .from("documents")
-      .select("content");
-
-    if (error) {
-      console.error("[Context] Supabase Error:", error);
-      throw error;
-    }
-    
-    if (isDev) console.log(`[Context] Retrieved ${documents?.length} documents from Supabase.`);
-
-    // 2. Context Construction
-    const contextText = documents
-      ?.map((doc: any) => doc.content)
-      .join("\n---\n") || "No relevant context found.";
+    // 1. Semantic Vector Retrieval using Gemini query embedding + Supabase pgvector
+    if (isDev) console.log(`[Chat] Querying vector DB with Gemini embedding for query: "${currentMessage}"`);
+    const contextText = await searchKnowledgeBase(supabase, currentMessage, { matchCount: 6 });
 
     const currentDate = new Date().toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -156,86 +150,31 @@ Context:
 ${contextText}
 `;
 
-    const formattedMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.map((m: any) => ({
-        role: m.role === "ai" ? "assistant" : "user",
-        content: m.content
-      }))
-    ];
+    const formattedMessages = (messages as IncomingMessage[]).map((m) => ({
+      role: (m.role === "ai" || m.role === "assistant" || m.role === "model" ? "model" : "user") as "user" | "model",
+      content: m.content
+    }));
 
-    const deepseekRes = await fetch("https://api.deepseek.com/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.DEEPSEEK_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "deepseek-chat",
-        messages: formattedMessages,
-        temperature: 0.2,
-        stream: true
-      })
+    // 2. Stream generation using GCP Vertex AI / Gemini Enterprise Agent Platform
+    const responseStream = await streamChatCompletion({
+      messages: formattedMessages,
+      systemInstruction: systemPrompt,
+      temperature: 0.2,
     });
 
-    if (!deepseekRes.ok) {
-      const errText = await deepseekRes.text();
-      console.error("[DeepSeek API Error]:", errText);
-      throw new Error(`DeepSeek API error (${deepseekRes.status}): ${errText}`);
-    }
-
     const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
 
     const stream = new ReadableStream({
       async start(controller) {
-        if (!deepseekRes.body) {
-          controller.close();
-          return;
-        }
-
-        const reader = deepseekRes.body.getReader();
-        let buffer = "";
-
         try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-
-            buffer += decoder.decode(value, { stream: true });
-            const lines = buffer.split("\n");
-            buffer = lines.pop() || "";
-
-            for (const line of lines) {
-              const trimmed = line.trim();
-              if (!trimmed || trimmed === "data: [DONE]") continue;
-
-              if (trimmed.startsWith("data: ")) {
-                try {
-                  const json = JSON.parse(trimmed.slice(6));
-                  const textChunk = json.choices?.[0]?.delta?.content;
-                  if (textChunk) {
-                    controller.enqueue(encoder.encode(textChunk));
-                  }
-                } catch {
-                  // Ignore JSON parse error on partial chunks
-                }
-              }
+          for await (const chunk of responseStream) {
+            if (chunk.text) {
+              controller.enqueue(encoder.encode(chunk.text));
             }
           }
-
-          if (buffer.trim() && buffer.trim().startsWith("data: ") && buffer.trim() !== "data: [DONE]") {
-            try {
-              const json = JSON.parse(buffer.trim().slice(6));
-              const textChunk = json.choices?.[0]?.delta?.content;
-              if (textChunk) {
-                controller.enqueue(encoder.encode(textChunk));
-              }
-            } catch {}
-          }
-
           controller.close();
         } catch (err) {
+          console.error("[Stream Error]:", err);
           controller.error(err);
         }
       }
@@ -245,8 +184,9 @@ ${contextText}
       headers: { "Content-Type": "text/plain; charset=utf-8" },
     });
 
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMsg = e instanceof Error ? e.message : String(e);
     console.error("[Route Error]:", e);
-    return new Response(JSON.stringify({ error: e.message }), { status: 500 });
+    return new Response(JSON.stringify({ error: errorMsg }), { status: 500 });
   }
 }

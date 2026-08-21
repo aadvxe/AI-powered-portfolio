@@ -1,6 +1,6 @@
 ## Overview
 
-This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using DeepSeek's v4 Flash model.
+This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google Cloud Vertex AI / Gemini Flash models.
 
 ## Architecture
 
@@ -16,12 +16,12 @@ graph TD
 
     HybridRouter -- Complex Query --> API[Next.js API Route /api/chat]
 
-    subgraph RAG Orchestration
-    API --> Embed[Google gemini-embedding-001]
-    Embed -.->|Vector| API
+    subgraph RAG Orchestration (GCP Vertex AI)
+    API --> Embed[Gemini Embedding 2 / gemini-embedding-002]
+    Embed -.->|Query Vector| API
     API --> VectorDB[(Supabase pgvector)]
-    VectorDB -.->|Context| API
-    API --> LLM[DeepSeek v4 Flash]
+    VectorDB -.->|Semantic Context| API
+    API --> LLM[Gemini 3.1 Flash Lite]
     end
 
     LLM --> Response
@@ -31,9 +31,9 @@ graph TD
 
 - **Framework**: Next.js 16 (App Router)
 - **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM**: DeepSeek v4 Flash
-- **Embeddings**: Google `gemini-embedding-001`
-- **Orchestration**: LangChain.js
+- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
+- **Embeddings**: Google Cloud `gemini-embedding-002` (via `@google/genai`)
+- **Orchestration**: Direct GCP Gen AI SDK
 - **Styling**: TailwindCSS + Framer Motion
 
 ## RAG Implementation Details
@@ -47,7 +47,7 @@ I realized that professional data is highly structured. Splitting a project desc
 - **Entity-Level Chunking**:
   - **Projects**: Each project is its own standalone document. This ensures that when a user asks about a specific project, the AI retrieves the _entire_ context of that project.
   - **Skills**: Grouped by category (e.g., "Frontend Skills", "Backend Skills").
-  - **Profile**: Split into functional sections (`profile-bio`, `profile-experience`, `profile-education`).
+  - **Profile**: Split into functional sections (`profile-bio`, `profile-experience`, `profile-education`, `profile-certifications`, `profile-achievements`).
 
 - **Metadata Enrichment**:
   Each chunk is tagged with metadata (e.g., `{ type: 'project', id: '123' }`). This allows for future filtering or weighted retrieval, though currently, the primary retrieval mechanism is pure cosine similarity.
@@ -59,8 +59,8 @@ The "Knowledge Base" is not static text. It is a living reflection of the databa
 1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
 2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
 3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
-4.  **Vectorization**: Documents are sent to Google's `gemini-embedding-001` model to generate 3072-dimensional vectors.
-5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase.
+4.  **Vectorization**: Documents are sent to Google Cloud's `text-embedding-004` model with task type `RETRIEVAL_DOCUMENT` to generate dense semantic vector representations.
+5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase pgvector.
 
 ### 3. Hybrid Retrieval Logic
 
@@ -74,12 +74,12 @@ To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hyb
 
 2.  **Remote RAG**:
     - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
-    - Sends query to server -> Embeds Query -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
-    - **Latency**: ~800ms - 1.5s.
+    - Sends query to server -> Generates Query Embedding via Gemini `text-embedding-004` (`RETRIEVAL_QUERY`) -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
+    - **Latency**: ~300ms - 800ms.
 
 ### 4. Generation & Streaming
 
-The retrieved context is fed into **DeepSeek v4 Flash** with a strict system prompt:
+The retrieved context is fed into **Gemini 2.5 Flash / 3.1 Flash Lite** with a strict system prompt:
 
 > "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
 
@@ -88,5 +88,6 @@ The response is **streamed** back to the client token-by-token to ensure the int
 ## Why this approach?
 
 - **Precision**: Structure-based chunking prevents "context bleeding" where unrelated info gets mixed into an answer.
-- **Cost Efficiency**: Local intents handle 40% of queries for free. DeepSeek v4 Flash handles the rest at an extremely cost-efficient rate.
+- **Enterprise Grade AI**: GCP Vertex AI provides enterprise SLAs, fast streaming, and multimodal support.
+- **Cost Efficiency**: Local intents handle 40% of queries for free. Gemini Flash handles the rest at industry-leading speed and pricing.
 - **Dynamism**: The RAG index is updated instantly via the Admin Panel, meaning new projects added to the DB are immediately "known" by the AI without code changes.
