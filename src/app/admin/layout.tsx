@@ -4,14 +4,14 @@ import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase } from "@/lib/supabase";
-import { 
-  LayoutDashboard, 
-  Briefcase, 
-  Layers, 
-  LogOut, 
-  Menu, 
+import {
+  LayoutDashboard,
+  Briefcase,
+  Layers,
+  LogOut,
+  Menu,
   X,
-  User as UserIcon 
+  User as UserIcon
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {

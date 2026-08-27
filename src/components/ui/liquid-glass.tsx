@@ -58,8 +58,7 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
     >
       <div className="absolute inset-0 overflow-hidden rounded-[inherit] pointer-events-none">
         {/* Safari Fallback: Disable filters to prevent text blurring */}{/* Safari Fallback: Remove SVG filter AND backdrop-blur to prevent blurry text */}
-        <motion.div 
-            layout 
+        <div 
             className="liquidGlass-effect" 
             style={isSafari ? { 
                 filter: "none", 
@@ -67,8 +66,8 @@ export function LiquidGlass({ children, className, type = "menu", style, ...prop
                 WebkitBackdropFilter: "none" 
             } : undefined}
         />
-        <motion.div layout className="liquidGlass-tint" />
-        <motion.div layout className="liquidGlass-shine" />
+        <div className="liquidGlass-tint" />
+        <div className="liquidGlass-shine" />
       </div>
 
       <div className="liquidGlass-text w-full h-full rounded-[inherit] overflow-hidden text-left">

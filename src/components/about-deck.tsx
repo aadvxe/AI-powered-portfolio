@@ -1,6 +1,7 @@
 import { GlassCard } from "./ui/glass-card";
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase, Trophy, User, ExternalLink, Award } from "lucide-react";
+import { AppleEmoji } from "./ui/apple-emoji";
 
 import { ProfileData } from "@/hooks/use-content";
 
@@ -29,9 +30,9 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
 
   const Sections = {
       about: (
-        <div key="about" className="flex flex-col md:flex-row gap-6">
+        <div key="about" className="flex flex-col md:flex-row gap-4 sm:gap-6">
             {/* Avatar container */}
-            <GlassCard className="w-full md:w-[300px] shrink-0 relative overflow-hidden group">
+            <GlassCard className="w-full h-64 sm:h-72 md:h-auto md:w-[300px] shrink-0 relative overflow-hidden group">
                 {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
                 ) : (
@@ -42,14 +43,17 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             </GlassCard>
 
             {/* Biography container */}
-            <GlassCard className="flex-1 p-8 flex flex-col justify-center">
-                <div className="mb-6">
-                    <h3 className="text-3xl font-bold text-neutral-800 mb-2">Hi, I'm {profile?.name || "Your Name"}👋</h3>
-                    <div className="inline-block px-3 py-1 bg-brand-cyan/10 rounded-full text-brand-cyan text-sm font-semibold">
+            <GlassCard className="flex-1 p-5 sm:p-8 flex flex-col justify-center">
+                <div className="mb-4 sm:mb-6">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-2 flex items-center gap-2">
+                        <span>Hi, I&apos;m {profile?.name || "Your Name"}</span>
+                        <AppleEmoji emoji="👋" className="w-[0.9em] h-[0.9em]" />
+                    </h3>
+                    <div className="inline-block px-3 py-1 bg-brand-cyan/10 rounded-full text-brand-cyan text-xs sm:text-sm font-semibold">
                         {profile?.role || "Creative Developer"}
                     </div>
                 </div>
-                <p className="text-neutral-600 leading-relaxed pr-2">
+                <p className="text-sm sm:text-base text-neutral-600 leading-relaxed pr-2">
                     {profile?.bio || "I am a passionate Creative Technologist with a knack for building fluid, intuitive, and beautiful web experiences. I bridge the gap between design and engineering."}
                 </p>
                 {/* Downloadable CV */}

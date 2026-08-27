@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { AppleEmoji } from "./apple-emoji";
 
 interface TypewriterProps {
   phrases: { text: string; emoji?: string }[];
@@ -81,7 +82,7 @@ export function LoopingTypewriter({
         {"\u200B"} {/* Prevent vertical collapse */}
       </span>
       {emojiPart && (
-         <span className={emojiClassName}>{emojiPart}</span>
+         <AppleEmoji emoji={emojiPart} className={`ml-1 ${emojiClassName}`} />
       )}
       <motion.span
         animate={{ opacity: blink ? 1 : 0 }}

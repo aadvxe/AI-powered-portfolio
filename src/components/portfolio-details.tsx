@@ -26,7 +26,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         {/* Modal Overlay */}
-        <motion.div 
+        <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -41,33 +41,33 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 300, mass: 0.8 }}
-            className="w-full max-w-2xl h-[85vh] rounded-2xl relative z-10"
+            className="w-full max-w-2xl h-[88vh] sm:h-[85vh] rounded-2xl relative z-10"
             onClick={(e) => e.stopPropagation()}
         >
-            <GlassCard 
-                className="w-full h-full p-8 relative overflow-hidden flex flex-col bg-white shadow-2xl !backdrop-blur-none border-neutral-200"
+            <GlassCard
+                className="w-full h-full p-5 sm:p-8 relative overflow-hidden flex flex-col bg-white shadow-2xl !backdrop-blur-none border-neutral-200"
             >
-                <button 
-                    onClick={onClose} 
-                    className="absolute top-4 right-4 p-2 bg-neutral-100/80 rounded-full text-neutral-500 hover:bg-neutral-200 transition-colors z-20"
+                <button
+                    onClick={onClose}
+                    className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2 bg-neutral-100/90 rounded-full text-neutral-500 hover:bg-neutral-200 transition-colors z-20"
                     title="Close"
                 >
                     <X size={18} />
                 </button>
 
                 {/* Header Section */}
-                <div className="flex-none text-center mb-8">
-                     <div className="mx-auto w-12 h-12 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-4">
-                         <Sparkles size={24} />
+                <div className="flex-none text-center mb-6 sm:mb-8 pr-8 sm:pr-0 pl-2 sm:pl-0">
+                     <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-3 sm:mb-4">
+                         <Sparkles size={22} />
                      </div>
-                     <h2 className="text-3xl font-bold text-neutral-800">About this Portfolio</h2>
-                     <p className="text-neutral-500 mt-2">An interactive, AI-powered Portfolio</p>
+                     <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800">About this Portfolio</h2>
+                     <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">An interactive, AI-powered Portfolio</p>
                 </div>
 
                 {/* Main Content Scroll Area */}
                 <div className="flex-1 overflow-y-auto no-scrollbar pr-2 -mr-2">
                     <div className="flex flex-col gap-8 pb-4">
-                        
+
                         {/* System Capabilities Overview */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-neutral-900 flex items-center gap-2 text-lg">
@@ -102,7 +102,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                                 <Database size={20} className="text-purple-500" />
                                 Technical Architecture
                             </h3>
-                            
+
                             <div className="space-y-6">
                                 {/* Architectural Overview */}
                                 <div className="space-y-2">
@@ -140,9 +140,9 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
 
                          {/* Repository Link */}
                          <div className="mt-0 flex justify-center">
-                            <a 
-                                href="https://github.com/aadvxe/AI-powered-portfolio" 
-                                target="_blank" 
+                            <a
+                                href="https://github.com/aadvxe/AI-powered-portfolio"
+                                target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex items-center gap-2 px-5 py-3 bg-neutral-900 text-white rounded-xl hover:bg-neutral-800 transition-all font-medium"
                             >
@@ -153,13 +153,13 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
 
                     </div>
                 </div>
-                
+
                 {/* Background Decoration */}
                 <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-brand-cyan/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
                 <div className="absolute bottom-0 left-0 -z-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
             </GlassCard>
         </motion.div>
-        
+
         {/* Style tag to hide scrollbar but keep functionality */}
         <style jsx global>{`
           .no-scrollbar::-webkit-scrollbar {
