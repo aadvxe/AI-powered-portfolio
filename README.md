@@ -1,93 +1,187 @@
-## Overview
+## System Overview
 
-This portfolio is an AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses, the system leverages a vector database to perform semantic search over my professional data (projects, skills, experience) and generates natural language answers using Google Cloud Vertex AI / Gemini Flash models.
+This application is a Next.js 16 (App Router) web application implementing a desktop graphical interface paired with a Retrieval-Augmented Generation (RAG) conversational pipeline. The backend queries a PostgreSQL database (`pgvector`) hosted on Supabase and orchestrates vector embeddings and generative completions using `gemini-embedding-001` and `gemini-3.1-flash-lite` via `@google/genai`.
+
+---
 
 ## Architecture
 
-The system follows a modern **Hybrid RAG** architecture, balancing latency, cost, and accuracy.
-
 ```mermaid
 graph TD
-    User["User Query"] --> Frontend["Next.js Chat UI"]
-    Frontend --> HybridRouter{"Local vs Cloud?"}
+    Client["Browser Client (Next.js 16)"] --> Router{"Hybrid Query Router"}
 
-    HybridRouter -- Simple Intent --> Local["Local Regex Matcher"]
-    Local --> Response["Response"]
+    Router -- Deterministic Regex --> LocalHandler["Local Intent Handler (< 50ms)"]
+    LocalHandler --> UIAction["Direct Deck / Modal Render"]
 
-    HybridRouter -- Complex Query --> API["Next.js API Route /api/chat"]
+    Router -- Open-Ended Query --> APIChat["POST /api/chat"]
 
-    subgraph RAG_Orchestration ["RAG Orchestration - GCP Vertex AI"]
-    API --> Embed["Gemini gemini-embedding-001"]
-    Embed -.->|Query Vector| API
-    API --> VectorDB[("Supabase pgvector")]
-    VectorDB -.->|Semantic Context| API
-    API --> LLM["Gemini 3.1 Flash Lite"]
+    subgraph AI_Engine ["AI Model Pipeline (@google/genai)"]
+    APIChat --> GenEmbed["gemini-embedding-001 (taskType: RETRIEVAL_QUERY)"]
+    GenEmbed -.->|3072d Query Vector| APIChat
+    APIChat --> GenLLM["gemini-3.1-flash-lite (Streaming)"]
     end
 
-    LLM --> Response
+    subgraph Vector_DB ["Supabase PostgreSQL + pgvector"]
+    APIChat --> RPC["match_documents RPC (Cosine Similarity)"]
+    RPC -.->|Top K Semantic Chunks + Metadata| APIChat
+    end
+
+    GenLLM --> Stream["Raw Text Stream + [SHOW_*] Action Protocol"]
+    Stream --> Client
 ```
 
-## Technology Stack
+---
 
-- **Framework**: Next.js 16 (App Router)
-- **Database**: Supabase (PostgreSQL + pgvector)
-- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
-- **Embeddings**: Google Cloud `gemini-embedding-001` (via `@google/genai`)
-- **Orchestration**: Direct GCP Gen AI SDK
-- **Styling**: TailwindCSS + Framer Motion
+## Tech Stack & Dependencies
 
-## RAG Implementation Details
+- **Framework**: Next.js 16.1.6 (React 19, Turbopack, App Router)
+- **Runtime**: Node.js / Edge Runtime compatible
+- **Database**: Supabase PostgreSQL with `pgvector` extension (3072-dimensional vector indexing)
+- **AI SDK**: `@google/genai`
+- **Models**:
+  - LLM: `gemini-3.1-flash-lite`
+  - Embedding: `gemini-embedding-001` (3072 dimensions)
+- **State & Animation**: `framer-motion` (spring physics, layout projection, gesture tracking)
+- **CSS**: TailwindCSS v4 with custom CSS variables and SVG filter primitives
 
-### 1. Chunking Strategy (Structure-Based)
+---
 
-Unlike generic RAG systems that blindly split text into fixed character windows, this system uses **Semantic Structure-Based Chunking**.
+## Technical Specifications
 
-I realized that professional data is highly structured. Splitting a project description in half destroys context. Instead, the ingestion pipeline (`src/lib/rag.ts`) treats each logical entity as a discrete document:
+### 1. RAG Ingestion & Vector Indexing Pipeline (`src/lib/rag.ts`)
 
-- **Entity-Level Chunking**:
-  - **Projects**: Each project is its own standalone document. This ensures that when a user asks about a specific project, the AI retrieves the _entire_ context of that project.
-  - **Skills**: Grouped by category (e.g., "Frontend Skills", "Backend Skills").
-  - **Profile**: Split into functional sections (`profile-bio`, `profile-experience`, `profile-education`, `profile-certifications`, `profile-achievements`).
+The knowledge base is built from relational database rows rather than unstructured text files.
 
-- **Metadata Enrichment**:
-  Each chunk is tagged with metadata (e.g., `{ type: 'project', id: '123' }`). This allows for future filtering or weighted retrieval, though currently, the primary retrieval mechanism is pure cosine similarity.
+- **Entity Serialization**:
+  - **Projects Table**: Each row in `projects` is serialized into a discrete Markdown document containing title, description, technology tags, live demo URLs, and GitHub references.
+  - **Skills Table**: Rows are grouped by `category` (e.g. `frontend`, `backend`, `ml`, `devops`) and formatted into structured skill matrices.
+  - **Profile Table**: Serialized into domain-specific chunks (`bio`, `experience`, `education`, `certifications`, `achievements`).
+- **Embedding Generation**:
+  - Documents are batch-embedded via `gemini-embedding-001` using `taskType: TaskType.RETRIEVAL_DOCUMENT`.
+  - Vectors are 3072-dimensional floating-point arrays.
+- **Storage & Indexing**:
+  - Vectors and document payloads are inserted into the `documents` table in Supabase.
+  - Similarity matching uses the `match_documents` PostgreSQL stored procedure executing cosine distance (`<=>`) queries against the vector column.
 
-### 2. Ingestion Pipeline
+### 2. Request Routing & Hybrid Retrieval (`src/app/page.tsx`, `src/app/api/chat/route.ts`)
 
-The "Knowledge Base" is not static text. It is a living reflection of the database.
+Queries pass through a two-tier evaluation path to minimize unnecessary API calls:
 
-1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
-2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
-3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
-4.  **Vectorization**: Documents are sent to Google Cloud's `gemini-embedding-001` model with task type `RETRIEVAL_DOCUMENT` to generate dense semantic vector representations (3072 dimensions).
-5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase pgvector.
+1. **Client-Side Intent Router (`checkLocalIntent`)**:
+   - Evaluates input against regex patterns for standard navigation intents (e.g., requests for projects, skills, contact info, about details).
+   - Directly mutates local state to render corresponding UI decks without network requests.
+2. **Server-Side Semantic Retrieval (`POST /api/chat`)**:
+   - Rate-limited per client IP (in-memory token bucket, 20 requests/minute).
+   - Generates a query vector (`taskType: TaskType.RETRIEVAL_QUERY`).
+   - Retrieves top 6 matching chunks using `match_documents` with similarity thresholding (default similarity > 0.3).
+   - Injects retrieved context into a parameterized system prompt instructing the model to cite exclusively from context and append UI action tags.
+   - Streams completions via HTTP chunked transfer encoding.
 
-### 3. Hybrid Retrieval Logic
+### 3. Action Tag Protocol (`[SHOW_*]`)
 
-To minimize latency and token costs, the Chat UI (`page.tsx`) implements a **Hybrid Router**:
+The LLM outputs structured action tokens inline with natural language text:
 
-1.  **Local Intent**:
-    - High-speed, zero-cost.
-    - Uses Regex/Keyword matching locally in the browser.
-    - Handles navigational queries like "Show me projects", "Contact info", or "What determines your skills?".
-    - **Latency**: < 50ms.
+| Action Tag | Client Handler | Rendered Component |
+|---|---|---|
+| `[SHOW_PROJECTS]` | Filter: all | `<ProjectDeck />` (Full catalog) |
+| `[SHOW_PROJECTS:<tag>]` | Filter: `<tag>` substring | `<ProjectDeck filter="<tag>" />` |
+| `[SHOW_SKILLS]` | None | `<SkillsDeck />` |
+| `[SHOW_EXPERIENCE]` | None | `<AboutDeck />` |
+| `[SHOW_CONTACT]` | None | `<ContactDeck />` |
 
-2.  **Remote RAG**:
-    - Triggered for complex questions (e.g., "Do you have experience with Real-time AI?").
-    - Sends query to server -> Generates Query Embedding via Gemini `gemini-embedding-001` (`RETRIEVAL_QUERY`) -> Performs Cosine Similarity Search (`match_documents` function in Postgres) -> Retrieves top 6 chunks.
-    - **Latency**: ~300ms - 800ms.
+The client strips the action tag token from the rendered text stream and mounts the specified React deck component inline within the conversation thread.
 
-### 4. Generation & Streaming
+### 4. UI Architecture & Shader Engine
 
-The retrieved context is fed into **Gemini 3.1 Flash Lite** with a strict system prompt:
+- **`BackgroundCanvas` (`src/components/ui/background-canvas.tsx`)**:
+  - Eliminates static wallpaper image assets.
+  - Uses `useMotionValue` and `useSpring` to track pointer coordinates (`clientX`, `clientY`) with spring physics (`stiffness: 50`, `damping: 20`).
+  - Constructs dynamic `radial-gradient` strings via `useMotionTemplate` for GPU-composited lighting.
+  - Overlays a 32px repeating linear grid (`.tahoe-grid-bg`) via CSS.
+- **`LiquidGlass` (`src/components/ui/liquid-glass.tsx`)**:
+  - Multi-layer glass compositing container with specular highlights, inner border strokes, and backdrop blur.
+  - Integrates SVG filter definitions (`src/components/ui/liquid-filters.tsx`) for chromatic displacement.
+  - Automatically disables SVG displacement filters on WebKit/Safari to avoid text rendering artifacts.
+- **Desktop Drag Subsystem**:
+  - Desktop items (Projects, VS Code, Python, TensorFlow) utilize Framer Motion `drag` with drag boundary constraints and `z-index` stacking management upon selection.
 
-> "You are an AI assistant for Rangga's portfolio. You must answer strictly based on the provided context."
+### 5. Authentication & Middleware (`src/proxy.ts`)
 
-The response is **streamed** back to the client token-by-token to ensure the interface feels responsive, even during complex generations.
+- Next.js edge middleware intercepts requests to `/admin/*` and `/api/admin/*`.
+- Validates Supabase session tokens via `@supabase/ssr` cookies.
+- Unauthenticated requests to `/admin` are redirected to `/login` (307). Unauthenticated API calls receive `401 Unauthorized`.
 
-## Why this approach?
+---
 
-- **Precision**: Structure-based chunking prevents "context bleeding" where unrelated info gets mixed into an answer.
-- **Enterprise Grade AI**: GCP Vertex AI provides enterprise SLAs, fast streaming, and multimodal support.
-- **Cost Efficiency**: Local intents handle 40% of queries for free. Gemini Flash handles the rest at industry-leading speed and pricing.
-- **Dynamism**: The RAG index is updated instantly via the Admin Panel, meaning new projects added to the DB are immediately "known" by the AI without code changes.
+## Database Schema (Supabase PostgreSQL)
+
+```sql
+-- Documents Table for Vector Embeddings
+create table documents (
+  id bigint primary key generated always as identity,
+  content text not null,
+  metadata jsonb,
+  embedding vector(3072)
+);
+
+-- Cosine Similarity Search RPC
+create or replace function match_documents (
+  query_embedding vector(3072),
+  match_threshold float,
+  match_count int
+)
+returns table (
+  id bigint,
+  content text,
+  metadata jsonb,
+  similarity float
+)
+language plpgsql
+as $$
+begin
+  return query
+  select
+    documents.id,
+    documents.content,
+    documents.metadata,
+    1 - (documents.embedding <=> query_embedding) as similarity
+  from documents
+  where 1 - (documents.embedding <=> query_embedding) > match_threshold
+  order by similarity desc
+  limit match_count;
+end;
+$$;
+```
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase Anonymous Public API Key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase Service Role Key (Used for admin operations and vector indexing) |
+| `GEMINI_API_KEY` | Yes | API Key for Gemini model authentication |
+| `NEXT_PUBLIC_SITE_URL` | No | Base application URL for CORS and OpenGraph resolution |
+
+---
+
+## Development & Build Commands
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server (Turbopack)
+npm run dev
+
+# Run TypeScript compilation and production build
+npm run build
+
+# Start production server
+npm run start
+
+# Run ESLint validation
+npm run lint
+```
