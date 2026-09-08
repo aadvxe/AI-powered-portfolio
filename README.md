@@ -1,187 +1,121 @@
-## System Overview
+## Overview
 
-This application is a Next.js 16 (App Router) web application implementing a desktop graphical interface paired with a Retrieval-Augmented Generation (RAG) conversational pipeline. The backend queries a PostgreSQL database (`pgvector`) hosted on Supabase and orchestrates vector embeddings and generative completions using `gemini-embedding-001` and `gemini-3.1-flash-lite` via `@google/genai`.
-
----
+This portfolio is an AI-powered portfolio and interactive desktop experience that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses or presenting a static resume, the system pairs a macOS Tahoe-inspired spatial desktop environment with a vector-augmented AI assistant. Visitors can explore projects through draggable desktop folders, application shortcuts, and interactive decks, or hold natural language conversations backed by Google Cloud Vertex AI / Gemini 3.1 Flash Lite and Supabase pgvector.
 
 ## Architecture
 
+The system follows a modern **Hybrid RAG & Action Protocol** architecture, balancing sub-50ms interaction latency, token cost efficiency, and generative precision.
+
 ```mermaid
 graph TD
-    Client["Browser Client (Next.js 16)"] --> Router{"Hybrid Query Router"}
+    User["User Query / Desktop Action"] --> Frontend["macOS Desktop & Chat UI"]
+    Frontend --> HybridRouter{"Local vs Remote RAG?"}
 
-    Router -- Deterministic Regex --> LocalHandler["Local Intent Handler (< 50ms)"]
-    LocalHandler --> UIAction["Direct Deck / Modal Render"]
+    HybridRouter -- "Simple Intent (< 50ms)" --> Local["Local Regex Matcher"]
+    Local --> DirectDeck["Direct Deck Mount / Preset Response"]
 
-    Router -- Open-Ended Query --> APIChat["POST /api/chat"]
+    HybridRouter -- "Complex Query" --> API["Next.js Route /api/chat"]
 
-    subgraph AI_Engine ["AI Model Pipeline (@google/genai)"]
-    APIChat --> GenEmbed["gemini-embedding-001 (taskType: RETRIEVAL_QUERY)"]
-    GenEmbed -.->|3072d Query Vector| APIChat
-    APIChat --> GenLLM["gemini-3.1-flash-lite (Streaming)"]
+    subgraph Security ["Security & Guardrails"]
+    API --> RateLimit["In-Memory Rate Limiter (20 req/min)"]
+    RateLimit --> OriginCheck["Origin / CORS Verification"]
     end
 
-    subgraph Vector_DB ["Supabase PostgreSQL + pgvector"]
-    APIChat --> RPC["match_documents RPC (Cosine Similarity)"]
-    RPC -.->|Top K Semantic Chunks + Metadata| APIChat
+    subgraph RAG_Orchestration ["RAG Orchestration - GCP Vertex AI"]
+    OriginCheck --> Embed["Gemini gemini-embedding-001 (RETRIEVAL_QUERY)"]
+    Embed -.->|3072d Query Vector| VectorDB[("Supabase pgvector (match_documents)")]
+    VectorDB -.->|Top-6 Semantic Chunks| LLM["Gemini 3.1 Flash Lite"]
     end
 
-    GenLLM --> Stream["Raw Text Stream + [SHOW_*] Action Protocol"]
-    Stream --> Client
+    LLM --> Stream["Token Streaming + Action Tag [SHOW_*]"]
+    Stream --> ClientMount["Streamed Text + Inline React Deck Component"]
 ```
 
----
+## Technology Stack
 
-## Tech Stack & Dependencies
+- **Framework**: Next.js 16 (App Router with Server & Client Components)
+- **Database & Vector Store**: Supabase (PostgreSQL with `pgvector` extension)
+- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
+- **Embeddings**: Google Cloud `gemini-embedding-001` (via `@google/genai`, 3072 dimensions)
+- **Orchestration**: Direct GCP Gen AI SDK + Next.js Edge Middleware & Server Route Handlers
+- **Styling & UI**: TailwindCSS, Liquid Glass (custom SVG chromatic filters & specular highlights), Dynamic `BackgroundCanvas`
+- **Motion Engine**: Framer Motion, custom physics presets (`src/lib/ease.ts`), `TextReveal`
 
-- **Framework**: Next.js 16.1.6 (React 19, Turbopack, App Router)
-- **Runtime**: Node.js / Edge Runtime compatible
-- **Database**: Supabase PostgreSQL with `pgvector` extension (3072-dimensional vector indexing)
-- **AI SDK**: `@google/genai`
-- **Models**:
-  - LLM: `gemini-3.1-flash-lite`
-  - Embedding: `gemini-embedding-001` (3072 dimensions)
-- **State & Animation**: `framer-motion` (spring physics, layout projection, gesture tracking)
-- **CSS**: TailwindCSS v4 with custom CSS variables and SVG filter primitives
+## RAG Implementation Details
 
----
+### 1. Chunking Strategy (Structure-Based)
 
-## Technical Specifications
+Unlike generic RAG systems that blindly split text into fixed character windows, this system uses **Semantic Structure-Based Chunking**.
 
-### 1. RAG Ingestion & Vector Indexing Pipeline (`src/lib/rag.ts`)
+Professional portfolio data is highly structured: breaking a project description or an employment record in half destroys relational meaning. The ingestion pipeline (`src/lib/rag.ts`) treats each logical database record as a discrete semantic document:
 
-The knowledge base is built from relational database rows rather than unstructured text files.
+- **Entity-Level Chunking**:
+  - **Projects**: Each project is serialized as an independent document containing its title, featured flag, category, narrative description, tech stack tags, and demo/repo URLs.
+  - **Skills**: Grouped by domain category into comparative matrices (e.g., `Skills in Frontend: React (90%), Next.js (85%)`) to maintain holistic context.
+  - **Profile Sections**: Divided into dedicated documents (`profile-bio`, `profile-contact`, `profile-experience`, `profile-education`, `profile-certifications`, `profile-achievements`, `profile-custom`).
+  - **Keyword Enrichment**: Educational chunks are enriched with targeted lexical markers (e.g., distinguishing `University Degree Study Academic` from `Bootcamp Course Workshop Cohort`) to dramatically boost cosine similarity recall on natural language queries.
 
-- **Entity Serialization**:
-  - **Projects Table**: Each row in `projects` is serialized into a discrete Markdown document containing title, description, technology tags, live demo URLs, and GitHub references.
-  - **Skills Table**: Rows are grouped by `category` (e.g. `frontend`, `backend`, `ml`, `devops`) and formatted into structured skill matrices.
-  - **Profile Table**: Serialized into domain-specific chunks (`bio`, `experience`, `education`, `certifications`, `achievements`).
-- **Embedding Generation**:
-  - Documents are batch-embedded via `gemini-embedding-001` using `taskType: TaskType.RETRIEVAL_DOCUMENT`.
-  - Vectors are 3072-dimensional floating-point arrays.
-- **Storage & Indexing**:
-  - Vectors and document payloads are inserted into the `documents` table in Supabase.
-  - Similarity matching uses the `match_documents` PostgreSQL stored procedure executing cosine distance (`<=>`) queries against the vector column.
+- **Metadata Enrichment**:
+  Each chunk is tagged with structured metadata (e.g., `{ type: 'project', id: '123' }` or `{ type: 'profile-education' }`) stored in a JSONB column alongside the embedding vector, enabling targeted filtering and contextual verification.
 
-### 2. Request Routing & Hybrid Retrieval (`src/app/page.tsx`, `src/app/api/chat/route.ts`)
+### 2. Ingestion Pipeline
 
-Queries pass through a two-tier evaluation path to minimize unnecessary API calls:
+The "Knowledge Base" is not static text. It is a living reflection of the database, managed directly through the authenticated Admin CMS:
 
-1. **Client-Side Intent Router (`checkLocalIntent`)**:
-   - Evaluates input against regex patterns for standard navigation intents (e.g., requests for projects, skills, contact info, about details).
-   - Directly mutates local state to render corresponding UI decks without network requests.
-2. **Server-Side Semantic Retrieval (`POST /api/chat`)**:
-   - Rate-limited per client IP (in-memory token bucket, 20 requests/minute).
-   - Generates a query vector (`taskType: TaskType.RETRIEVAL_QUERY`).
-   - Retrieves top 6 matching chunks using `match_documents` with similarity thresholding (default similarity > 0.3).
-   - Injects retrieved context into a parameterized system prompt instructing the model to cite exclusively from context and append UI action tags.
-   - Streams completions via HTTP chunked transfer encoding.
+1. **Admin Trigger**: An authorized administrator triggers reindexing via the Admin Dashboard or `POST /api/admin/reindex`.
+2. **Extraction**: Live records are fetched from Supabase tables (`projects`, `skills`, `profile`).
+3. **Transformation**: Records are parsed, keyword-enriched, and structured into discrete natural language documents.
+4. **Vectorization**: Documents are sent to Google Cloud's `gemini-embedding-001` model using `taskType: "RETRIEVAL_DOCUMENT"` to generate dense 3072-dimensional semantic embeddings.
+5. **Storage**: Existing records in the `documents` table are cleared and refreshed with the newly computed vectors, content, and metadata.
 
-### 3. Action Tag Protocol (`[SHOW_*]`)
+### 3. Hybrid Retrieval Logic & Action Tag Protocol
 
-The LLM outputs structured action tokens inline with natural language text:
+To minimize latency and token consumption, the Chat UI (`page.tsx`) implements a **Hybrid Router** paired with an **Action Tag Protocol**:
 
-| Action Tag | Client Handler | Rendered Component |
-|---|---|---|
-| `[SHOW_PROJECTS]` | Filter: all | `<ProjectDeck />` (Full catalog) |
-| `[SHOW_PROJECTS:<tag>]` | Filter: `<tag>` substring | `<ProjectDeck filter="<tag>" />` |
-| `[SHOW_SKILLS]` | None | `<SkillsDeck />` |
-| `[SHOW_EXPERIENCE]` | None | `<AboutDeck />` |
-| `[SHOW_CONTACT]` | None | `<ContactDeck />` |
+1. **Local Intent Router**:
+   - High-speed, zero network cost.
+   - Evaluates user queries against regex and keyword patterns for greetings and standard navigational intents (projects, skills, about, contact).
+   - Instantly opens the corresponding interactive deck or conversational greeting.
+   - **Latency**: < 50ms.
 
-The client strips the action tag token from the rendered text stream and mounts the specified React deck component inline within the conversation thread.
+2. **Remote Semantic RAG**:
+   - Triggered for exploratory and nuanced questions (e.g., *"What experience do you have with real-time AI and WebSockets?"*).
+   - Evaluates in-memory rate limiting (20 req/min) and origin security in `POST /api/chat`.
+   - Embeds the query via `gemini-embedding-001` (`taskType: "RETRIEVAL_QUERY"`).
+   - Executes the PostgreSQL stored procedure `match_documents` to find the top 6 most relevant chunks using cosine similarity (`1 - (documents.embedding <=> query_embedding)` with a similarity threshold of 0.2).
+   - Includes automatic graceful fallback to table queries if vector RPC encounters downtime.
+   - **Latency**: ~300ms - 800ms.
 
-### 4. UI Architecture & Shader Engine
+3. **UI Action Tag Protocol (`[SHOW_*]`)**:
+   - The LLM prompt instructs Gemini to append structured action tags when answers relate to specific evidence or sections:
+     - `[SHOW_PROJECTS]` or `[SHOW_PROJECTS:keyword]` $\to$ Mounts `<ProjectDeck filter="keyword" />`
+     - `[SHOW_SKILLS]` $\to$ Mounts `<SkillsDeck />`
+     - `[SHOW_EXPERIENCE]` $\to$ Mounts `<AboutDeck />`
+     - `[SHOW_EDUCATION]`, `[SHOW_CONTACT]`, `[SHOW_ABOUT]`, `[SHOW_ACHIEVEMENTS]`, `[SHOW_CERTIFICATIONS]`
+   - The client strips the tag from displayed text and renders the rich React deck component directly within the conversation stream.
 
-- **`BackgroundCanvas` (`src/components/ui/background-canvas.tsx`)**:
-  - Eliminates static wallpaper image assets.
-  - Uses `useMotionValue` and `useSpring` to track pointer coordinates (`clientX`, `clientY`) with spring physics (`stiffness: 50`, `damping: 20`).
-  - Constructs dynamic `radial-gradient` strings via `useMotionTemplate` for GPU-composited lighting.
-  - Overlays a 32px repeating linear grid (`.tahoe-grid-bg`) via CSS.
-- **`LiquidGlass` (`src/components/ui/liquid-glass.tsx`)**:
-  - Multi-layer glass compositing container with specular highlights, inner border strokes, and backdrop blur.
-  - Integrates SVG filter definitions (`src/components/ui/liquid-filters.tsx`) for chromatic displacement.
-  - Automatically disables SVG displacement filters on WebKit/Safari to avoid text rendering artifacts.
-- **Desktop Drag Subsystem**:
-  - Desktop items (Projects, VS Code, Python, TensorFlow) utilize Framer Motion `drag` with drag boundary constraints and `z-index` stacking management upon selection.
+### 4. Generation & Streaming
 
-### 5. Authentication & Middleware (`src/proxy.ts`)
+The retrieved context is injected into **Gemini 3.1 Flash Lite** (`temperature: 0.2`) with a comprehensive system prompt enforcing:
+- Strict adherence to retrieved context (zero hallucination of unlisted skills or experiences).
+- Query classification strategies (confirming existing skills with proof, gracefully pivoting when a technology is absent).
+- Emission of UI action tags.
 
-- Next.js edge middleware intercepts requests to `/admin/*` and `/api/admin/*`.
-- Validates Supabase session tokens via `@supabase/ssr` cookies.
-- Unauthenticated requests to `/admin` are redirected to `/login` (307). Unauthenticated API calls receive `401 Unauthorized`.
+Completions are streamed back to the client token-by-token over a raw HTTP chunked stream (`ReadableStream`), ensuring immediate visual responsiveness.
 
----
+## Interactive Desktop & Motion System
 
-## Database Schema (Supabase PostgreSQL)
+Beyond conversational RAG, the portfolio provides a tactile, macOS Tahoe-inspired spatial operating environment:
 
-```sql
--- Documents Table for Vector Embeddings
-create table documents (
-  id bigint primary key generated always as identity,
-  content text not null,
-  metadata jsonb,
-  embedding vector(3072)
-);
+- **Desktop Subsystem (`src/components/ui/macos-desktop-icons.tsx`)**: Draggable desktop folders, quick action triggers, application launchers (VS Code, Python, TensorFlow), active selection highlight frames, and blue label pills.
+- **Dynamic Background Canvas (`src/components/ui/background-canvas.tsx`)**: Pointer-tracking GPU radial lighting built with Framer Motion spring physics (`stiffness: 50`, `damping: 20`) over a zero-image CSS grid (`.tahoe-grid-bg`), eliminating heavy background image downloads.
+- **Liquid Glass (`src/components/ui/liquid-glass.tsx`)**: Multi-layer frosted glass containers with specular highlights, inner borders, and SVG chromatic refraction with Safari-safe fallbacks.
+- **Motion Tokens (`src/lib/ease.ts`)**: Standardized cubic-bezier easing curves (`EASE_OUT`, `EASE_IN_OUT`, `EASE_DRAWER`) and spring physics presets (`SPRING_PRESS`, `SPRING_SWAP`, `SPRING_PANEL`, `SPRING_LAYOUT`, `SPRING_MOUSE`, `SPRING_GLIDE`) powering cohesive 60fps transitions.
 
--- Cosine Similarity Search RPC
-create or replace function match_documents (
-  query_embedding vector(3072),
-  match_threshold float,
-  match_count int
-)
-returns table (
-  id bigint,
-  content text,
-  metadata jsonb,
-  similarity float
-)
-language plpgsql
-as $$
-begin
-  return query
-  select
-    documents.id,
-    documents.content,
-    documents.metadata,
-    1 - (documents.embedding <=> query_embedding) as similarity
-  from documents
-  where 1 - (documents.embedding <=> query_embedding) > match_threshold
-  order by similarity desc
-  limit match_count;
-end;
-$$;
-```
+## Why this approach?
 
----
-
-## Environment Variables
-
-| Variable | Required | Description |
-|---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase Anonymous Public API Key |
-| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase Service Role Key (Used for admin operations and vector indexing) |
-| `GEMINI_API_KEY` | Yes | API Key for Gemini model authentication |
-| `NEXT_PUBLIC_SITE_URL` | No | Base application URL for CORS and OpenGraph resolution |
-
----
-
-## Development & Build Commands
-
-```bash
-# Install dependencies
-npm install
-
-# Start development server (Turbopack)
-npm run dev
-
-# Run TypeScript compilation and production build
-npm run build
-
-# Start production server
-npm run start
-
-# Run ESLint validation
-npm run lint
-```
+- **Precision**: Structure-based semantic chunking prevents context bleeding and ensures exact context delivery for projects and skills.
+- **Fluid Desktop Immersion**: Replaces traditional static single-page portfolios with an interactive macOS environment powered by GPU-accelerated motion and liquid glass aesthetics.
+- **Enterprise Grade AI**: GCP Vertex AI provides enterprise reliability, low-latency streaming, and high-dimensional 3072d vector embeddings.
+- **Cost & Speed Efficiency**: Local intents handle common queries in under 50ms at zero token cost; Gemini Flash answers complex synthesis queries in milliseconds.
+- **Live Dynamism**: The portfolio is driven by Supabase as a single source of truth, updated in real time via an authenticated admin CMS with instant vector reindexing.
