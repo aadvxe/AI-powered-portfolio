@@ -41,6 +41,19 @@ body {
   background-size: 32px 32px;
 }
 
+/* Responsive Desktop / Mobile Floating Icons */
+.desktop-icon-item {
+  left: var(--item-x-mobile, var(--item-x));
+  top: var(--item-y-mobile, var(--item-y));
+}
+
+@media (min-width: 640px) {
+  .desktop-icon-item {
+    left: var(--item-x);
+    top: var(--item-y);
+  }
+}
+
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;

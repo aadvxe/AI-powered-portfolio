@@ -31,6 +31,15 @@ export default function Home() {
   const [input, setInput] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedDesktopId, setSelectedDesktopId] = useState<string | null>(null);
+  const isDraggingRef = useRef(false);
+  const [zIndices, setZIndices] = useState<Record<string, number>>({});
+  const topZRef = useRef(1);
+
+  const bringToFront = (id: string) => {
+    topZRef.current += 1;
+    const newZ = topZRef.current;
+    setZIndices(prev => ({ ...prev, [id]: newZ }));
+  };
 
   // Import Message type from shared types
   type Message = import("@/types/chat").Message;
@@ -257,14 +266,6 @@ export default function Home() {
 
   const FIXED_DESKTOP_ITEMS = [
     {
-      id: 'folder-projects',
-      type: 'folder' as const,
-      title: 'projects',
-      prompt: 'Show me your projects',
-      x: 9,
-      y: 18,
-    },
-    {
       id: 'app-vscode',
       type: 'app' as const,
       title: 'VS Code',
@@ -272,6 +273,18 @@ export default function Home() {
       prompt: 'Show me your projects and code',
       x: 20,
       y: 12,
+      mobileX: 15,
+      mobileY: 9,
+    },
+    {
+      id: 'folder-projects',
+      type: 'folder' as const,
+      title: 'projects',
+      prompt: 'Show me your projects',
+      x: 9,
+      y: 18,
+      mobileX: 13,
+      mobileY: 22,
     },
     {
       id: 'img-school-women',
@@ -282,6 +295,8 @@ export default function Home() {
       prompt: 'Show me your projects',
       x: 8,
       y: 74,
+      mobileX: 13,
+      mobileY: 39,
     },
     {
       id: 'app-python',
@@ -291,6 +306,8 @@ export default function Home() {
       prompt: 'Tell me about your Python and AI experience',
       x: 20,
       y: 84,
+      mobileX: 16,
+      mobileY: 76,
     },
     {
       id: 'img-ecological',
@@ -301,6 +318,8 @@ export default function Home() {
       prompt: 'Show me your projects',
       x: 76,
       y: 14,
+      mobileX: 85,
+      mobileY: 9,
     },
     {
       id: 'folder-social',
@@ -309,6 +328,8 @@ export default function Home() {
       prompt: 'What are your skills?',
       x: 89,
       y: 18,
+      mobileX: 87,
+      mobileY: 22,
     },
     {
       id: 'app-tensorflow',
@@ -318,6 +339,8 @@ export default function Home() {
       prompt: 'What are your skills?',
       x: 90,
       y: 52,
+      mobileX: 87,
+      mobileY: 39,
     },
     {
       id: 'folder-contact',
@@ -326,6 +349,8 @@ export default function Home() {
       prompt: 'How can I contact you?',
       x: 84,
       y: 82,
+      mobileX: 84,
+      mobileY: 76,
     },
   ];
 
@@ -349,9 +374,10 @@ export default function Home() {
       {/* Floating Desktop Items (Landing Mode) */}
       <AnimatePresence>
         {viewState === "landing" && (
-          <div className="hidden sm:block absolute inset-0 pointer-events-none z-30">
+          <div className="absolute inset-0 pointer-events-none z-10">
             {FIXED_DESKTOP_ITEMS.map((item) => {
               const isSelected = selectedDesktopId === item.id;
+              const itemZIndex = zIndices[item.id] ?? 1;
 
               const handleItemAction = () => {
                 if ('action' in item && item.action === 'about-portfolio') {
@@ -367,27 +393,44 @@ export default function Home() {
                   drag
                   dragMomentum={false}
                   dragElastic={0}
-                  whileDrag={{ zIndex: 60, opacity: 0.9 }}
+                  whileDrag={{ opacity: 0.9, scale: 1.05 }}
                   onPointerDown={(e) => {
                     e.stopPropagation();
+                    bringToFront(item.id);
                     setSelectedDesktopId(item.id);
                   }}
                   onDragStart={() => {
+                    isDraggingRef.current = true;
+                    bringToFront(item.id);
                     setSelectedDesktopId(item.id);
+                  }}
+                  onDragEnd={() => {
+                    setTimeout(() => {
+                      isDraggingRef.current = false;
+                    }, 120);
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setSelectedDesktopId(item.id);
+                    if (isDraggingRef.current) return;
+                    bringToFront(item.id);
+                    if (selectedDesktopId === item.id) {
+                      handleItemAction();
+                    } else {
+                      setSelectedDesktopId(item.id);
+                    }
                   }}
                   onDoubleClick={(e) => {
                     e.stopPropagation();
                     handleItemAction();
                   }}
-                  className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-default z-30 group"
+                  className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-default group touch-none"
                   style={{
-                    left: `${item.x}%`,
-                    top: `${item.y}%`
-                  }}
+                    '--item-x': `${item.x}%`,
+                    '--item-y': `${item.y}%`,
+                    '--item-x-mobile': `${item.mobileX ?? item.x}%`,
+                    '--item-y-mobile': `${item.mobileY ?? item.y}%`,
+                    zIndex: itemZIndex,
+                  } as React.CSSProperties}
                 >
                   {/* macOS Icon Container with Selection Highlight Box */}
                   <div className={`p-1 rounded-xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
@@ -427,7 +470,7 @@ export default function Home() {
                   {/* macOS Blue Selection Label Pill */}
                   <div className="mt-1.5 flex justify-center pointer-events-none">
                     <span
-                      className={`max-w-[88px] line-clamp-2 break-words text-[11.5px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
+                      className={`max-w-[76px] sm:max-w-[88px] line-clamp-2 break-words text-[11px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
                         ? 'bg-[#007AFF] text-white shadow-xs'
                         : 'text-neutral-800'
                         }`}
@@ -451,7 +494,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
             transition={{ duration: 0.4 }}
-            className="relative z-10 flex w-full max-w-3xl flex-1 flex-col items-center justify-center overflow-y-auto custom-scrollbar px-4 text-center pt-6 sm:pt-8 pb-32 sm:pb-28"
+            className="relative z-30 flex w-full max-w-3xl flex-1 flex-col items-center justify-center overflow-y-auto custom-scrollbar px-4 text-center pt-6 sm:pt-8 pb-32 sm:pb-28 pointer-events-none"
           >
             {/* About Badge Callout */}
             <motion.div className="mb-3 sm:mb-4 pointer-events-auto">
@@ -469,8 +512,8 @@ export default function Home() {
             </motion.div>
 
             {/* Main Hero Title Line */}
-            <div className="relative z-20 pointer-events-auto w-full flex flex-col items-center">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight pb-1 leading-tight flex items-center justify-center gap-1.5 sm:gap-2">
+            <div className="relative z-20 pointer-events-none w-full flex flex-col items-center">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight pb-1 leading-tight flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto">
                 <motion.span
                   className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-neutral-800 to-neutral-600 bg-clip-text text-transparent"
                   initial={{ opacity: 0, y: "0.5em", filter: "blur(6px)" }}
@@ -484,7 +527,7 @@ export default function Home() {
               <TextReveal
                 as="p"
                 text="Fullstack Engineer specializing in AI & Backend System"
-                className="mt-1 text-xs sm:text-base md:text-lg font-medium text-neutral-600 max-w-xs sm:max-w-md md:max-w-xl"
+                className="mt-1 text-xs sm:text-base md:text-lg font-medium text-neutral-600 max-w-xs sm:max-w-md md:max-w-xl pointer-events-auto"
                 whileInView={false}
                 delay={0.325}
                 stagger={0.025}
@@ -515,7 +558,7 @@ export default function Home() {
             <TextReveal
               as="p"
               text="Welcome to my interactive portfolio. Here, you can explore my projects, skills, and experience, and even ask the AI directly about my work."
-              className="mt-1.5 sm:mt-3 max-w-xs sm:max-w-md md:max-w-xl text-xs sm:text-base text-neutral-600 leading-relaxed font-medium px-2"
+              className="mt-1.5 sm:mt-3 max-w-xs sm:max-w-md md:max-w-xl text-xs sm:text-base text-neutral-600 leading-relaxed font-medium px-2 pointer-events-auto"
               whileInView={false}
               delay={0.525}
               stagger={0.025}
@@ -524,7 +567,7 @@ export default function Home() {
             />
 
             {/* Quick Actions Grid (Landing) */}
-            <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl px-2">
+            <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl px-2 pointer-events-auto">
               {ACTION_ITEMS.map((item) => (
                 <QuickAction
                   key={item.label}
