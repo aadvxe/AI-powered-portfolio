@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { FolderGit2 } from "lucide-react";
 import Image from "next/image";
 import { ProjectData } from "@/hooks/use-content";
+import { LiquidGlass } from "@/components/ui/liquid-glass";
 
 export type Project = ProjectData;
 
@@ -26,7 +27,7 @@ const SEMANTIC_MAP: Record<string, string[]> = {
   "embedded": ["embedded", "arduino", "stm32", "microcontroller", "esp32", "hardware", "firmware", "c++", "rtos"],
 };
 
-export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps) {
+export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeckProps) {
   const filteredProjects = runFilter(projects, filter);
 
   function runFilter(allProjects: Project[], keyword?: string) {
@@ -97,13 +98,13 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
           const innerRadiusClass = isLarge ? 'rounded-[1.25rem]' : isMedium ? 'rounded-2xl' : 'rounded-xl';
 
           return (
-            <motion.div
+            <LiquidGlass
               key={project.id}
+              type="project-card"
+              draggable={false}
               variants={itemVariants}
-              whileHover={{ y: -4, scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
               onClick={() => onSelect(project)}
-              className={`group relative flex flex-col justify-between overflow-hidden ${outerRadiusClass} border border-neutral-100 bg-white p-1.5 sm:p-2 gap-2 sm:gap-3 shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-pointer ${
+              className={`relative ${outerRadiusClass} p-1.5 sm:p-2 cursor-pointer ${
                 isHero
                   ? 'min-h-[420px] sm:min-h-[460px]'
                   : isFeatured
@@ -115,64 +116,66 @@ export function ProjectDeck({ id, projects, onSelect, filter }: ProjectDeckProps
                         : 'col-span-1 min-h-[220px]'
               }`}
             >
-              {/* Visual Thumbnail — a thin inset frame, not full-bleed but not heavily padded either.
-                  flex-1 so a row-spanning card's extra grid height becomes a bigger photo instead
-                  of dead whitespace below the text; min-h is just the floor for non-spanning cards. */}
-              <div className={`relative w-full overflow-hidden ${innerRadiusClass} bg-neutral-100 flex-1 ${
-                isHero ? 'min-h-64 sm:min-h-80' : isFeatured ? 'min-h-56 sm:min-h-72' : isDuo ? 'min-h-48 sm:min-h-56' : isWide ? 'min-h-36 sm:min-h-40' : 'min-h-36'
-              }`}>
-                {project.image_url ? (
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={project.image_url}
-                      alt={project.title}
-                      fill
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50 group-hover:opacity-30 transition-opacity" />
-                  </div>
-                ) : (
-                  <div className={`w-full h-full ${project.gradient || 'bg-gradient-to-br from-cyan-500/15 to-blue-600/20'} flex items-center justify-center`}>
-                    <FolderGit2 className="text-neutral-400/40 w-12 h-12" />
-                  </div>
-                )}
-              </div>
-
-              {/* Metadata Content — sized to its own content, not stretched, so it hugs the image above it */}
-              <div className="flex flex-col shrink-0 px-1.5 pb-1">
-                <div>
-                  <h3 className={`font-bold text-neutral-800 leading-snug line-clamp-1 ${
-                    isFeatured ? 'text-lg sm:text-xl mb-1.5' : 'text-sm sm:text-base mb-1'
-                  }`}>
-                    {project.title}
-                  </h3>
-
-                  {/* Description snippet — shown consistently on every card, not just featured/wide ones */}
-                  {project.description && (
-                    <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-3">
-                      {project.description.replace(/^[•\-\*]\s+/gm, '')}
-                    </p>
+              <div className="flex flex-col justify-between h-full w-full gap-2 sm:gap-3">
+                {/* Visual Thumbnail — a thin inset frame, not full-bleed but not heavily padded either.
+                    flex-1 so a row-spanning card's extra grid height becomes a bigger photo instead
+                    of dead whitespace below the text; min-h is just the floor for non-spanning cards. */}
+                <div className={`relative w-full overflow-hidden ${innerRadiusClass} bg-neutral-100/60 flex-1 ${
+                  isHero ? 'min-h-64 sm:min-h-80' : isFeatured ? 'min-h-56 sm:min-h-72' : isDuo ? 'min-h-48 sm:min-h-56' : isWide ? 'min-h-36 sm:min-h-40' : 'min-h-36'
+                }`}>
+                  {project.image_url ? (
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={project.image_url}
+                        alt={project.title}
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50" />
+                    </div>
+                  ) : (
+                    <div className={`w-full h-full ${project.gradient || 'bg-gradient-to-br from-cyan-500/15 to-blue-600/20'} flex items-center justify-center`}>
+                      <FolderGit2 className="text-neutral-400/40 w-12 h-12" />
+                    </div>
                   )}
                 </div>
 
-                {/* Tags Footer */}
-                <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                  {project.tags.slice(0, isFeatured ? 4 : 2).map((tag) => (
-                    <span
-                      key={tag}
-                      className="text-[10.5px] font-medium text-neutral-600 bg-neutral-100 px-2 py-0.5 rounded-md"
-                    >
-                      #{tag}
-                    </span>
-                  ))}
-                  {project.tags.length > (isFeatured ? 4 : 2) && (
-                    <span className="text-[10px] font-medium text-neutral-400 pl-0.5">
-                      +{project.tags.length - (isFeatured ? 4 : 2)}
-                    </span>
-                  )}
+                {/* Metadata Content — sized to its own content, not stretched, so it hugs the image above it */}
+                <div className="flex flex-col shrink-0 px-1.5 pb-1">
+                  <div>
+                    <h3 className={`font-bold text-neutral-800 leading-snug line-clamp-1 ${
+                      isFeatured ? 'text-lg sm:text-xl mb-1.5' : 'text-sm sm:text-base mb-1'
+                    }`}>
+                      {project.title}
+                    </h3>
+
+                    {/* Description snippet — shown consistently on every card, not just featured/wide ones */}
+                    {project.description && (
+                      <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-3">
+                        {project.description.replace(/^[•\-\*]\s+/gm, '')}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Tags Footer */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {project.tags.slice(0, isFeatured ? 4 : 2).map((tag) => (
+                      <span
+                        key={tag}
+                        className="text-[10.5px] font-medium text-neutral-600 bg-white/60 border border-white/80 shadow-xs px-2 py-0.5 rounded-md backdrop-blur-xs"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                    {project.tags.length > (isFeatured ? 4 : 2) && (
+                      <span className="text-[10px] font-medium text-neutral-400 pl-0.5">
+                        +{project.tags.length - (isFeatured ? 4 : 2)}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </motion.div>
+            </LiquidGlass>
           );
         })}
       </motion.div>
