@@ -115,6 +115,16 @@ body {
   background: rgba(255, 255, 255, 0.4);
 }
 
+/* Card & Modal Glass: Pristine, smooth glass matching button shine and shadow without SVG distortion artifacts */
+.liquidGlass-wrapper.project-card .liquidGlass-effect,
+.liquidGlass-wrapper.project-modal .liquidGlass-effect {
+  inset: 0;
+  filter: none;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  background: rgba(255, 255, 255, 0.45);
+}
+
 .liquidGlass-tint {
   z-index: 1;
   position: absolute;
