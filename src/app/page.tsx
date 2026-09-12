@@ -743,7 +743,7 @@ export default function Home() {
                   <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: viewState === "chat" ? 1 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: viewState === "chat" ? 0.2 : 0.15 }}
                   >
                     <LiquidGlass
                       type="button"
@@ -765,9 +765,9 @@ export default function Home() {
                           scale: viewState === "chat" ? 1 : 0.95,
                         }}
                         transition={{
-                          duration: 0.22,
+                          duration: viewState === "chat" ? 0.22 : 0.08,
                           delay: viewState === "chat" ? 0.08 : 0,
-                          ease: [0.16, 1, 0.3, 1],
+                          ease: viewState === "chat" ? [0.16, 1, 0.3, 1] : "easeOut",
                         }}
                       >
                         Clear
