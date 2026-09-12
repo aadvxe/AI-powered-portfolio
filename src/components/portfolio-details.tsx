@@ -44,19 +44,20 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
             className="w-full max-w-2xl h-[88vh] sm:h-[85vh] rounded-2xl relative z-10"
             onClick={(e) => e.stopPropagation()}
         >
+            <button
+                onClick={onClose}
+                className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2 bg-neutral-100/90 rounded-full text-neutral-500 hover:bg-neutral-200 transition-colors z-30 shadow-sm"
+                title="Close"
+            >
+                <X size={18} />
+            </button>
+
             <GlassCard
                 className="w-full h-full p-5 sm:p-8 relative overflow-hidden flex flex-col bg-white shadow-2xl !backdrop-blur-none border-neutral-200"
             >
-                <button
-                    onClick={onClose}
-                    className="absolute top-3.5 right-3.5 sm:top-4 sm:right-4 p-2 bg-neutral-100/90 rounded-full text-neutral-500 hover:bg-neutral-200 transition-colors z-20"
-                    title="Close"
-                >
-                    <X size={18} />
-                </button>
 
                 {/* Header Section */}
-                <div className="flex-none text-center mb-6 sm:mb-8 pr-8 sm:pr-0 pl-2 sm:pl-0">
+                <div className="flex-none text-center mb-6 sm:mb-8">
                      <Sparkles size={28} className="mx-auto text-neutral-800 mb-3 sm:mb-4" />
                      <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800">About this Portfolio</h2>
                      <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">An interactive, AI-powered Portfolio</p>
