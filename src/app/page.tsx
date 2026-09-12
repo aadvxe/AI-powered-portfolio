@@ -629,7 +629,7 @@ export default function Home() {
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 sm:px-4 custom-scrollbar pt-16 sm:pt-20">
-              <div className="mx-auto flex max-w-2xl flex-col gap-6 sm:gap-8 pb-48 sm:pb-52">
+              <div className="mx-auto flex max-w-2xl flex-col gap-6 sm:gap-8 pb-60 sm:pb-64">
                 {messages.map((msg, i) => (
                   <motion.div
                     key={i}

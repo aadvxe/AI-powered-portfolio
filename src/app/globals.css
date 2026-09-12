@@ -116,6 +116,12 @@ body {
 }
 
 /* Card & Modal Glass: Pristine, smooth glass matching button shine and shadow without SVG distortion artifacts */
+.liquidGlass-wrapper.project-card,
+.liquidGlass-wrapper.project-modal {
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
 .liquidGlass-wrapper.project-card .liquidGlass-effect,
 .liquidGlass-wrapper.project-modal .liquidGlass-effect {
   inset: 0;

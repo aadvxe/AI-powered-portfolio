@@ -98,12 +98,12 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
-                                            <span>{trimmed.substring(1).trim()}</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px] shrink-0">●</span>
+                                            <span className="min-w-0 flex-1 break-words">{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
                                 }
-                                return <p key={idx} className="mb-1">{line}</p>;
+                                return <p key={idx} className="mb-1 break-words">{line}</p>;
                             })}
                         </div>
 
@@ -130,9 +130,9 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             transition={{ delay: 0.2 }}
         >
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Education</h4>
-            <div className="grid grid-cols-1 gap-4 h-full">
+            <div className="grid grid-cols-1 gap-4">
             {education.map((edu: any, i: number) => (
-                <GlassCard key={i} className="p-6 hover:bg-white/60 h-full flex flex-col justify-center">
+                <GlassCard key={i} className="p-6 hover:bg-white/60 flex flex-col">
                     <div className="flex items-center gap-2.5 mb-2">
                         <GraduationCap size={20} className="text-neutral-700 shrink-0" />
                         <h3 className="font-bold text-neutral-800">{edu.degree}</h3>
@@ -153,12 +153,12 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
-                                            <span>{trimmed.substring(1).trim()}</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px] shrink-0">●</span>
+                                            <span className="min-w-0 flex-1 break-words">{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
                                 }
-                                return <p key={idx} className="mb-1">{line}</p>;
+                                return <p key={idx} className="mb-1 break-words">{line}</p>;
                             })}
                         </div>
                     )}
@@ -288,7 +288,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                     </span>
                                 )}
                             </div>
-                            <p className="text-sm text-neutral-600 leading-relaxed mt-2">
+                            <p className="text-sm text-neutral-600 leading-relaxed mt-2 break-words">
                                 {item.description}
                             </p>
                         </GlassCard>

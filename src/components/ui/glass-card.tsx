@@ -19,7 +19,7 @@ export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
         {...props}
         draggable={false}
       >
-        <div className="w-full h-full relative">
+        <div className="w-full h-full relative flex flex-col flex-1">
           {gradient && (
             <div
               className="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover:opacity-100"
