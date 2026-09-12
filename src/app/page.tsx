@@ -736,34 +736,38 @@ export default function Home() {
                   ambiguity. The sibling input grows "for free" every repaint frame as this
                   track shrinks — no separate transition needed on its side. */}
               <div
-                className="grid overflow-hidden py-4 -my-4 pl-2 -ml-2 transition-[grid-template-columns] duration-300 ease-out"
+                className="grid overflow-hidden py-4 -my-4 pl-2 -ml-2 transition-[grid-template-columns] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                 style={{ gridTemplateColumns: viewState === "chat" ? "1fr" : "0fr" }}
               >
                 <div className="min-w-0 pr-2 py-4 -my-4">
                   <motion.div
+                    initial={{ opacity: 0 }}
                     animate={{ opacity: viewState === "chat" ? 1 : 0 }}
                     transition={{ duration: 0.2 }}
                   >
                     <LiquidGlass
                       type="button"
                       onClick={handleClearChat}
-                      className="rounded-[1.5rem] px-4 sm:px-4 py-3.5 sm:py-3 cursor-pointer shadow-md"
+                      className={`rounded-[1.5rem] !overflow-hidden cursor-pointer shadow-md px-4 sm:px-4 py-3.5 sm:py-3 ${
+                        viewState !== "chat" ? "pointer-events-none select-none" : ""
+                      }`}
+                      style={{ overflow: "hidden" }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      tabIndex={viewState === "chat" ? 0 : -1}
+                      aria-hidden={viewState !== "chat"}
                     >
                       <motion.div
-                        className="flex items-center justify-start origin-left text-xs sm:text-sm font-semibold text-neutral-500 hover:text-red-500 transition-colors whitespace-nowrap"
+                        className="flex items-center justify-center text-xs sm:text-sm font-semibold text-neutral-600 hover:text-red-500 transition-colors whitespace-nowrap"
                         initial={false}
-                        style={{ transformOrigin: "left center" }}
                         animate={{
                           opacity: viewState === "chat" ? 1 : 0,
-                          x: viewState === "chat" ? 0 : -4,
-                          scale: viewState === "chat" ? 1 : 0.94,
+                          scale: viewState === "chat" ? 1 : 0.95,
                         }}
                         transition={{
                           duration: 0.22,
-                          delay: viewState === "chat" ? 0.12 : 0,
-                          ease: "easeOut"
+                          delay: viewState === "chat" ? 0.08 : 0,
+                          ease: [0.16, 1, 0.3, 1],
                         }}
                       >
                         Clear
