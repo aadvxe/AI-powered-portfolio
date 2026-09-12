@@ -13,9 +13,9 @@ interface QuickActionProps {
 
 export function QuickAction({ icon: Icon, label, onClick, layoutId, compact }: QuickActionProps) {
   return (
-    <LiquidGlass 
+    <LiquidGlass
       layoutId={layoutId}
-      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors" 
+      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors"
       onClick={onClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
