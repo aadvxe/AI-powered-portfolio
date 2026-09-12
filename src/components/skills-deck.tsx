@@ -132,10 +132,8 @@ export function SkillsDeck({ skills }: SkillsDeckProps) {
                   className={category.span}
                 >
                   <GlassCard className="p-6 h-full hover:bg-white/60 transition-colors group">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-brand-cyan/10 rounded-lg text-brand-cyan group-hover:bg-brand-cyan/20 transition-colors">
-                        <category.icon size={20} />
-                      </div>
+                    <div className="flex items-center gap-2.5 mb-4">
+                      <category.icon size={20} className="text-neutral-700 shrink-0" />
                       <h3 className="font-bold text-neutral-800">{category.title}</h3>
                     </div>
                     <div className="flex flex-wrap gap-2">

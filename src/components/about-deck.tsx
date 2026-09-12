@@ -36,8 +36,8 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                 {profile?.avatar_url ? (
                     <img src={profile.avatar_url} alt={profile.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
                 ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/20 to-purple-500/20 flex items-center justify-center">
-                        <User size={48} className="text-white/40" />
+                    <div className="absolute inset-0 bg-neutral-200 flex items-center justify-center">
+                        <User size={48} className="text-neutral-400" />
                     </div>
                 )}
             </GlassCard>
@@ -49,7 +49,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                         <span>Hi, I&apos;m {profile?.name || "Your Name"}</span>
                         <AppleEmoji emoji="👋" className="w-[0.9em] h-[0.9em]" />
                     </h3>
-                    <div className="inline-block px-3 py-1 bg-brand-cyan/10 rounded-full text-brand-cyan text-xs sm:text-sm font-semibold">
+                    <div className="inline-block px-3 py-1 bg-neutral-100 border border-neutral-200/80 rounded-full text-neutral-700 text-xs sm:text-sm font-semibold">
                         {profile?.role || "Creative Developer"}
                     </div>
                 </div>
@@ -59,7 +59,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                 {/* Downloadable CV */}
                 {profile?.resume_url && (
                     <div className="mt-4 pt-4 border-t border-neutral-100">
-                        <a href={profile.resume_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-cyan hover:underline flex items-center gap-1">
+                        <a href={profile.resume_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-neutral-700 hover:text-black hover:underline flex items-center gap-1">
                             View Resume <Trophy size={14} className="rotate-90" />
                         </a>
                     </div>
@@ -81,7 +81,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                             <div>
                                 <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
-                                    <Briefcase size={16} className="text-brand-cyan" />
+                                    <Briefcase size={16} className="text-neutral-700" />
                                     {exp.role}
                                 </h3>
                                 <div className="text-sm font-medium text-neutral-500">{exp.company}</div>
@@ -98,7 +98,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-brand-cyan mt-1.5 text-[6px]">●</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
                                             <span>{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
@@ -133,11 +133,11 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             <div className="grid grid-cols-1 gap-4 h-full">
             {education.map((edu: any, i: number) => (
                 <GlassCard key={i} className="p-6 hover:bg-white/60 h-full flex flex-col justify-center">
-                    <div className="mb-3 p-2 bg-brand-cyan/10 rounded-lg w-fit text-brand-cyan">
-                        <GraduationCap size={20} />
+                    <div className="flex items-center gap-2.5 mb-2">
+                        <GraduationCap size={20} className="text-neutral-700 shrink-0" />
+                        <h3 className="font-bold text-neutral-800">{edu.degree}</h3>
                     </div>
-                    <h3 className="font-bold text-neutral-800">{edu.degree}</h3>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <div className="text-sm text-neutral-500">{edu.school}</div>
                         {edu.gpa && (
                             <span className="text-xs font-medium px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md">
@@ -153,7 +153,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-brand-cyan mt-1.5 text-[6px]">●</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
                                             <span>{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
@@ -180,19 +180,19 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Certifications</h4>
             <div className="grid grid-cols-1 gap-3">
                 {profile?.certifications?.map((cert: any, i: number) => (
-                    <GlassCard key={i} className="p-4 hover:bg-white/60 flex items-center gap-4 group">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <Award size={20} />
+                    <GlassCard key={i} className="p-4 hover:bg-white/60 group">
+                        <div className="flex items-center gap-4">
+                            <Award size={20} className="text-neutral-700 shrink-0" />
+                            <div className="flex-1">
+                                <h3 className="font-bold text-neutral-800 text-sm">{cert.title}</h3>
+                                <div className="text-xs text-neutral-500 mt-0.5">{cert.issuer} • {cert.date}</div>
+                            </div>
+                            {cert.link && (
+                                <a href={cert.link} target="_blank" rel="noopener noreferrer" className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                    <ExternalLink size={14} />
+                                </a>
+                            )}
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-neutral-800 text-sm">{cert.title}</h3>
-                            <div className="text-xs text-neutral-500 mt-0.5">{cert.issuer} • {cert.date}</div>
-                        </div>
-                        {cert.link && (
-                            <a href={cert.link} target="_blank" rel="noopener noreferrer" className="p-2 text-neutral-400 hover:text-brand-cyan hover:bg-brand-cyan/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                                <ExternalLink size={14} />
-                            </a>
-                        )}
                     </GlassCard>
                 ))}
             </div>
@@ -209,13 +209,13 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Achievements</h4>
             <div className="flex flex-col gap-3">
                 {achievements.map((ach: any, i: number) => (
-                    <GlassCard key={i} className="p-4 flex items-center gap-4 hover:bg-white/60">
-                        <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg shrink-0">
-                            <Trophy size={20} />
-                        </div>
-                        <div>
-                            <div className="font-semibold text-neutral-800 text-sm">{ach.title}</div>
-                            <div className="text-xs text-neutral-500">{ach.event}</div>
+                    <GlassCard key={i} className="p-4 hover:bg-white/60">
+                        <div className="flex items-center gap-4">
+                            <Trophy size={20} className="text-neutral-700 shrink-0" />
+                            <div>
+                                <div className="font-semibold text-neutral-800 text-sm">{ach.title}</div>
+                                <div className="text-xs text-neutral-500">{ach.event}</div>
+                            </div>
                         </div>
                     </GlassCard>
                 ))}
@@ -237,7 +237,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                             <div>
                                 <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
-                                    <Briefcase size={16} className="text-brand-cyan" />
+                                    <Briefcase size={16} className="text-neutral-700" />
                                     {exp.role}
                                 </h3>
                                 <div className="text-sm font-medium text-neutral-500">{exp.company}</div>

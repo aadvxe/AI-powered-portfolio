@@ -56,9 +56,17 @@ export default function Home() {
   const [selectedProject, setSelectedProject] = useState<{ project: ProjectData; deckId: string } | null>(null);
   const [showPortfolioInfo, setShowPortfolioInfo] = useState(false);
 
-  // Auto-scroll to bottom
+  // Auto-scroll handler: scroll to component top if deck is rendered, otherwise bottom
   useEffect(() => {
     if (viewState === "chat") {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.type === "component") {
+        const el = document.getElementById(`message-${messages.length - 1}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+          return;
+        }
+      }
       bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, viewState]);
@@ -360,7 +368,7 @@ export default function Home() {
       onPointerDown={(e) => {
         if (e.target === e.currentTarget) setSelectedDesktopId(null);
       }}
-      className="relative flex h-[100dvh] w-full flex-col items-center overflow-hidden text-neutral-900 selection:bg-brand-cyan/30 select-none"
+      className="relative flex h-[100dvh] w-full flex-col items-center overflow-hidden text-neutral-900 selection:bg-neutral-200 select-none"
     >
       <BackgroundCanvas />
       <LiquidFilters />
@@ -504,7 +512,7 @@ export default function Home() {
               >
                 <LiquidGlass type="button" className="rounded-full px-4 py-2.5 sm:px-4 sm:py-1.5 border border-white/80 shadow-md hover:bg-white/60 transition-colors">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-stone-800">
-                    <Sparkles size={14} className="text-brand-cyan" />
+                    <Sparkles size={14} className="text-neutral-500" />
                     <span>About this Portfolio</span>
                   </div>
                 </LiquidGlass>
@@ -625,6 +633,7 @@ export default function Home() {
                 {messages.map((msg, i) => (
                   <motion.div
                     key={i}
+                    id={`message-${i}`}
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     className={`flex w-full ${msg.role === "user" ? "justify-end" : "justify-start"} ${msg.type === "component" ? "-mt-6" : ""}`}
@@ -670,7 +679,7 @@ export default function Home() {
                                   strong: ({ children }) => <span className="font-bold text-neutral-900">{children}</span>,
                                   ul: ({ children }) => <ul className="list-disc pl-4 mb-2 space-y-1">{children}</ul>,
                                   li: ({ children }) => <li>{children}</li>,
-                                  a: ({ children, href }) => <a href={href} className="text-brand-cyan hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>
+                                  a: ({ children, href }) => <a href={href} className="text-neutral-900 underline font-medium" target="_blank" rel="noopener noreferrer">{children}</a>
                                 }}
                               >
                                 {msg.content}
@@ -843,7 +852,7 @@ export default function Home() {
                     {/* Fixed Header */}
                     <div className="p-8 pb-4 shrink-0 border-b border-neutral-100">
                       <h2 className="text-2xl font-bold text-neutral-900 pr-12">{selectedProject.project.title}</h2>
-                      <span className="mt-2 text-brand-cyan text-sm">{selectedProject.project.category}</span>
+                      <span className="mt-2 text-neutral-500 text-sm font-medium">{selectedProject.project.category}</span>
                     </div>
 
                     {/* Scrollable Content */}
@@ -854,7 +863,7 @@ export default function Home() {
                           if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                             return (
                               <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                <span className="text-brand-cyan mt-1.5 text-[6px]">●</span>
+                                <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
                                 <span>{trimmed.substring(1).trim()}</span>
                               </div>
                             );
@@ -881,7 +890,7 @@ export default function Home() {
                             href={selectedProject.project.demo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-lg bg-brand-cyan px-4 py-3 font-semibold text-white transition hover:brightness-110 flex-1 min-w-[140px]"
+                            className="flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-4 py-3 font-semibold text-white transition hover:bg-neutral-800 flex-1 min-w-[140px]"
                           >
                             <ExternalLink size={18} /> Visit Live
                           </a>

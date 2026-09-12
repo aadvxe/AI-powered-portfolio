@@ -57,9 +57,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
 
                 {/* Header Section */}
                 <div className="flex-none text-center mb-6 sm:mb-8 pr-8 sm:pr-0 pl-2 sm:pl-0">
-                     <div className="mx-auto w-10 h-10 sm:w-12 sm:h-12 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-3 sm:mb-4">
-                         <Sparkles size={22} />
-                     </div>
+                     <Sparkles size={28} className="mx-auto text-neutral-800 mb-3 sm:mb-4" />
                      <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800">About this Portfolio</h2>
                      <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-2">An interactive, AI-powered Portfolio</p>
                 </div>
@@ -71,7 +69,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                         {/* System Capabilities Overview */}
                         <div className="space-y-4">
                             <h3 className="font-bold text-neutral-900 flex items-center gap-2 text-lg">
-                                <Bot size={20} className="text-brand-cyan" />
+                                <Bot size={20} className="text-neutral-700" />
                                 Interactive Portfolio
                             </h3>
                             <p className="text-sm text-neutral-600 leading-relaxed">
@@ -99,7 +97,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                         {/* Technical Deep Dive */}
                         <div>
                             <h3 className="font-bold text-neutral-900 flex items-center gap-2 text-lg mb-4">
-                                <Database size={20} className="text-purple-500" />
+                                <Database size={20} className="text-neutral-700" />
                                 Technical Architecture
                             </h3>
 
@@ -125,7 +123,7 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                          {/* Tech Stack */}
                          <div className="bg-neutral-50/80 rounded-xl p-6">
                             <h3 className="font-semibold text-neutral-900 flex items-center gap-2 mb-4">
-                                <Code2 size={18} className="text-brand-cyan" />
+                                <Code2 size={18} className="text-neutral-700" />
                                 Technical Stack
                             </h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8">
@@ -155,8 +153,8 @@ export function PortfolioDetails({ onClose }: { onClose: () => void }) {
                 </div>
 
                 {/* Background Decoration */}
-                <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-brand-cyan/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-                <div className="absolute bottom-0 left-0 -z-10 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
+                <div className="absolute top-0 right-0 -z-10 w-64 h-64 bg-neutral-200/20 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
+                <div className="absolute bottom-0 left-0 -z-10 w-64 h-64 bg-neutral-200/20 rounded-full blur-3xl -translate-x-1/2 translate-y-1/2" />
             </GlassCard>
         </motion.div>
 
