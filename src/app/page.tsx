@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, Send, Sparkles, Briefcase, FileText, User, Search, MoreHorizontal, ArrowRight, Smile, Layers, Trash2, X, ExternalLink, Github } from "lucide-react";
+import { ArrowLeft, Send, Sparkles, Briefcase, FileText, User, Search, MoreHorizontal, ArrowRight, Smile, Layers, Trash2, X, ExternalLink, Github, FolderGit2 } from "lucide-react";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { ProjectDeck } from "@/components/project-deck";
@@ -97,8 +97,8 @@ export default function Home() {
     if (lower.includes("skill") && (lower.includes("what") || lower.includes("show") || lower.includes("see"))) return "skills";
     if (lower.includes("contact") || lower.includes("reach")) return "contact";
 
-    // Strict match for 'About'
-    if (lower === "about" || lower === "about me" || lower.includes("who are you") || lower.includes("tell me about yourself")) return "about";
+    // Strict match for 'About' / Profile
+    if (lower === "about" || lower === "about me" || lower.includes("who are you") || lower.includes("tell me about yourself") || lower.includes("profile")) return "about";
 
     return null;
   }
@@ -274,16 +274,31 @@ export default function Home() {
     { icon: User, label: "Contact", prompt: "How can I contact you?" }
   ];
 
-  // Only break at underscores/dots (like a real filename), never mid-word.
+  // Only break at underscores/dots/hyphens (like a real filename), never mid-word.
   const renderBreakableTitle = (title: string) =>
-    title.split(/(?<=[_.])/).map((part, i) => (
+    title.split(/(?<=[_.-])/).map((part, i) => (
       <span key={i}>
         {part}
         <wbr />
       </span>
     ));
 
-  const FIXED_DESKTOP_ITEMS = [
+  interface DesktopItem {
+    id: string;
+    type: 'app' | 'folder' | 'image';
+    title: string;
+    icon?: 'vscode' | 'python' | 'tensorflow';
+    imageUrl?: string;
+    orientation?: 'portrait' | 'landscape';
+    action?: 'about-portfolio' | 'open-project';
+    prompt?: string;
+    x: number;
+    y: number;
+    mobileX?: number;
+    mobileY?: number;
+  }
+
+  const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     {
       id: 'app-vscode',
       type: 'app' as const,
@@ -306,11 +321,11 @@ export default function Home() {
       mobileY: 22,
     },
     {
-      id: 'img-school-women',
+      id: 'img-aide',
       type: 'image' as const,
-      title: 'school_for_women.jpeg',
-      imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80',
-      orientation: 'portrait' as const,
+      title: 'aid-e.jpg',
+      imageUrl: '/aid-e.jpg',
+      orientation: 'landscape' as const,
       prompt: 'Show me your projects',
       x: 8,
       y: 74,
@@ -329,12 +344,12 @@ export default function Home() {
       mobileY: 76,
     },
     {
-      id: 'img-ecological',
+      id: 'img-profile',
       type: 'image' as const,
-      title: 'ecological_school.jpeg',
-      imageUrl: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=600&q=80',
-      orientation: 'landscape' as const,
-      prompt: 'Show me your projects',
+      title: 'profile-pic.jpg',
+      imageUrl: '/profile-pic.jpg',
+      orientation: 'portrait' as const,
+      prompt: 'Tell me about yourself',
       x: 76,
       y: 14,
       mobileX: 85,
@@ -432,14 +447,11 @@ export default function Home() {
                     e.stopPropagation();
                     if (isDraggingRef.current) return;
                     bringToFront(item.id);
-                    if (selectedDesktopId === item.id) {
-                      handleItemAction();
-                    } else {
-                      setSelectedDesktopId(item.id);
-                    }
+                    setSelectedDesktopId(item.id);
                   }}
                   onDoubleClick={(e) => {
                     e.stopPropagation();
+                    if (isDraggingRef.current) return;
                     handleItemAction();
                   }}
                   className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-default group touch-none"
@@ -473,13 +485,13 @@ export default function Home() {
                     {/* ITEM TYPE: Image Preview */}
                     {item.type === 'image' && (
                       <div className={`rounded-lg overflow-hidden border-[1.5px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)] bg-white shrink-0 ${'orientation' in item && item.orientation === 'landscape'
-                        ? 'w-15 h-10 sm:w-16 sm:h-11'
+                        ? 'w-16 h-11 sm:w-18 sm:h-12'
                         : 'w-10 h-13 sm:w-11 sm:h-14'
                         }`}>
                         <img
                           src={item.imageUrl}
                           alt={item.title}
-                          className="w-full h-full object-cover"
+                          className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-center'}`}
                           draggable={false}
                         />
                       </div>
