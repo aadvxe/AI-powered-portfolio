@@ -43,6 +43,8 @@ export default function Home() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [selectedDesktopId, setSelectedDesktopId] = useState<string | null>(null);
   const isDraggingRef = useRef(false);
+  const pointerDownPosRef = useRef<{ x: number; y: number; time: number } | null>(null);
+  const didActuallyDragRef = useRef(false);
   const [zIndices, setZIndices] = useState<Record<string, number>>({});
   const topZRef = useRef(1);
 
@@ -307,8 +309,8 @@ export default function Home() {
       prompt: 'Show me your projects and code',
       x: 20,
       y: 12,
-      mobileX: 15,
-      mobileY: 9,
+      mobileX: 14,
+      mobileY: 8,
     },
     {
       id: 'folder-projects',
@@ -317,8 +319,8 @@ export default function Home() {
       prompt: 'Show me your projects',
       x: 9,
       y: 18,
-      mobileX: 13,
-      mobileY: 22,
+      mobileX: 14,
+      mobileY: 20,
     },
     {
       id: 'img-aide',
@@ -329,8 +331,8 @@ export default function Home() {
       prompt: 'Show me your projects',
       x: 8,
       y: 74,
-      mobileX: 13,
-      mobileY: 39,
+      mobileX: 14,
+      mobileY: 74,
     },
     {
       id: 'app-python',
@@ -340,8 +342,8 @@ export default function Home() {
       prompt: 'Tell me about your Python and AI experience',
       x: 20,
       y: 84,
-      mobileX: 16,
-      mobileY: 76,
+      mobileX: 14,
+      mobileY: 86,
     },
     {
       id: 'img-profile',
@@ -352,8 +354,8 @@ export default function Home() {
       prompt: 'Tell me about yourself',
       x: 76,
       y: 14,
-      mobileX: 85,
-      mobileY: 9,
+      mobileX: 84,
+      mobileY: 8,
     },
     {
       id: 'folder-social',
@@ -362,8 +364,8 @@ export default function Home() {
       prompt: 'What are your skills?',
       x: 89,
       y: 18,
-      mobileX: 87,
-      mobileY: 22,
+      mobileX: 84,
+      mobileY: 20,
     },
     {
       id: 'app-tensorflow',
@@ -373,8 +375,8 @@ export default function Home() {
       prompt: 'What are your skills?',
       x: 90,
       y: 52,
-      mobileX: 87,
-      mobileY: 39,
+      mobileX: 84,
+      mobileY: 74,
     },
     {
       id: 'folder-contact',
@@ -384,7 +386,7 @@ export default function Home() {
       x: 84,
       y: 82,
       mobileX: 84,
-      mobileY: 76,
+      mobileY: 86,
     },
   ];
 
@@ -408,7 +410,7 @@ export default function Home() {
       {/* Floating Desktop Items (Landing Mode) */}
       <AnimatePresence>
         {viewState === "landing" && (
-          <div className="absolute inset-0 pointer-events-none z-10">
+          <div className="absolute inset-0 pointer-events-none z-30">
             {FIXED_DESKTOP_ITEMS.map((item) => {
               const isSelected = selectedDesktopId === item.id;
               const itemZIndex = zIndices[item.id] ?? 1;
@@ -432,29 +434,57 @@ export default function Home() {
                     e.stopPropagation();
                     bringToFront(item.id);
                     setSelectedDesktopId(item.id);
+                    pointerDownPosRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
+                    didActuallyDragRef.current = false;
+                  }}
+                  onDrag={(e, info) => {
+                    if (Math.hypot(info.offset.x, info.offset.y) > 8) {
+                      didActuallyDragRef.current = true;
+                      isDraggingRef.current = true;
+                    }
                   }}
                   onDragStart={() => {
-                    isDraggingRef.current = true;
                     bringToFront(item.id);
                     setSelectedDesktopId(item.id);
                   }}
                   onDragEnd={() => {
                     setTimeout(() => {
                       isDraggingRef.current = false;
+                      didActuallyDragRef.current = false;
                     }, 120);
+                  }}
+                  onPointerUp={(e) => {
+                    if (pointerDownPosRef.current) {
+                      const dx = e.clientX - pointerDownPosRef.current.x;
+                      const dy = e.clientY - pointerDownPosRef.current.y;
+                      const dist = Math.hypot(dx, dy);
+                      const dt = Date.now() - pointerDownPosRef.current.time;
+                      pointerDownPosRef.current = null;
+
+                      // If tapped without dragging (< 12px jitter and < 500ms)
+                      if (!didActuallyDragRef.current && dist < 12 && dt < 500) {
+                        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                          handleItemAction();
+                        }
+                      }
+                    }
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    if (isDraggingRef.current) return;
+                    if (didActuallyDragRef.current || isDraggingRef.current) return;
                     bringToFront(item.id);
                     setSelectedDesktopId(item.id);
+
+                    if (typeof window !== 'undefined' && window.innerWidth < 640) {
+                      handleItemAction();
+                    }
                   }}
                   onDoubleClick={(e) => {
                     e.stopPropagation();
-                    if (isDraggingRef.current) return;
+                    if (didActuallyDragRef.current || isDraggingRef.current) return;
                     handleItemAction();
                   }}
-                  className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-default group touch-none"
+                  className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-pointer group touch-none"
                   style={{
                     '--item-x': `${item.x}%`,
                     '--item-y': `${item.y}%`,
@@ -464,7 +494,7 @@ export default function Home() {
                   } as React.CSSProperties}
                 >
                   {/* Icon Container with Selection Highlight Box */}
-                  <div className={`p-1 rounded-xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
+                  <div className={`p-1 rounded-2xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
                     ? 'bg-black/10 border-2 border-white/80 shadow-xs backdrop-blur-xs'
                     : 'bg-transparent border-2 border-transparent'
                     }`}>
@@ -484,14 +514,14 @@ export default function Home() {
 
                     {/* ITEM TYPE: Image Preview */}
                     {item.type === 'image' && (
-                      <div className={`rounded-lg overflow-hidden border-[1.5px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)] bg-white shrink-0 ${'orientation' in item && item.orientation === 'landscape'
+                      <div className={`rounded-xl overflow-hidden border-[1.5px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)] bg-white shrink-0 ${'orientation' in item && item.orientation === 'landscape'
                         ? 'w-16 h-11 sm:w-18 sm:h-12'
-                        : 'w-10 h-13 sm:w-11 sm:h-14'
+                        : 'w-11 h-14 sm:w-12 sm:h-16'
                         }`}>
                         <img
                           src={item.imageUrl}
                           alt={item.title}
-                          className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-center'}`}
+                          className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-[center_20%]'}`}
                           draggable={false}
                         />
                       </div>
@@ -501,7 +531,7 @@ export default function Home() {
                   {/* Selection Label Pill */}
                   <div className="mt-1.5 flex justify-center pointer-events-none">
                     <span
-                      className={`max-w-[76px] sm:max-w-[88px] line-clamp-2 break-words text-[11px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
+                      className={`max-w-[86px] sm:max-w-[88px] whitespace-nowrap sm:whitespace-normal line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
                         ? 'bg-[#007AFF] text-white shadow-xs'
                         : 'text-neutral-800'
                         }`}
@@ -551,13 +581,13 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                   transition={{ duration: 0.5, ease: EASE_OUT, delay: 0.3 }}
                 >
-                  Hi, I&apos;m Rangga
+                  Hi, I&apos;m Daniel Rangga
                   <AppleEmoji emoji="👋" className="w-[0.9em] h-[0.9em]" />
                 </motion.span>
               </h1>
               <TextReveal
                 as="p"
-                text="Fullstack Engineer specializing in AI & Backend System"
+                text="Welcome to my interactive portfolio."
                 className="mt-1 text-xs sm:text-base md:text-lg font-medium text-neutral-600 max-w-xs sm:max-w-md md:max-w-xl pointer-events-auto"
                 whileInView={false}
                 delay={0.325}
@@ -588,7 +618,7 @@ export default function Home() {
             {/* Sub-headline Text */}
             <TextReveal
               as="p"
-              text="Welcome to my interactive portfolio. Here, you can explore my projects, skills, and experience, and even ask the AI directly about my work."
+              text="Here, you can explore my projects, skills, and experience, and even ask the AI directly about my work."
               className="mt-1.5 sm:mt-3 max-w-xs sm:max-w-md md:max-w-xl text-xs sm:text-base text-neutral-600 leading-relaxed font-medium px-2 pointer-events-auto"
               whileInView={false}
               delay={0.525}
@@ -771,9 +801,8 @@ export default function Home() {
                     <LiquidGlass
                       type="button"
                       onClick={handleClearChat}
-                      className={`rounded-[1.5rem] !overflow-hidden cursor-pointer shadow-md px-4 sm:px-4 py-3.5 sm:py-3 ${
-                        viewState !== "chat" ? "pointer-events-none select-none" : ""
-                      }`}
+                      className={`rounded-[1.5rem] !overflow-hidden cursor-pointer shadow-md px-4 sm:px-4 py-3.5 sm:py-3 ${viewState !== "chat" ? "pointer-events-none select-none" : ""
+                        }`}
                       style={{ overflow: "hidden" }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
