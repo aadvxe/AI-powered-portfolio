@@ -93,9 +93,8 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
           // value. Each tier keeps the outer/inner gap at the 8px inset padding
           // so the corners still nest concentrically within their own tier.
           const isLarge = isHero || isFeatured;
-          const isMedium = isDuo || isWide;
-          const outerRadiusClass = isLarge ? 'rounded-[1.75rem]' : isMedium ? 'rounded-[1.5rem]' : 'rounded-[1.25rem]';
-          const innerRadiusClass = isLarge ? 'rounded-[1.25rem]' : isMedium ? 'rounded-2xl' : 'rounded-xl';
+          const outerRadiusClass = isLarge ? 'rounded-[1.75rem]' : 'rounded-2xl';
+          const innerRadiusClass = isLarge ? 'rounded-[1.35rem]' : 'rounded-xl';
 
           return (
             <LiquidGlass
@@ -104,7 +103,7 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
               draggable={false}
               variants={itemVariants}
               onClick={() => onSelect(project)}
-              className={`relative ${outerRadiusClass} p-1.5 sm:p-2 cursor-pointer ${
+              className={`relative ${outerRadiusClass} !overflow-hidden p-1 sm:p-1.5 cursor-pointer group !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] ${
                 isHero
                   ? 'min-h-[420px] sm:min-h-[460px]'
                   : isFeatured
@@ -112,63 +111,78 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
                     : isDuo
                       ? 'min-h-[280px] sm:min-h-[320px]'
                       : isWide
-                        ? 'sm:col-span-2 min-h-[220px]'
-                        : 'col-span-1 min-h-[220px]'
+                        ? 'sm:col-span-2 min-h-[250px] sm:min-h-[270px]'
+                        : 'col-span-1 min-h-[280px] sm:min-h-[300px]'
               }`}
             >
-              <div className="flex flex-col justify-between h-full w-full gap-2 sm:gap-3">
-                {/* Visual Thumbnail — a thin inset frame, not full-bleed but not heavily padded either.
-                    flex-1 so a row-spanning card's extra grid height becomes a bigger photo instead
-                    of dead whitespace below the text; min-h is just the floor for non-spanning cards. */}
-                <div className={`relative w-full overflow-hidden ${innerRadiusClass} bg-neutral-100/60 flex-1 ${
-                  isHero ? 'min-h-64 sm:min-h-80' : isFeatured ? 'min-h-56 sm:min-h-72' : isDuo ? 'min-h-48 sm:min-h-56' : isWide ? 'min-h-36 sm:min-h-40' : 'min-h-36'
-                }`}>
-                  {project.image_url ? (
-                    <div className="relative w-full h-full">
-                      <Image
-                        src={project.image_url}
-                        alt={project.title}
-                        fill
-                        className="object-cover"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-50" />
-                    </div>
-                  ) : (
-                    <div className={`w-full h-full ${project.gradient || 'bg-gradient-to-br from-cyan-500/15 to-blue-600/20'} flex items-center justify-center`}>
-                      <FolderGit2 className="text-neutral-400/40 w-12 h-12" />
-                    </div>
-                  )}
-                </div>
+              {/* Outer bottom white gradient: eliminates bottom corner line while preserving the thin bezel around the card */}
+              <div className="absolute -inset-x-2 -bottom-2 h-[68%] rounded-b-[inherit] pointer-events-none bg-gradient-to-t from-white via-white/95 via-45% to-transparent" />
 
-                {/* Metadata Content — sized to its own content, not stretched, so it hugs the image above it */}
-                <div className="flex flex-col shrink-0 px-1.5 pb-1">
+              {/* Inner card container with concentric rounded corners */}
+              <div className={`relative w-full h-full overflow-hidden ${innerRadiusClass} bg-white flex flex-col justify-end`}>
+                {/* Visual Background — faded before the bottom so no image pixels reach or bleed through the bottom corners */}
+                {project.image_url ? (
+                  <div
+                    className="absolute inset-x-0 top-0 bottom-8 overflow-hidden"
+                    style={{
+                      maskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                      WebkitMaskImage: 'linear-gradient(to bottom, black 60%, transparent 100%)',
+                    }}
+                  >
+                    <Image
+                      src={project.image_url}
+                      alt={project.title}
+                      fill
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  </div>
+                ) : (
+                  <div className={`absolute inset-x-0 top-0 bottom-8 ${project.gradient || 'bg-gradient-to-br from-cyan-500/15 to-blue-600/20'} flex items-center justify-center`}>
+                    <FolderGit2 className="text-neutral-400/40 w-16 h-16 mb-20" />
+                  </div>
+                )}
+
+                {/* Frosted glass progressive blur overlay (bottom 65%) */}
+                <div
+                  className="absolute inset-x-0 bottom-0 h-[65%] pointer-events-none backdrop-blur-md"
+                  style={{
+                    maskImage: 'linear-gradient(to top, black 45%, transparent 100%)',
+                    WebkitMaskImage: 'linear-gradient(to top, black 45%, transparent 100%)',
+                  }}
+                />
+
+                {/* Inner white gradient overlay for smooth transition */}
+                <div className="absolute inset-x-0 bottom-0 h-[65%] pointer-events-none bg-gradient-to-t from-white via-white/90 via-45% to-transparent" />
+
+                {/* Metadata Content on top of frosted overlay */}
+                <div className="relative z-10 flex flex-col justify-end p-3.5 sm:p-4 text-left">
                   <div>
-                    <h3 className={`font-bold text-neutral-800 leading-snug line-clamp-1 ${
-                      isFeatured ? 'text-lg sm:text-xl mb-1.5' : 'text-sm sm:text-base mb-1'
+                    <h3 className={`font-bold text-neutral-900 leading-snug line-clamp-1 ${
+                      isFeatured ? 'text-lg sm:text-xl mb-1' : 'text-sm sm:text-base mb-1'
                     }`}>
                       {project.title}
                     </h3>
 
-                    {/* Description snippet — shown consistently on every card, not just featured/wide ones */}
+                    {/* Description snippet */}
                     {project.description && (
-                      <p className="text-xs text-neutral-500 line-clamp-2 leading-relaxed mb-3">
+                      <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed mb-2.5 font-normal">
                         {project.description.replace(/^[•\-\*]\s+/gm, '')}
                       </p>
                     )}
                   </div>
 
-                  {/* Tags Footer */}
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                  {/* Tags Footer — styled as clean white card pills */}
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {project.tags.slice(0, isFeatured ? 4 : 2).map((tag) => (
                       <span
                         key={tag}
-                        className="text-[10.5px] font-medium text-neutral-600 bg-white/60 border border-white/80 shadow-xs px-2 py-0.5 rounded-md backdrop-blur-xs"
+                        className="text-[11px] font-semibold text-neutral-700 bg-white/95 border border-white shadow-xs px-2.5 py-0.5 rounded-lg backdrop-blur-xs"
                       >
                         #{tag}
                       </span>
                     ))}
                     {project.tags.length > (isFeatured ? 4 : 2) && (
-                      <span className="text-[10px] font-medium text-neutral-400 pl-0.5">
+                      <span className="text-[10px] font-semibold text-neutral-500 bg-white/80 border border-white/80 px-2 py-0.5 rounded-lg shadow-xs">
                         +{project.tags.length - (isFeatured ? 4 : 2)}
                       </span>
                     )}
