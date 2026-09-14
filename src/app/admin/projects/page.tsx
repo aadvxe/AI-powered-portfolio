@@ -312,11 +312,12 @@ export default function AdminProjects() {
                             </div>
                             
                             <div className="space-y-1">
-                                <label className="text-xs font-semibold text-neutral-500 uppercase">Description</label>
+                                <label className="text-xs font-semibold text-neutral-500 uppercase">Description (Markdown Supported)</label>
                                 <textarea 
                                     className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 min-h-[100px]"
                                     value={currentProject.description || ""}
                                     onChange={e => setCurrentProject({...currentProject, description: e.target.value})}
+                                    placeholder="Supports Markdown: # Headings, **bold**, - lists, [links](url)..."
                                 />
                             </div>
 

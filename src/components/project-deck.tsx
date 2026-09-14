@@ -64,12 +64,11 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
   // Grid shape adapts to the actual result count, so a lone (or paired) result
   // becomes a deliberately-sized centerpiece instead of a small tile stranded
   // beside empty columns.
+  // Bento grid layout: Maximum 2 columns (1 then 2 then 1 rhythm)
   const gridColsClass =
     count === 1
       ? 'grid-cols-1 max-w-lg sm:max-w-xl mx-auto'
-      : count === 2
-        ? 'grid-cols-1 sm:grid-cols-2'
-        : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 md:grid-flow-dense';
+      : 'grid-cols-1 sm:grid-cols-2';
 
   return (
     <div className="relative w-full py-2">
@@ -80,21 +79,15 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
         className={`grid ${gridColsClass} gap-3 sm:gap-4 w-full auto-rows-[minmax(180px,auto)]`}
       >
         {filteredProjects.map((project, index) => {
-          const isHero = count === 1;
           const isDuo = count === 2;
-          // One hero card leads every deck of 3+, then a "wide" accent repeats
-          // every 4 cards — so the rhythm holds however many results come back,
-          // instead of only working for exactly 3 or 4.
-          const isFeatured = isHero || (count >= 3 && index === 0);
-          const isWide = isDuo || (count >= 4 && index % 4 === 3);
+          // Bento rhythm: 1 then 2 then 1 pattern (index 0 is full-width, 1 & 2 are half-width, 3 is full-width, etc.)
+          // Also a lone trailing card at the end of the deck spans full width
+          const isFullWidth =
+            count === 1 ||
+            (!isDuo && (index % 3 === 0 || (index === count - 1 && index % 3 === 1)));
 
-          // Corner radius scales with tile size — a fixed radius reads as much
-          // "rounder" on a small tile than a large one, even at the same pixel
-          // value. Each tier keeps the outer/inner gap at the 8px inset padding
-          // so the corners still nest concentrically within their own tier.
-          const isLarge = isHero || isFeatured;
-          const outerRadiusClass = isLarge ? 'rounded-[1.75rem]' : 'rounded-2xl';
-          const innerRadiusClass = isLarge ? 'rounded-[1.35rem]' : 'rounded-xl';
+          const outerRadiusClass = isFullWidth ? 'rounded-[1.75rem]' : 'rounded-2xl';
+          const innerRadiusClass = isFullWidth ? 'rounded-[1.35rem]' : 'rounded-xl';
 
           return (
             <LiquidGlass
@@ -103,16 +96,10 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
               draggable={false}
               variants={itemVariants}
               onClick={() => onSelect(project)}
-              className={`relative ${outerRadiusClass} !overflow-hidden p-1 sm:p-1.5 cursor-pointer group !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] ${
-                isHero
-                  ? 'min-h-[420px] sm:min-h-[460px]'
-                  : isFeatured
-                    ? 'sm:col-span-2 sm:row-span-2 min-h-[340px] sm:min-h-[380px]'
-                    : isDuo
-                      ? 'min-h-[280px] sm:min-h-[320px]'
-                      : isWide
-                        ? 'sm:col-span-2 min-h-[250px] sm:min-h-[270px]'
-                        : 'col-span-1 min-h-[280px] sm:min-h-[300px]'
+              className={`relative ${outerRadiusClass} !overflow-hidden p-1 sm:p-1.5 cursor-pointer !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)] ${
+                isFullWidth
+                  ? 'sm:col-span-2 min-h-[320px] sm:min-h-[360px]'
+                  : 'col-span-1 min-h-[290px] sm:min-h-[320px]'
               }`}
             >
               {/* Outer bottom white gradient: eliminates bottom corner line while preserving the thin bezel around the card */}
@@ -133,7 +120,7 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
                       src={project.image_url}
                       alt={project.title}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="object-cover"
                     />
                   </div>
                 ) : (
@@ -158,7 +145,7 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
                 <div className="relative z-10 flex flex-col justify-end p-3.5 sm:p-4 text-left">
                   <div>
                     <h3 className={`font-bold text-neutral-900 leading-snug line-clamp-1 ${
-                      isFeatured ? 'text-lg sm:text-xl mb-1' : 'text-sm sm:text-base mb-1'
+                      isFullWidth ? 'text-lg sm:text-xl mb-1' : 'text-sm sm:text-base mb-1'
                     }`}>
                       {project.title}
                     </h3>
@@ -173,7 +160,7 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
 
                   {/* Tags Footer — styled as clean white card pills */}
                   <div className="flex flex-wrap items-center gap-1.5">
-                    {project.tags.slice(0, isFeatured ? 4 : 2).map((tag) => (
+                    {project.tags.slice(0, isFullWidth ? 4 : 2).map((tag) => (
                       <span
                         key={tag}
                         className="text-[11px] font-semibold text-neutral-700 bg-white/95 border border-white shadow-xs px-2.5 py-0.5 rounded-lg backdrop-blur-xs"
@@ -181,9 +168,9 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
                         #{tag}
                       </span>
                     ))}
-                    {project.tags.length > (isFeatured ? 4 : 2) && (
+                    {project.tags.length > (isFullWidth ? 4 : 2) && (
                       <span className="text-[10px] font-semibold text-neutral-500 bg-white/80 border border-white/80 px-2 py-0.5 rounded-lg shadow-xs">
-                        +{project.tags.length - (isFeatured ? 4 : 2)}
+                        +{project.tags.length - (isFullWidth ? 4 : 2)}
                       </span>
                     )}
                   </div>

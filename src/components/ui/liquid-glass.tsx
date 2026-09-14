@@ -78,7 +78,7 @@ export const LiquidGlass = React.forwardRef<HTMLDivElement, LiquidGlassProps>(
           <div className="liquidGlass-shine" />
         </div>
 
-        <div className="liquidGlass-text w-full h-full text-left flex flex-col">
+        <div className="liquidGlass-text w-full h-full text-left flex flex-col min-h-0">
           {children}
         </div>
       </motion.div>

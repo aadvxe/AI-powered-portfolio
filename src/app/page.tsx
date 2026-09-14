@@ -26,6 +26,17 @@ import {
   MacOSFolderIcon
 } from "@/components/ui/macos-desktop-icons";
 
+function formatProjectDescription(text: string): string {
+  if (!text) return "";
+  // Convert unicode bullets (•, ·) at line starts to standard markdown list item "- "
+  let md = text.replace(/^[•·]\s*/gm, "- ");
+  // Ensure lists have a preceding blank line if preceded by normal text
+  md = md.replace(/([^\n])\n(- |\* |\+ |\d+\. )/g, "$1\n\n$2");
+  // Separate lines with double newlines so paragraphs don't collapse together
+  md = md.replace(/([^\n])\n([^\n\-*+\d•#>\s])/g, "$1\n\n$2");
+  return md;
+}
+
 export default function Home() {
   const [viewState, setViewState] = useState<"landing" | "chat">("landing");
   const [input, setInput] = useState("");
@@ -817,25 +828,26 @@ export default function Home() {
               onClick={() => setSelectedProject(null)}
               className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
             />
-            <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-3 sm:p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
+            <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-3 sm:p-5 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
               <GlassCard
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="pointer-events-auto relative flex h-[88vh] sm:h-[80vh] w-full max-w-4xl flex-col overflow-y-auto md:overflow-hidden !border-neutral-200 !bg-white/95 shadow-2xl rounded-2xl"
+                className="pointer-events-auto relative flex h-[90vh] sm:h-[84vh] max-h-[880px] w-full max-w-5xl lg:max-w-6xl flex-col overflow-y-auto md:overflow-hidden !border-neutral-200 !bg-white shadow-2xl !overflow-hidden rounded-3xl"
               >
                 {/* Close Button */}
                 <button
                   onClick={() => setSelectedProject(null)}
-                  className="absolute right-3.5 top-3.5 sm:right-4 sm:top-4 z-50 rounded-full bg-neutral-100/90 p-2 text-neutral-600 hover:bg-neutral-200"
+                  className="absolute right-3.5 top-3.5 sm:right-5 sm:top-5 z-50 rounded-full bg-white/90 backdrop-blur-sm p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 shadow-sm transition-colors"
+                  title="Close modal"
                 >
                   <X size={20} />
                 </button>
 
-                {/* Content */}
-                <div className="flex flex-col md:flex-1 md:flex-row md:min-h-0 md:overflow-hidden">
+                {/* Content Container with matching rounded corners */}
+                <div className="flex flex-col md:flex-1 md:flex-row md:min-h-0 md:overflow-hidden rounded-3xl">
                   {/* Visual Side */}
-                  <div className={`relative w-full h-64 md:h-auto md:w-1/2 ${selectedProject.project.gradient} shrink-0`}>
+                  <div className={`relative w-full h-72 md:h-auto md:w-[46%] lg:w-[44%] ${selectedProject.project.gradient || 'bg-neutral-100'} shrink-0 overflow-hidden rounded-t-3xl md:rounded-tr-none md:rounded-l-3xl`}>
                     {selectedProject.project.image_url ? (
                       <>
                         <Image
@@ -847,46 +859,94 @@ export default function Home() {
                         <div className="absolute inset-0 bg-black/10" />
                       </>
                     ) : (
-                      <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
+                      <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] flex items-center justify-center">
+                        <FolderGit2 className="text-neutral-400/50 w-20 h-20" />
+                      </div>
                     )}
                   </div>
 
                   {/* Info Side */}
-                  <div className="flex w-full flex-col md:h-full md:w-1/2 md:min-h-0 bg-white">
+                  <div className="flex w-full flex-col md:h-full md:w-[54%] lg:w-[56%] md:min-h-0 bg-white rounded-b-3xl md:rounded-bl-none md:rounded-r-3xl overflow-hidden">
                     {/* Fixed Header */}
-                    <div className="p-8 pb-4 shrink-0 border-b border-neutral-100">
-                      <h2 className="text-2xl font-bold text-neutral-900 pr-12">{selectedProject.project.title}</h2>
-                      <span className="mt-2 text-neutral-500 text-sm font-medium">{selectedProject.project.category}</span>
+                    <div className="p-5 sm:p-6 pb-3.5 shrink-0 border-b border-neutral-100">
+                      <h2 className="text-lg sm:text-xl font-bold text-neutral-900 pr-10 leading-snug">
+                        {selectedProject.project.title}
+                      </h2>
+                      {selectedProject.project.category && (
+                        <span className="inline-block mt-2 px-2.5 py-0.5 bg-neutral-100 border border-neutral-200/80 rounded-full text-neutral-600 text-xs font-semibold">
+                          {selectedProject.project.category}
+                        </span>
+                      )}
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="md:flex-1 md:overflow-y-auto custom-scrollbar p-8 pt-6">
-                      <div className="text-sm leading-relaxed text-neutral-600">
-                        {selectedProject.project.description?.split('\n').map((line: string, idx: number) => {
-                          const trimmed = line.trim();
-                          if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
-                            return (
-                              <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                <span className="text-neutral-400 mt-1.5 text-[6px]">●</span>
-                                <span>{trimmed.substring(1).trim()}</span>
-                              </div>
-                            );
-                          }
-                          return <p key={idx} className="mb-1">{line}</p>;
-                        })}
+                    <div className="md:flex-1 md:overflow-y-auto custom-scrollbar p-5 sm:p-6 pt-5">
+                      {/* Markdown formatted description */}
+                      <div className="text-sm sm:text-base leading-relaxed text-neutral-600">
+                        <ReactMarkdown
+                          components={{
+                            h1: ({ children }) => <h1 className="text-base sm:text-lg font-bold text-neutral-900 mt-4 mb-2">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-sm sm:text-base font-bold text-neutral-900 mt-3.5 mb-1.5">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 mt-3 mb-1">{children}</h3>,
+                            p: ({ children }) => <p className="mb-3 leading-relaxed text-neutral-600 last:mb-0">{children}</p>,
+                            strong: ({ children }) => <strong className="font-semibold text-neutral-900">{children}</strong>,
+                            em: ({ children }) => <em className="italic text-neutral-700">{children}</em>,
+                            ul: ({ children }) => <ul className="list-disc pl-5 mb-4 space-y-1.5 text-neutral-600">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal pl-5 mb-4 space-y-1.5 text-neutral-600">{children}</ol>,
+                            li: ({ children }) => <li className="pl-1 leading-relaxed [&>p]:mb-1 [&>p:last-child]:mb-0">{children}</li>,
+                            a: ({ children, href }) => (
+                              <a
+                                href={href}
+                                className="text-neutral-900 underline font-medium hover:text-black transition-colors"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {children}
+                              </a>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="border-l-3 border-neutral-300 pl-3.5 py-1 my-3 text-neutral-500 italic bg-neutral-50 rounded-r">
+                                {children}
+                              </blockquote>
+                            ),
+                            code: ({ children, className }) => {
+                              const isInline = !className;
+                              return isInline ? (
+                                <code className="bg-neutral-100 text-neutral-800 text-xs px-1.5 py-0.5 rounded font-mono border border-neutral-200/80">
+                                  {children}
+                                </code>
+                              ) : (
+                                <pre className="bg-neutral-900 text-neutral-100 text-xs p-3.5 rounded-xl overflow-x-auto font-mono my-3 shadow-inner">
+                                  <code>{children}</code>
+                                </pre>
+                              );
+                            },
+                          }}
+                        >
+                          {formatProjectDescription(selectedProject.project.description || "")}
+                        </ReactMarkdown>
                       </div>
 
-                      <div className="mt-8">
-                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-wider mb-3">Skills Used</h3>
-                        <div className="flex flex-wrap gap-2">
-                          {selectedProject.project.tags.map((tag) => (
-                            <span key={tag} className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-sm font-medium border border-neutral-200">
-                              {tag}
-                            </span>
-                          ))}
+                      {/* Skills Section */}
+                      {selectedProject.project.tags && selectedProject.project.tags.length > 0 && (
+                        <div className="mt-8">
+                          <h3 className="text-xs sm:text-sm font-bold text-neutral-500 uppercase tracking-wider mb-3">
+                            Skills Used
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {selectedProject.project.tags.map((tag) => (
+                              <span
+                                key={tag}
+                                className="px-3 py-1 bg-neutral-100 text-neutral-700 rounded-full text-xs sm:text-sm font-medium border border-neutral-200/80"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </div>
+                      )}
 
+                      {/* Action Links */}
                       <div className="mt-8 flex flex-wrap gap-3 pb-8">
                         {/* Standard Buttons */}
                         {selectedProject.project.demo_link && (
@@ -894,7 +954,7 @@ export default function Home() {
                             href={selectedProject.project.demo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-lg bg-neutral-900 px-4 py-3 font-semibold text-white transition hover:bg-neutral-800 flex-1 min-w-[140px]"
+                            className="flex items-center justify-center gap-2 rounded-xl bg-neutral-900 px-5 py-3 font-semibold text-white transition hover:bg-neutral-800 flex-1 min-w-[140px] shadow-sm"
                           >
                             <ExternalLink size={18} /> Visit Live
                           </a>
@@ -904,7 +964,7 @@ export default function Home() {
                             href={selectedProject.project.repo_link}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 font-semibold text-neutral-700 transition hover:bg-neutral-50 flex-1 min-w-[140px]"
+                            className="flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-5 py-3 font-semibold text-neutral-700 transition hover:bg-neutral-50 flex-1 min-w-[140px] shadow-sm"
                           >
                             <Github size={18} /> Code
                           </a>
@@ -917,7 +977,7 @@ export default function Home() {
                             href={link.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-white px-4 py-3 font-semibold text-neutral-700 transition hover:bg-neutral-50 flex-1 min-w-[140px]"
+                            className="flex items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white px-5 py-3 font-semibold text-neutral-700 transition hover:bg-neutral-50 flex-1 min-w-[140px] shadow-sm"
                           >
                             <ExternalLink size={18} className="text-neutral-400" /> {link.label}
                           </a>
