@@ -42,7 +42,7 @@ export const BackgroundCanvas = memo(function BackgroundCanvas() {
         className="absolute inset-0 will-change-transform"
         style={{ background: backgroundStyle }}
       />
-      {/* Tahoe Grid Overlay */}
+      {/* Subtle Grid Overlay */}
       <div className="absolute inset-0 tahoe-grid-bg opacity-70" />
     </div>
   );

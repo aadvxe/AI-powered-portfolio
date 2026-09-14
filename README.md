@@ -1,6 +1,6 @@
 ## Overview
 
-This portfolio is an AI-powered portfolio and interactive desktop experience that uses **Retrieval-Augmented Generation (RAG)** to "talk" to visitors. Instead of hardcoding responses or presenting a static resume, the system pairs a macOS Tahoe-inspired spatial desktop environment with a vector-augmented AI assistant. Visitors can explore projects through draggable desktop folders, application shortcuts, and interactive decks, or hold natural language conversations backed by Google Cloud Vertex AI / Gemini 3.1 Flash Lite and Supabase pgvector.
+This portfolio is an interactive, AI-powered portfolio that uses **Retrieval-Augmented Generation (RAG)** to answer questions about projects, skills, and experience. Built with an interactive UI and a vector-backed AI assistant, visitors can explore projects, skills, and background information through interactive cards and decks, or ask questions directly using natural language backed by Google Cloud Vertex AI / Gemini 3.1 Flash Lite and Supabase pgvector.
 
 ## Architecture
 
@@ -8,10 +8,10 @@ The system follows a modern **Hybrid RAG & Action Protocol** architecture, balan
 
 ```mermaid
 graph TD
-    User["User Query / Desktop Action"] --> Frontend["macOS Desktop & Chat UI"]
+    User["User Query / UI Action"] --> Frontend["Interactive UI & Chat Interface"]
     Frontend --> HybridRouter{"Local vs Remote RAG?"}
 
-    HybridRouter -- "Simple Intent (< 50ms)" --> Local["Local Regex Matcher"]
+    HybridRouter -- "Simple Intent (< 50ms)" --> Local["Local Intent Matcher"]
     Local --> DirectDeck["Direct Deck Mount / Preset Response"]
 
     HybridRouter -- "Complex Query" --> API["Next.js Route /api/chat"]
@@ -33,13 +33,15 @@ graph TD
 
 ## Technology Stack
 
-- **Framework**: Next.js 16 (App Router with Server & Client Components)
+- **Framework**: Next.js 16 (App Router, React 19, Server & Client Components)
+- **Styling & UI**: Tailwind CSS v4, Framer Motion, dynamic background canvas, glassmorphism UI components
+- **Language**: TypeScript 5
+- **Motion Engine**: Framer Motion 12, custom animation presets (`src/lib/ease.ts`), `TextReveal`
 - **Database & Vector Store**: Supabase (PostgreSQL with `pgvector` extension)
-- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI (`gemini-3.1-flash-lite`)
+- **LLM / AI Engine**: Google Cloud Platform (GCP) Vertex AI / Google AI Studio (`gemini-3.1-flash-lite`)
 - **Embeddings**: Google Cloud `gemini-embedding-001` (via `@google/genai`, 3072 dimensions)
-- **Orchestration**: Direct GCP Gen AI SDK + Next.js Edge Middleware & Server Route Handlers
-- **Styling & UI**: TailwindCSS, Liquid Glass (custom SVG chromatic filters & specular highlights), Dynamic `BackgroundCanvas`
-- **Motion Engine**: Framer Motion, custom physics presets (`src/lib/ease.ts`), `TextReveal`
+- **Orchestration**: Google Gen AI SDK (`@google/genai`), LangChain, Next.js Edge Middleware & Server Route Handlers
+- **Content Rendering**: React Markdown
 
 ## RAG Implementation Details
 
@@ -103,19 +105,19 @@ The retrieved context is injected into **Gemini 3.1 Flash Lite** (`temperature: 
 
 Completions are streamed back to the client token-by-token over a raw HTTP chunked stream (`ReadableStream`), ensuring immediate visual responsiveness.
 
-## Interactive Desktop & Motion System
+## Interface & Interaction Design
 
-Beyond conversational RAG, the portfolio provides a tactile, macOS Tahoe-inspired spatial operating environment:
+In addition to conversational RAG, the interface includes interactive elements and responsive animations:
 
-- **Desktop Subsystem (`src/components/ui/macos-desktop-icons.tsx`)**: Draggable desktop folders, quick action triggers, application launchers (VS Code, Python, TensorFlow), active selection highlight frames, and blue label pills.
-- **Dynamic Background Canvas (`src/components/ui/background-canvas.tsx`)**: Pointer-tracking GPU radial lighting built with Framer Motion spring physics (`stiffness: 50`, `damping: 20`) over a zero-image CSS grid (`.tahoe-grid-bg`), eliminating heavy background image downloads.
-- **Liquid Glass (`src/components/ui/liquid-glass.tsx`)**: Multi-layer frosted glass containers with specular highlights, inner borders, and SVG chromatic refraction with Safari-safe fallbacks.
-- **Motion Tokens (`src/lib/ease.ts`)**: Standardized cubic-bezier easing curves (`EASE_OUT`, `EASE_IN_OUT`, `EASE_DRAWER`) and spring physics presets (`SPRING_PRESS`, `SPRING_SWAP`, `SPRING_PANEL`, `SPRING_LAYOUT`, `SPRING_MOUSE`, `SPRING_GLIDE`) powering cohesive 60fps transitions.
+- **Interactive Layout**: Draggable icons, quick action buttons, project shortcuts, and preview cards with double-click opening.
+- **Dynamic Background Canvas (`src/components/ui/background-canvas.tsx`)**: Pointer-tracking lighting effects built with Framer Motion spring physics over a lightweight CSS grid.
+- **Glassmorphism Components (`src/components/ui/glass-card.tsx`, `src/components/ui/liquid-glass.tsx`)**: Layered glass cards with blur effects and border styling.
+- **Motion System (`src/lib/ease.ts`)**: Standardized easing curves and spring physics presets for fluid UI transitions.
 
-## Why this approach?
+## Key Features
 
 - **Precision**: Structure-based semantic chunking prevents context bleeding and ensures exact context delivery for projects and skills.
-- **Fluid Desktop Immersion**: Replaces traditional static single-page portfolios with an interactive macOS environment powered by GPU-accelerated motion and liquid glass aesthetics.
-- **Enterprise Grade AI**: GCP Vertex AI provides enterprise reliability, low-latency streaming, and high-dimensional 3072d vector embeddings.
-- **Cost & Speed Efficiency**: Local intents handle common queries in under 50ms at zero token cost; Gemini Flash answers complex synthesis queries in milliseconds.
-- **Live Dynamism**: The portfolio is driven by Supabase as a single source of truth, updated in real time via an authenticated admin CMS with instant vector reindexing.
+- **Interactive UI**: Clean layout with interactive cards, draggable icons, and responsive transitions built with Tailwind CSS and Framer Motion.
+- **Enterprise-Grade AI**: Powered by Google Gemini 3.1 Flash Lite with 3072-dimensional vector embeddings for high accuracy and fast responses.
+- **Cost & Speed Efficiency**: Local intent routing handles common navigation queries in under 50ms at zero token cost; Gemini Flash answers complex synthesis queries in milliseconds.
+- **Live Dynamism**: Supabase serves as the single source of truth, updated in real time via an authenticated admin CMS with instant vector reindexing.

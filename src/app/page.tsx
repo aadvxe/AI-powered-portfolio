@@ -463,7 +463,7 @@ export default function Home() {
                     zIndex: itemZIndex,
                   } as React.CSSProperties}
                 >
-                  {/* macOS Icon Container with Selection Highlight Box */}
+                  {/* Icon Container with Selection Highlight Box */}
                   <div className={`p-1 rounded-xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
                     ? 'bg-black/10 border-2 border-white/80 shadow-xs backdrop-blur-xs'
                     : 'bg-transparent border-2 border-transparent'
@@ -498,7 +498,7 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* macOS Blue Selection Label Pill */}
+                  {/* Selection Label Pill */}
                   <div className="mt-1.5 flex justify-center pointer-events-none">
                     <span
                       className={`max-w-[76px] sm:max-w-[88px] line-clamp-2 break-words text-[11px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
@@ -567,7 +567,7 @@ export default function Home() {
               />
             </div>
 
-            {/* Giant Tahoe Center Folder Graphic with Live Badges */}
+            {/* Center Folder Graphic */}
             <div className="relative my-2.5 sm:my-4 transition-all duration-300 z-20 pointer-events-auto flex items-center justify-center">
               <div
                 onClick={() => handleStartChat("Show me your projects")}
@@ -639,7 +639,7 @@ export default function Home() {
               </LiquidGlass>
             </div>
 
-            {/* Progressive blur: fades scrolled content out under the header, macOS-toolbar style */}
+            {/* Progressive blur: fades scrolled content out under the header toolbar */}
             <div
               className="pointer-events-none absolute inset-x-0 top-0 z-20 h-20 sm:h-24"
               style={{
