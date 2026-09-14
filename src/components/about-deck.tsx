@@ -32,14 +32,16 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
       about: (
         <div key="about" className="flex flex-col md:flex-row gap-4 sm:gap-6">
             {/* Avatar container */}
-            <GlassCard className="w-full h-64 sm:h-72 md:h-auto md:w-[300px] shrink-0 relative overflow-hidden group">
-                {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt={profile.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
-                ) : (
-                    <div className="absolute inset-0 bg-neutral-200 flex items-center justify-center">
-                        <User size={48} className="text-neutral-400" />
-                    </div>
-                )}
+            <GlassCard className="w-full h-64 sm:h-72 md:h-auto md:w-[300px] shrink-0 p-1 sm:p-1.5 relative !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)]">
+                <div className="relative w-full h-full overflow-hidden rounded-xl">
+                    {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
+                            <User size={48} className="text-neutral-400" />
+                        </div>
+                    )}
+                </div>
             </GlassCard>
 
             {/* Biography container */}
