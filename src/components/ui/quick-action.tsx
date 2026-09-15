@@ -13,16 +13,25 @@ interface QuickActionProps {
 
 export function QuickAction({ icon: Icon, label, onClick, layoutId, compact }: QuickActionProps) {
   return (
-    <LiquidGlass 
+    <LiquidGlass
       layoutId={layoutId}
-      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors" 
+      role="button"
+      tabIndex={0}
+      aria-label={label}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       onClick={onClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 350, damping: 30 }}
     >
-      <div className={`flex items-center gap-3 ${compact ? 'px-4 py-2' : 'px-6 py-4'}`}>
-        <Icon size={compact ? 16 : 20} className="text-neutral-700" />
+      <div className={`flex items-center gap-3 ${compact ? 'px-4 py-3 sm:py-2' : 'px-6 py-4'}`}>
+        <Icon size={compact ? 18 : 20} className="text-neutral-700" />
         <span className={`text-sm font-semibold text-neutral-600 whitespace-nowrap ${compact ? 'hidden md:inline' : ''}`}>{label}</span>
       </div>
     </LiquidGlass>

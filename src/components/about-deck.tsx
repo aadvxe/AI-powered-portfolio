@@ -1,6 +1,7 @@
 import { GlassCard } from "./ui/glass-card";
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase, Trophy, User, ExternalLink, Award } from "lucide-react";
+import { AppleEmoji } from "./ui/apple-emoji";
 
 import { ProfileData } from "@/hooks/use-content";
 
@@ -29,33 +30,38 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
 
   const Sections = {
       about: (
-        <div key="about" className="flex flex-col md:flex-row gap-6">
+        <div key="about" className="flex flex-col md:flex-row gap-4 sm:gap-6">
             {/* Avatar container */}
-            <GlassCard className="w-full md:w-[300px] shrink-0 relative overflow-hidden group">
-                {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt={profile.name} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500" />
-                ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-brand-cyan/20 to-purple-500/20 flex items-center justify-center">
-                        <User size={48} className="text-white/40" />
-                    </div>
-                )}
+            <GlassCard className="w-full h-64 sm:h-72 md:h-auto md:w-[300px] shrink-0 p-1 sm:p-1.5 relative !shadow-[0_10px_25px_-5px_rgba(0,0,0,0.08),0_0_0_1px_rgba(0,0,0,0.04)]">
+                <div className="relative w-full h-full overflow-hidden rounded-xl">
+                    {profile?.avatar_url ? (
+                        <img src={profile.avatar_url} alt={profile.name} className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full bg-neutral-200 flex items-center justify-center">
+                            <User size={48} className="text-neutral-400" />
+                        </div>
+                    )}
+                </div>
             </GlassCard>
 
             {/* Biography container */}
-            <GlassCard className="flex-1 p-8 flex flex-col justify-center">
-                <div className="mb-6">
-                    <h3 className="text-3xl font-bold text-neutral-800 mb-2">Hi, I'm {profile?.name || "Your Name"}👋</h3>
-                    <div className="inline-block px-3 py-1 bg-brand-cyan/10 rounded-full text-brand-cyan text-sm font-semibold">
+            <GlassCard className="flex-1 p-5 sm:p-8 flex flex-col justify-center">
+                <div className="mb-4 sm:mb-6">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-2 flex items-center gap-2">
+                        <span>Hi, I&apos;m {profile?.name || "Your Name"}</span>
+                        <AppleEmoji emoji="👋" className="w-[0.9em] h-[0.9em]" />
+                    </h3>
+                    <div className="inline-block px-3 py-1 bg-neutral-100 border border-neutral-200/80 rounded-full text-neutral-700 text-xs sm:text-sm font-semibold">
                         {profile?.role || "Creative Developer"}
                     </div>
                 </div>
-                <p className="text-neutral-600 leading-relaxed pr-2">
+                <p className="text-sm sm:text-base text-neutral-600 leading-relaxed pr-2">
                     {profile?.bio || "I am a passionate Creative Technologist with a knack for building fluid, intuitive, and beautiful web experiences. I bridge the gap between design and engineering."}
                 </p>
                 {/* Downloadable CV */}
                 {profile?.resume_url && (
                     <div className="mt-4 pt-4 border-t border-neutral-100">
-                        <a href={profile.resume_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-brand-cyan hover:underline flex items-center gap-1">
+                        <a href={profile.resume_url} target="_blank" rel="noreferrer" className="text-sm font-semibold text-neutral-700 hover:text-black hover:underline flex items-center gap-1">
                             View Resume <Trophy size={14} className="rotate-90" />
                         </a>
                     </div>
@@ -77,7 +83,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                             <div>
                                 <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
-                                    <Briefcase size={16} className="text-brand-cyan" />
+                                    <Briefcase size={16} className="text-neutral-700" />
                                     {exp.role}
                                 </h3>
                                 <div className="text-sm font-medium text-neutral-500">{exp.company}</div>
@@ -94,12 +100,12 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-brand-cyan mt-1.5 text-[6px]">●</span>
-                                            <span>{trimmed.substring(1).trim()}</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px] shrink-0">●</span>
+                                            <span className="min-w-0 flex-1 break-words">{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
                                 }
-                                return <p key={idx} className="mb-1">{line}</p>;
+                                return <p key={idx} className="mb-1 break-words">{line}</p>;
                             })}
                         </div>
 
@@ -126,14 +132,14 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             transition={{ delay: 0.2 }}
         >
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Education</h4>
-            <div className="grid grid-cols-1 gap-4 h-full">
+            <div className="grid grid-cols-1 gap-4">
             {education.map((edu: any, i: number) => (
-                <GlassCard key={i} className="p-6 hover:bg-white/60 h-full flex flex-col justify-center">
-                    <div className="mb-3 p-2 bg-brand-cyan/10 rounded-lg w-fit text-brand-cyan">
-                        <GraduationCap size={20} />
+                <GlassCard key={i} className="p-6 hover:bg-white/60 flex flex-col">
+                    <div className="flex items-center gap-2.5 mb-2">
+                        <GraduationCap size={20} className="text-neutral-700 shrink-0" />
+                        <h3 className="font-bold text-neutral-800">{edu.degree}</h3>
                     </div>
-                    <h3 className="font-bold text-neutral-800">{edu.degree}</h3>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                    <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                         <div className="text-sm text-neutral-500">{edu.school}</div>
                         {edu.gpa && (
                             <span className="text-xs font-medium px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded-md">
@@ -149,12 +155,12 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                 if (trimmed.startsWith('-') || trimmed.startsWith('•')) {
                                     return (
                                         <div key={idx} className="flex items-start gap-2 ml-2 mb-1">
-                                            <span className="text-brand-cyan mt-1.5 text-[6px]">●</span>
-                                            <span>{trimmed.substring(1).trim()}</span>
+                                            <span className="text-neutral-400 mt-1.5 text-[6px] shrink-0">●</span>
+                                            <span className="min-w-0 flex-1 break-words">{trimmed.substring(1).trim()}</span>
                                         </div>
                                     );
                                 }
-                                return <p key={idx} className="mb-1">{line}</p>;
+                                return <p key={idx} className="mb-1 break-words">{line}</p>;
                             })}
                         </div>
                     )}
@@ -176,19 +182,19 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Certifications</h4>
             <div className="grid grid-cols-1 gap-3">
                 {profile?.certifications?.map((cert: any, i: number) => (
-                    <GlassCard key={i} className="p-4 hover:bg-white/60 flex items-center gap-4 group">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <Award size={20} />
+                    <GlassCard key={i} className="p-4 hover:bg-white/60 group">
+                        <div className="flex items-center gap-4">
+                            <Award size={20} className="text-neutral-700 shrink-0" />
+                            <div className="flex-1">
+                                <h3 className="font-bold text-neutral-800 text-sm">{cert.title}</h3>
+                                <div className="text-xs text-neutral-500 mt-0.5">{cert.issuer} • {cert.date}</div>
+                            </div>
+                            {cert.link && (
+                                <a href={cert.link} target="_blank" rel="noopener noreferrer" className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
+                                    <ExternalLink size={14} />
+                                </a>
+                            )}
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-bold text-neutral-800 text-sm">{cert.title}</h3>
-                            <div className="text-xs text-neutral-500 mt-0.5">{cert.issuer} • {cert.date}</div>
-                        </div>
-                        {cert.link && (
-                            <a href={cert.link} target="_blank" rel="noopener noreferrer" className="p-2 text-neutral-400 hover:text-brand-cyan hover:bg-brand-cyan/5 rounded-lg transition-colors opacity-0 group-hover:opacity-100">
-                                <ExternalLink size={14} />
-                            </a>
-                        )}
                     </GlassCard>
                 ))}
             </div>
@@ -205,13 +211,13 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
             <h4 className="text-sm font-semibold text-neutral-500 uppercase tracking-wider mb-3 ml-1">Achievements</h4>
             <div className="flex flex-col gap-3">
                 {achievements.map((ach: any, i: number) => (
-                    <GlassCard key={i} className="p-4 flex items-center gap-4 hover:bg-white/60">
-                        <div className="p-2 bg-yellow-50 text-yellow-600 rounded-lg shrink-0">
-                            <Trophy size={20} />
-                        </div>
-                        <div>
-                            <div className="font-semibold text-neutral-800 text-sm">{ach.title}</div>
-                            <div className="text-xs text-neutral-500">{ach.event}</div>
+                    <GlassCard key={i} className="p-4 hover:bg-white/60">
+                        <div className="flex items-center gap-4">
+                            <Trophy size={20} className="text-neutral-700 shrink-0" />
+                            <div>
+                                <div className="font-semibold text-neutral-800 text-sm">{ach.title}</div>
+                                <div className="text-xs text-neutral-500">{ach.event}</div>
+                            </div>
                         </div>
                     </GlassCard>
                 ))}
@@ -233,7 +239,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                         <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
                             <div>
                                 <h3 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
-                                    <Briefcase size={16} className="text-brand-cyan" />
+                                    <Briefcase size={16} className="text-neutral-700" />
                                     {exp.role}
                                 </h3>
                                 <div className="text-sm font-medium text-neutral-500">{exp.company}</div>
@@ -284,7 +290,7 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
                                     </span>
                                 )}
                             </div>
-                            <p className="text-sm text-neutral-600 leading-relaxed mt-2">
+                            <p className="text-sm text-neutral-600 leading-relaxed mt-2 break-words">
                                 {item.description}
                             </p>
                         </GlassCard>

@@ -35,10 +35,8 @@ export function ContactDeck({ profile }: ContactDeckProps) {
       >
         {/* Primary contact interface */}
         <GlassCard className="p-6 flex flex-col justify-center">
-             <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-brand-cyan/10 rounded-full text-brand-cyan">
-                    <Mail size={24} />
-                </div>
+             <div className="flex items-center gap-2.5 mb-4">
+                <Mail size={22} className="text-neutral-700 shrink-0" />
                 <h3 className="text-xl font-bold text-neutral-800">Get in Touch</h3>
              </div>
              
@@ -48,7 +46,7 @@ export function ContactDeck({ profile }: ContactDeckProps) {
 
             <div className="flex flex-col sm:flex-row gap-3">
                 {/* Clipboard interaction handler */}
-                <div className="flex items-center gap-2 p-1.5 pl-4 pr-1.5 bg-neutral-100/50 border border-neutral-200 rounded-full w-full sm:max-w-md transition-colors hover:bg-white/80 hover:border-brand-cyan/30 group">
+                <div className="flex items-center gap-2 p-1.5 pl-4 pr-1.5 bg-neutral-100/50 border border-neutral-200 rounded-full w-full sm:max-w-md transition-colors hover:bg-white/80 hover:border-neutral-400 group">
                     <span className="flex-1 text-sm font-medium text-neutral-700 truncate select-all">
                         {email}
                     </span>
@@ -68,12 +66,14 @@ export function ContactDeck({ profile }: ContactDeckProps) {
             {socialLinks.map((social) => (
                 <GlassCard 
                     key={social.name}
-                    className="p-4 flex items-center gap-3 hover:bg-white/60 transition-all cursor-pointer group"
+                    className="p-4 hover:bg-white/60 transition-all cursor-pointer group"
                     onClick={() => window.open(social.url, '_blank')}
                 >
-                    <social.icon size={20} className={`transition-colors ${social.color}`} />
-                    <span className="text-sm font-semibold text-neutral-600 group-hover:text-neutral-900">{social.name}</span>
-                    <ArrowUpRight size={14} className="ml-auto text-neutral-400 group-hover:text-neutral-600" />
+                    <div className="flex items-center gap-3">
+                        <social.icon size={20} className={`transition-colors ${social.color}`} />
+                        <span className="text-sm font-semibold text-neutral-600 group-hover:text-neutral-900">{social.name}</span>
+                        <ArrowUpRight size={14} className="ml-auto text-neutral-400 group-hover:text-neutral-600" />
+                    </div>
                 </GlassCard>
             ))}
         </div>
