@@ -8,27 +8,23 @@ The system follows a modern **Hybrid RAG & Action Protocol** architecture, balan
 
 ```mermaid
 graph TD
-    User["User Query / UI Action"] --> Frontend["Interactive UI & Chat Interface"]
-    Frontend --> HybridRouter{"Local vs Remote RAG?"}
+    User["User Query"] --> Frontend["Next.js Chat UI"]
+    Frontend --> HybridRouter{"Local vs Cloud?"}
 
-    HybridRouter -- "Simple Intent (< 50ms)" --> Local["Local Intent Matcher"]
-    Local --> DirectDeck["Direct Deck Mount / Preset Response"]
+    HybridRouter -- Simple Intent --> Local["Local Regex Matcher"]
+    Local --> Response["Response"]
 
-    HybridRouter -- "Complex Query" --> API["Next.js Route /api/chat"]
-
-    subgraph Security ["Security & Guardrails"]
-    API --> RateLimit["In-Memory Rate Limiter (20 req/min)"]
-    RateLimit --> OriginCheck["Origin / CORS Verification"]
-    end
+    HybridRouter -- Complex Query --> API["Next.js API Route /api/chat"]
 
     subgraph RAG_Orchestration ["RAG Orchestration - GCP Vertex AI"]
-    OriginCheck --> Embed["Gemini gemini-embedding-001 (RETRIEVAL_QUERY)"]
-    Embed -.->|3072d Query Vector| VectorDB[("Supabase pgvector (match_documents)")]
-    VectorDB -.->|Top-6 Semantic Chunks| LLM["Gemini 3.1 Flash Lite"]
+    API --> Embed["Gemini gemini-embedding-001"]
+    Embed -.->|Query Vector| API
+    API --> VectorDB[("Supabase pgvector")]
+    VectorDB -.->|Semantic Context| API
+    API --> LLM["Gemini 3.1 Flash Lite"]
     end
 
-    LLM --> Stream["Token Streaming + Action Tag [SHOW_*]"]
-    Stream --> ClientMount["Streamed Text + Inline React Deck Component"]
+    LLM --> Response
 ```
 
 ## Technology Stack
@@ -62,13 +58,13 @@ Professional portfolio data is highly structured: breaking a project description
 
 ### 2. Ingestion Pipeline
 
-The "Knowledge Base" is not static text. It is a living reflection of the database, managed directly through the authenticated Admin CMS:
+The "Knowledge Base" is not static text. It is a living reflection of the database.
 
-1. **Admin Trigger**: An authorized administrator triggers reindexing via the Admin Dashboard or `POST /api/admin/reindex`.
-2. **Extraction**: Live records are fetched from Supabase tables (`projects`, `skills`, `profile`).
-3. **Transformation**: Records are parsed, keyword-enriched, and structured into discrete natural language documents.
-4. **Vectorization**: Documents are sent to Google Cloud's `gemini-embedding-001` model using `taskType: "RETRIEVAL_DOCUMENT"` to generate dense 3072-dimensional semantic embeddings.
-5. **Storage**: Existing records in the `documents` table are cleared and refreshed with the newly computed vectors, content, and metadata.
+1.  **Admin Trigger**: A "Rebuild Index" button in the Admin Dashboard triggers the pipeline.
+2.  **Extraction**: Data is fetched live from Supabase tables (`projects`, `skills`, `profile`).
+3.  **Transformation**: Data is formatted into natural language "documents" (as described in the chunking strategy).
+4.  **Vectorization**: Documents are sent to Google Cloud's `gemini-embedding-001` model with task type `RETRIEVAL_DOCUMENT` to generate dense semantic vector representations (3072 dimensions).
+5.  **Storage**: Vectors + Content are stored in the `documents` table in Supabase pgvector.
 
 ### 3. Hybrid Retrieval Logic & Action Tag Protocol
 
