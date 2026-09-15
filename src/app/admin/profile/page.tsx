@@ -207,7 +207,7 @@ export default function AdminProfile() {
             <h2 className="text-lg font-bold text-neutral-800 flex items-center gap-2">
                 <List size={20} className="text-neutral-500" /> Section Order
             </h2>
-            <button onClick={addCustomSection} className="text-sm flex items-center gap-1 text-brand-cyan hover:underline font-medium">
+            <button onClick={addCustomSection} className="text-sm flex items-center gap-1 text-neutral-900 hover:underline font-medium">
                 <Plus size={16} /> Add Custom Section
             </button>
          </div>
@@ -216,8 +216,8 @@ export default function AdminProfile() {
                  <div key={sectionId} className="flex items-center gap-2 px-4 py-2 bg-neutral-100 rounded-lg text-sm font-medium text-neutral-700 border border-neutral-200">
                      <span>{getSectionLabel(sectionId)}</span>
                      <div className="flex flex-col gap-0.5 ml-2">
-                         <button onClick={() => moveSection(i, 'up')} disabled={i === 0} className="hover:text-brand-cyan disabled:opacity-30"><ArrowUp size={12} /></button>
-                         <button onClick={() => moveSection(i, 'down')} disabled={i === (profile.section_order?.length || 0) - 1} className="hover:text-brand-cyan disabled:opacity-30"><ArrowDown size={12} /></button>
+                         <button onClick={() => moveSection(i, 'up')} disabled={i === 0} className="hover:text-neutral-900 disabled:opacity-30"><ArrowUp size={12} /></button>
+                         <button onClick={() => moveSection(i, 'down')} disabled={i === (profile.section_order?.length || 0) - 1} className="hover:text-neutral-900 disabled:opacity-30"><ArrowDown size={12} /></button>
                      </div>
                  </div>
              ))}
@@ -227,7 +227,7 @@ export default function AdminProfile() {
       {/* Basic Info & Photo */}
       <GlassCard className="p-8 space-y-6">
         <h2 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
-            <User size={20} className="text-brand-cyan" /> Basic Info
+            <User size={20} className="text-neutral-700" /> Basic Info
         </h2>
         
         <div className="flex flex-col md:flex-row gap-8">
@@ -256,7 +256,7 @@ export default function AdminProfile() {
                 <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase">Name</label>
                     <input 
-                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/20"
+                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
                         value={profile.name || ""}
                         onChange={e => setProfile({...profile, name: e.target.value})}
                     />
@@ -264,7 +264,7 @@ export default function AdminProfile() {
                  <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase">Role Title</label>
                     <input 
-                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/20"
+                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
                         value={profile.role || ""}
                         onChange={e => setProfile({...profile, role: e.target.value})}
                     />
@@ -272,7 +272,7 @@ export default function AdminProfile() {
                  <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase">Bio</label>
                     <textarea 
-                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/20 min-h-[100px]"
+                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-800/20 min-h-[100px]"
                         value={profile.bio || ""}
                         onChange={e => setProfile({...profile, bio: e.target.value})}
                     />
@@ -280,7 +280,7 @@ export default function AdminProfile() {
                  <div className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase">Resume URL</label>
                     <input 
-                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/20"
+                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
                         value={profile.resume_url || ""}
                         onChange={e => setProfile({...profile, resume_url: e.target.value})}
                     />
@@ -297,7 +297,7 @@ export default function AdminProfile() {
                  <div key={platform} className="space-y-1">
                     <label className="text-xs font-semibold text-neutral-500 uppercase">{platform}</label>
                     <input 
-                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-cyan/20"
+                        className="w-full p-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-neutral-800/20"
                         placeholder={`https://${platform}.com/...`}
                         value={profile.social_links?.[platform as keyof typeof profile.social_links] || ""}
                         onChange={e => setProfile({
@@ -339,7 +339,7 @@ export default function AdminProfile() {
                         
                         {/* Skills Field */}
                         <input 
-                            className="bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-sm text-brand-cyan placeholder:text-neutral-400" 
+                            className="bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-sm text-neutral-800 placeholder:text-neutral-400" 
                             value={exp.skills || ""} 
                             onChange={e => updateArrayItem('experiences', i, 'skills', e.target.value)} 
                             placeholder="Skills Used (comma separated, e.g. React, Node.js)" 
@@ -367,7 +367,7 @@ export default function AdminProfile() {
         <div className="absolute top-0 right-0 p-2 text-[100px] text-neutral-50 opacity-20 pointer-events-none font-black leading-none select-none">EDU</div>
         <div className="flex items-center justify-between relative z-10">
             <h2 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
-                <GraduationCap size={20} className="text-orange-500" /> Education
+                <GraduationCap size={20} className="text-neutral-700" /> Education
             </h2>
              <button 
                 onClick={() => addItem('education', { degree: "Degree", school: "School", year: "2020", category: "University" })}
@@ -402,7 +402,7 @@ export default function AdminProfile() {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-neutral-500" value={edu.year} onChange={e => updateArrayItem('education', i, 'year', e.target.value)} placeholder="Year" />
-                         <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-brand-cyan font-semibold" value={edu.gpa || ""} onChange={e => updateArrayItem('education', i, 'gpa', e.target.value)} placeholder="GPA (e.g. 3.8/4.0)" />
+                         <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-neutral-800 font-semibold" value={edu.gpa || ""} onChange={e => updateArrayItem('education', i, 'gpa', e.target.value)} placeholder="GPA (e.g. 3.8/4.0)" />
                     </div>
                     <textarea 
                         className="w-full bg-transparent border border-neutral-200 rounded-lg p-2 text-sm text-neutral-600 focus:border-neutral-800 outline-none min-h-[60px] mt-2" 
@@ -420,7 +420,7 @@ export default function AdminProfile() {
         <div className="absolute top-0 right-0 p-2 text-[100px] text-neutral-50 opacity-20 pointer-events-none font-black leading-none select-none">CERT</div>
         <div className="flex items-center justify-between relative z-10">
             <h2 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
-                <Trophy size={20} className="text-blue-500" /> Certifications
+                <Trophy size={20} className="text-neutral-700" /> Certifications
             </h2>
              <button 
                 onClick={() => addItem('certifications', { title: "Certificate Name", issuer: "Issuer", date: "2024", link: "" })}
@@ -440,7 +440,7 @@ export default function AdminProfile() {
                         <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-neutral-600" value={cert.issuer} onChange={e => updateArrayItem('certifications', i, 'issuer', e.target.value)} placeholder="Issuer (e.g. Google)" />
                         <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-neutral-500" value={cert.date} onChange={e => updateArrayItem('certifications', i, 'date', e.target.value)} placeholder="Date" />
                     </div>
-                    <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-brand-cyan" value={cert.link || ""} onChange={e => updateArrayItem('certifications', i, 'link', e.target.value)} placeholder="Credential URL (Optional)" />
+                    <input className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-xs text-neutral-800" value={cert.link || ""} onChange={e => updateArrayItem('certifications', i, 'link', e.target.value)} placeholder="Credential URL (Optional)" />
                 </div>
              ))}
         </div>
@@ -451,7 +451,7 @@ export default function AdminProfile() {
         <div className="absolute top-0 right-0 p-2 text-[100px] text-neutral-50 opacity-20 pointer-events-none font-black leading-none select-none">ACH</div>
         <div className="flex items-center justify-between relative z-10">
             <h2 className="text-xl font-bold text-neutral-800 flex items-center gap-2">
-                <Trophy size={20} className="text-yellow-500" /> Achievements
+                <Trophy size={20} className="text-neutral-700" /> Achievements
             </h2>
             <div className="flex items-center gap-4">
                 <button 
@@ -472,7 +472,7 @@ export default function AdminProfile() {
             <div className="space-y-4 relative z-10">
                 {profile.achievements?.map((ach, i) => (
                     <div key={i} className="p-3 bg-white/50 border border-neutral-100 rounded-xl flex items-center gap-4 group relative shadow-sm">
-                        <div className="p-2 bg-yellow-100 text-yellow-600 rounded-lg">
+                        <div className="p-2 bg-neutral-100 text-neutral-700 rounded-lg">
                             <Trophy size={16} />
                         </div>
                         <div className="flex-1 space-y-1">
@@ -490,12 +490,12 @@ export default function AdminProfile() {
 
       {/* Custom Sections */}
       {profile.custom_sections?.map((section, sectionIndex) => (
-          <GlassCard key={section.id} className="p-8 space-y-6 relative overflow-hidden border-brand-cyan/20">
+          <GlassCard key={section.id} className="p-8 space-y-6 relative overflow-hidden border-neutral-200/80">
              <div className="flex items-center justify-between relative z-10">
                 <div className="flex items-center gap-3 flex-1">
-                    <Layers size={20} className="text-brand-cyan" />
+                    <Layers size={20} className="text-neutral-700" />
                     <input 
-                        className="text-xl font-bold text-neutral-800 bg-transparent border-b border-transparent focus:border-brand-cyan outline-none" 
+                        className="text-xl font-bold text-neutral-800 bg-transparent border-b border-transparent focus:border-neutral-900 outline-none" 
                         value={section.title}
                         onChange={(e) => updateCustomSection(sectionIndex, 'title', e.target.value)}
                         placeholder="Section Title"
@@ -504,7 +504,7 @@ export default function AdminProfile() {
                  <div className="flex items-center gap-2">
                     <button 
                         onClick={() => addCustomItem(sectionIndex)}
-                        className="text-sm bg-brand-cyan/10 text-brand-cyan hover:bg-brand-cyan/20 px-3 py-1.5 rounded-lg font-medium transition-colors"
+                        className="text-sm bg-neutral-100 text-neutral-800 hover:bg-neutral-200 px-3 py-1.5 rounded-lg font-medium transition-colors"
                     >
                         + Add Item
                     </button>

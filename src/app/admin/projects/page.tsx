@@ -189,7 +189,7 @@ export default function AdminProjects() {
                         </span>
                     </div>
                     <div className="col-span-2 flex gap-2">
-                        {p.demo_link && <a href={p.demo_link} target="_blank" className="text-neutral-400 hover:text-brand-cyan"><LinkIcon size={14} /></a>}
+                        {p.demo_link && <a href={p.demo_link} target="_blank" className="text-neutral-400 hover:text-neutral-900"><LinkIcon size={14} /></a>}
                         {p.repo_link && <a href={p.repo_link} target="_blank" className="text-neutral-400 hover:text-black"><Github size={14} /></a>}
                     </div>
                      <div className="col-span-2">
@@ -200,20 +200,20 @@ export default function AdminProjects() {
                         <div className="flex flex-col gap-0.5 mr-2">
                             <button 
                                 onClick={(e) => { e.stopPropagation(); moveProject(p.id, 'up'); }} 
-                                className="text-neutral-400 hover:text-brand-cyan disabled:opacity-30"
+                                className="text-neutral-400 hover:text-neutral-900 disabled:opacity-30"
                                 disabled={projects.findIndex(proj => proj.id === p.id) === 0}
                             >
                                 <ArrowUp size={12} />
                             </button>
                             <button 
                                 onClick={(e) => { e.stopPropagation(); moveProject(p.id, 'down'); }} 
-                                className="text-neutral-400 hover:text-brand-cyan disabled:opacity-30"
+                                className="text-neutral-400 hover:text-neutral-900 disabled:opacity-30"
                                 disabled={projects.findIndex(proj => proj.id === p.id) === projects.length - 1}
                             >
                                 <ArrowDown size={12} />
                             </button>
                         </div>
-                        <button onClick={() => handleEdit(p)} className="p-2 text-neutral-400 hover:text-brand-cyan hover:bg-brand-cyan/10 rounded-lg transition-colors">
+                        <button onClick={() => handleEdit(p)} className="p-2 text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors">
                             <Edit2 size={16} />
                         </button>
                         <button onClick={() => handleDelete(p.id)} className="p-2 text-neutral-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors">
@@ -255,7 +255,7 @@ export default function AdminProjects() {
                                      <div className="space-y-1">
                                         <label className="text-xs font-semibold text-neutral-500 uppercase">Title</label>
                                         <input 
-                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                             value={currentProject.title || ""}
                                             onChange={e => setCurrentProject({...currentProject, title: e.target.value})}
                                             required
@@ -264,7 +264,7 @@ export default function AdminProjects() {
                                     <div className="space-y-1">
                                         <label className="text-xs font-semibold text-neutral-500 uppercase">Category</label>
                                         <input 
-                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                             value={currentProject.category || ""}
                                             onChange={e => setCurrentProject({...currentProject, category: e.target.value})}
                                         />
@@ -272,7 +272,7 @@ export default function AdminProjects() {
                                     <div className="space-y-1">
                                         <label className="text-xs font-semibold text-neutral-500 uppercase">Tags</label>
                                         <input 
-                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                             defaultValue={currentProject.tags?.join(", ") || ""}
                                             onChange={e => setCurrentProject({...currentProject, tags: e.target.value.split(",").map(s => s.trim()).filter(Boolean)})}
                                             placeholder="React, Next.js, Tailwind"
@@ -285,7 +285,7 @@ export default function AdminProjects() {
                                             <label className="text-xs font-semibold text-neutral-500 uppercase">Year</label>
                                             <input 
                                                 type="number"
-                                                className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                                className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                                 value={currentProject.year || ""}
                                                 onChange={e => setCurrentProject({...currentProject, year: parseInt(e.target.value) || undefined})}
                                                 placeholder="2024"
@@ -294,7 +294,7 @@ export default function AdminProjects() {
                                         <div className="space-y-1">
                                             <label className="text-xs font-semibold text-neutral-500 uppercase">Month</label>
                                             <input 
-                                                className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                                className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                                 value={currentProject.month || ""}
                                                 onChange={e => setCurrentProject({...currentProject, month: e.target.value})}
                                                 placeholder="January"
@@ -303,12 +303,16 @@ export default function AdminProjects() {
                                     </div>
                                 </div>
 
-                                {/* Right Column: Image */}
-                                <div>
-                                    <ImageUploader 
-                                        value={currentProject.image_url}
-                                        onChange={(url) => setCurrentProject(prev => ({ ...prev, image_url: url }))}
-                                    />
+                                {/* Right Column: Media */}
+                                <div className="space-y-4">
+                                     <div className="space-y-1">
+                                        <label className="text-xs font-semibold text-neutral-500 uppercase">Project Image</label>
+                                        <ImageUploader 
+                                            value={currentProject.image_url || ""}
+                                            onChange={url => setCurrentProject({...currentProject, image_url: url})}
+                                            bucket="portfolio"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             
@@ -327,7 +331,7 @@ export default function AdminProjects() {
                                 <div className="space-y-1">
                                     <label className="text-xs font-semibold text-neutral-500 uppercase">Demo Link</label>
                                     <input 
-                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                         value={currentProject.demo_link || ""}
                                         onChange={e => setCurrentProject({...currentProject, demo_link: e.target.value})}
                                         placeholder="https://..."
@@ -336,7 +340,7 @@ export default function AdminProjects() {
                                  <div className="space-y-1">
                                     <label className="text-xs font-semibold text-neutral-500 uppercase">GitHub Repo</label>
                                     <input 
-                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                         value={currentProject.repo_link || ""}
                                         onChange={e => setCurrentProject({...currentProject, repo_link: e.target.value})}
                                         placeholder="https://github.com/..."
@@ -348,7 +352,7 @@ export default function AdminProjects() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <label className="text-xs font-semibold text-neutral-500 uppercase">Custom Buttons (Deck, Paper, etc)</label>
-                                    <button type="button" onClick={addCustomLink} className="text-xs flex items-center gap-1 text-brand-cyan hover:underline">
+                                    <button type="button" onClick={addCustomLink} className="text-xs flex items-center gap-1 text-neutral-900 hover:underline font-medium">
                                         <PlusCircle size={14} /> Add Link
                                     </button>
                                 </div>
@@ -356,13 +360,13 @@ export default function AdminProjects() {
                                     {currentProject.custom_links?.map((link, i) => (
                                         <div key={i} className="flex gap-2 items-center">
                                             <input 
-                                                className="flex-1 p-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                                className="flex-1 p-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                                 placeholder="Label (e.g. Read Paper)"
                                                 value={link.label}
                                                 onChange={e => updateCustomLink(i, 'label', e.target.value)}
                                             />
                                             <input 
-                                                className="flex-[2] p-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                                className="flex-[2] p-2 bg-neutral-50 border border-neutral-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                                 placeholder="URL (https://...)"
                                                 value={link.url}
                                                 onChange={e => updateCustomLink(i, 'url', e.target.value)}
@@ -383,7 +387,7 @@ export default function AdminProjects() {
                                     <label className="text-xs font-semibold text-neutral-500 uppercase">Gradient Class</label>
                                     <div className="flex gap-2">
                                         <input 
-                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                            className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                             value={currentProject.gradient || ""}
                                             onChange={e => setCurrentProject({...currentProject, gradient: e.target.value})}
                                         />
@@ -396,7 +400,7 @@ export default function AdminProjects() {
                                         id="featured"
                                         checked={currentProject.featured || false}
                                         onChange={e => setCurrentProject({...currentProject, featured: e.target.checked})}
-                                        className="w-4 h-4 rounded border-neutral-300 text-brand-cyan focus:ring-brand-cyan"
+                                        className="w-4 h-4 rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900"
                                     />
                                     <label htmlFor="featured" className="text-sm font-medium text-neutral-700 select-none">Feature this project</label>
                                 </div>

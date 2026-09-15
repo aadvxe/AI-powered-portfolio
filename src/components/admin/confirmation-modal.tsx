@@ -36,7 +36,7 @@ export function ConfirmationModal({ isOpen, onClose, onConfirm, title = "Confirm
           >
             <GlassCard className="p-6 overflow-hidden bg-white shadow-xl">
               <div className="flex flex-col items-center text-center">
-                <div className="w-12 h-12 bg-brand-cyan/10 rounded-2xl flex items-center justify-center text-brand-cyan mb-4">
+                <div className="w-12 h-12 bg-neutral-100 border border-neutral-200/80 rounded-2xl flex items-center justify-center text-neutral-800 mb-4">
                    <HelpCircle size={24} />
                 </div>
                 
@@ -55,7 +55,7 @@ export function ConfirmationModal({ isOpen, onClose, onConfirm, title = "Confirm
                             onConfirm();
                             onClose();
                         }}
-                        className="flex-1 py-2.5 rounded-xl bg-brand-cyan text-white font-medium hover:bg-brand-cyan/90 transition-colors shadow-lg shadow-brand-cyan/20"
+                        className="flex-1 py-2.5 rounded-xl bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors shadow-sm"
                     >
                         Confirm
                     </button>

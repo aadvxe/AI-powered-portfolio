@@ -334,7 +334,7 @@ export default function Home() {
       id: 'img-aide',
       type: 'image' as const,
       title: 'aid-e.jpg',
-      imageUrl: '/aid-e.jpg',
+      imageUrl: '/aid-e-thumb.jpg',
       orientation: 'landscape' as const,
       prompt: 'Show me your projects',
       x: 8,
@@ -357,7 +357,7 @@ export default function Home() {
       id: 'img-profile',
       type: 'image' as const,
       title: 'profile-pic.jpg',
-      imageUrl: '/profile-pic.jpg',
+      imageUrl: '/profile-pic-thumb.jpg',
       orientation: 'portrait' as const,
       prompt: 'Tell me about yourself',
       x: 76,
@@ -545,6 +545,8 @@ export default function Home() {
                           alt={item.title}
                           className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-[center_20%]'}`}
                           draggable={false}
+                          loading="eager"
+                          decoding="async"
                         />
                       </div>
                     )}

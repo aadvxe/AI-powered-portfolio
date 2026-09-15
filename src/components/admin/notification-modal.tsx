@@ -2,7 +2,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { GlassCard } from "@/components/ui/glass-card";
-import { X } from "lucide-react";
+import { X, Check } from "lucide-react";
 
 interface NotificationModalProps {
   notification: { message: string; type: "success" | "error" } | null;
@@ -21,17 +21,11 @@ export function NotificationModal({ notification, onClose }: NotificationModalPr
             className="w-full max-w-sm pointer-events-auto"
           >
             <GlassCard className="p-6 bg-white !backdrop-blur-none shadow-2xl flex flex-col items-center text-center">
-              <div
-                className={`p-3 rounded-full mb-4 ${
-                  notification.type === "error"
-                    ? "bg-red-50 text-red-500"
-                    : "bg-green-50 text-green-500"
-                }`}
-              >
+              <div className="w-12 h-12 rounded-full mb-4 bg-neutral-100 border border-neutral-200/80 text-neutral-800 flex items-center justify-center">
                 {notification.type === "error" ? (
-                  <X size={24} />
+                  <X size={22} className="text-neutral-800" />
                 ) : (
-                  <div className="text-2xl">🎉</div>
+                  <Check size={22} className="text-neutral-800" strokeWidth={2.5} />
                 )}
               </div>
               <h3 className="text-lg font-bold text-neutral-800 mb-2">

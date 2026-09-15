@@ -38,8 +38,8 @@ export default function AdminDashboard() {
   };
 
   const stats = [
-    { label: "Total Projects", value: projects.length, icon: Briefcase, color: "text-brand-cyan", bg: "bg-brand-cyan/10" },
-    { label: "Active Skills", value: skills.length, icon: Layers, color: "text-purple-500", bg: "bg-purple-500/10" },
+    { label: "Total Projects", value: projects.length, icon: Briefcase },
+    { label: "Active Skills", value: skills.length, icon: Layers },
   ];
 
   return (
@@ -53,13 +53,13 @@ export default function AdminDashboard() {
       {/* Statistics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
-            <GlassCard key={stat.label} className="p-6 flex items-center gap-4">
-                <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color}`}>
-                    <stat.icon size={24} />
-                </div>
-                <div>
-                    <h3 className="text-2xl font-bold text-neutral-900">{stat.value}</h3>
-                    <p className="text-sm font-medium text-neutral-500">{stat.label}</p>
+            <GlassCard key={stat.label} className="p-6">
+                <div className="flex items-center gap-4">
+                    <stat.icon size={28} className="text-neutral-800 shrink-0" />
+                    <div>
+                        <h3 className="text-2xl font-bold text-neutral-900">{stat.value}</h3>
+                        <p className="text-sm font-medium text-neutral-500">{stat.label}</p>
+                    </div>
                 </div>
             </GlassCard>
         ))}
@@ -74,7 +74,7 @@ export default function AdminDashboard() {
                     <Briefcase size={20} className="text-neutral-400" />
                     Recent Projects
                 </h3>
-                <Link href="/admin/projects" className="text-sm font-semibold text-brand-cyan hover:underline flex items-center">
+                <Link href="/admin/projects" className="text-sm font-semibold text-neutral-800 hover:text-black hover:underline flex items-center">
                     View All <ArrowRight size={14} className="ml-1" />
                 </Link>
             </div>
@@ -83,9 +83,9 @@ export default function AdminDashboard() {
                     <div key={p.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-neutral-50 transition-colors cursor-pointer border border-transparent hover:border-neutral-100">
                         <div className={`w-10 h-10 rounded-lg overflow-hidden bg-neutral-100 flex-shrink-0`}>
                              {p.image_url ? (
-                                <img src={p.image_url} alt="" className="w-full h-full object-cover" />
+                                 <img src={p.image_url} alt="" className="w-full h-full object-cover" />
                              ) : (
-                                <div className={`w-full h-full ${p.gradient}`} />
+                                 <div className={`w-full h-full ${p.gradient}`} />
                              )}
                         </div>
                         <div className="min-w-0">
@@ -119,7 +119,7 @@ export default function AdminDashboard() {
                     className="w-full flex items-center justify-between p-4 bg-neutral-50 rounded-xl hover:bg-neutral-100 transition-colors group text-left"
                 >
                     <span className="font-medium text-neutral-700 flex items-center gap-2">
-                        {reindexing ? <Loader2 size={16} className="animate-spin text-brand-cyan" /> : <BrainCircuit size={16} className="text-brand-cyan" />}
+                        {reindexing ? <Loader2 size={16} className="animate-spin text-neutral-800" /> : <BrainCircuit size={16} className="text-neutral-700" />}
                         {reindexing ? "Re-indexing..." : "Rebuild AI Index"}
                     </span>
                     <ArrowRight size={16} className="text-neutral-400 group-hover:text-neutral-800 transition-colors" />

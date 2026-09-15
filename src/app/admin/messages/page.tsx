@@ -72,7 +72,7 @@ export default function AdminMessages() {
                             </p>
 
                             {msg.user_contact && (
-                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-brand-cyan/10 text-brand-cyan rounded-lg text-sm font-medium">
+                                <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-neutral-100 text-neutral-800 border border-neutral-200/60 rounded-lg text-sm font-medium">
                                     <User size={16} />
                                     {msg.user_contact}
                                 </div>

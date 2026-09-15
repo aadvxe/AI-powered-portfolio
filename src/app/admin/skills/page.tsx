@@ -152,14 +152,14 @@ export default function AdminSkills() {
                         {category}
                         <button 
                              onClick={() => handleNewInCategory(category)}
-                             className="opacity-0 group-hover/header:opacity-100 p-1 hover:bg-neutral-100 rounded text-neutral-400 hover:text-brand-cyan transition-all"
+                             className="opacity-0 group-hover/header:opacity-100 p-1 hover:bg-neutral-100 rounded text-neutral-400 hover:text-neutral-900 transition-all"
                              title="Add Skill to Category"
                         >
                             <Plus size={12} />
                         </button>
                         <button 
                             onClick={() => handleRenameCategory(category)}
-                            className="opacity-0 group-hover/header:opacity-100 p-1 hover:bg-neutral-100 rounded text-neutral-400 hover:text-brand-cyan transition-all"
+                            className="opacity-0 group-hover/header:opacity-100 p-1 hover:bg-neutral-100 rounded text-neutral-400 hover:text-neutral-900 transition-all"
                             title="Rename Category"
                         >
                             <Edit2 size={12} />
@@ -169,10 +169,10 @@ export default function AdminSkills() {
                 </h3>
                 <div className="flex flex-wrap gap-2">
                     {list.map(skill => (
-                        <div key={skill.id} className="group relative px-3 py-1.5 bg-white border border-neutral-100 rounded-lg flex items-center gap-2 hover:border-brand-cyan/30 transition-colors">
+                        <div key={skill.id} className="group relative px-3 py-1.5 bg-white border border-neutral-100 rounded-lg flex items-center gap-2 hover:border-neutral-300 transition-colors">
                             <span className="text-sm font-medium text-neutral-700">{skill.name}</span>
                             <div className="opacity-0 group-hover:opacity-100 flex items-center gap-1 transition-opacity border-l border-neutral-100 pl-2 ml-1">
-                                <button onClick={() => handleEdit(skill)} className="text-neutral-400 hover:text-brand-cyan">
+                                <button onClick={() => handleEdit(skill)} className="text-neutral-400 hover:text-neutral-900">
                                     <Edit2 size={12} />
                                 </button>
                                 <button onClick={() => handleDelete(skill.id)} className="text-neutral-400 hover:text-red-500">
@@ -213,7 +213,7 @@ export default function AdminSkills() {
                             <div className="space-y-1">
                                 <label className="text-xs font-semibold text-neutral-500 uppercase">Skill Name</label>
                                 <input 
-                                    className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                    className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                     value={currentSkill.name || ""}
                                     onChange={e => setCurrentSkill({...currentSkill, name: e.target.value})}
                                     required
@@ -226,7 +226,7 @@ export default function AdminSkills() {
                                 <div className="space-y-2">
                                     <input 
                                         type="text"
-                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50"
+                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30"
                                         value={currentSkill.category || ""}
                                         onChange={e => setCurrentSkill({...currentSkill, category: e.target.value})}
                                         placeholder="Type category..."
@@ -298,7 +298,7 @@ export default function AdminSkills() {
                                     <label className="text-xs font-semibold text-neutral-500 uppercase">New Name</label>
                                     <input 
                                         autoFocus
-                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 mt-1"
+                                        className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30 mt-1"
                                         value={renamingCategory.newName}
                                         onChange={e => setRenamingCategory({...renamingCategory, newName: e.target.value})}
                                         required
