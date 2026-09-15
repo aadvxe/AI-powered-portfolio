@@ -25,6 +25,7 @@ interface MarkdownEditorProps {
   onChange: (value: string) => void;
   placeholder?: string;
   minHeight?: string;
+  className?: string;
   bucket?: string;
 }
 
@@ -33,6 +34,7 @@ export function MarkdownEditor({
   onChange,
   placeholder = "Write your project description in Markdown...",
   minHeight = "220px",
+  className = "",
   bucket = "portfolio",
 }: MarkdownEditorProps) {
   const [activeTab, setActiveTab] = useState<"write" | "preview">("write");
@@ -135,9 +137,9 @@ export function MarkdownEditor({
   };
 
   return (
-    <div className="rounded-xl border border-neutral-200 bg-white overflow-hidden shadow-xs">
+    <div className={`rounded-xl border border-neutral-200 bg-white overflow-hidden shadow-xs flex flex-col ${className}`}>
       {/* Editor Header & Toolbar */}
-      <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 bg-neutral-50/80 px-3 py-2 gap-2">
+      <div className="flex flex-wrap items-center justify-between border-b border-neutral-200 bg-neutral-50/80 px-3 py-2 gap-2 flex-shrink-0">
         {/* Tab Switcher */}
         <div className="flex items-center gap-1 bg-neutral-200/60 p-1 rounded-lg">
           <button
@@ -168,116 +170,112 @@ export function MarkdownEditor({
 
         {/* Formatting Toolbar (Only active during Write mode) */}
         {activeTab === "write" && (
-          <div className="flex items-center flex-wrap gap-1">
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("**", "**", "bold text")}
-              title="Bold"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <Bold size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("*", "*", "italic text")}
-              title="Italic"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <Italic size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("\n## ", "\n", "Heading")}
-              title="Heading 2"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <Heading2 size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("\n- ", "\n", "List item")}
-              title="Bullet List"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <List size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("[", "](https://example.com)", "link title")}
-              title="Insert Link"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <LinkIcon size={15} />
-            </button>
-            <button
-              type="button"
-              onClick={() => insertTextAtCursor("\n```\n", "\n```\n", "code block")}
-              title="Code Block"
-              className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
-            >
-              <Code size={15} />
-            </button>
+          <>
+            <div className="flex items-center flex-wrap gap-1">
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("**", "**", "bold text")}
+                title="Bold"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <Bold size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("*", "*", "italic text")}
+                title="Italic"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <Italic size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("\n## ", "\n", "Heading")}
+                title="Heading 2"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <Heading2 size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("\n- ", "\n", "List item")}
+                title="Bullet List"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <List size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("[", "](https://example.com)", "link title")}
+                title="Insert Link"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <LinkIcon size={15} />
+              </button>
+              <button
+                type="button"
+                onClick={() => insertTextAtCursor("\n```\n", "\n```\n", "code block")}
+                title="Code Block"
+                className="p-1.5 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60 rounded-md transition-colors"
+              >
+                <Code size={15} />
+              </button>
 
-            <div className="h-4 w-px bg-neutral-300 mx-1" />
+              <div className="h-4 w-px bg-neutral-300 mx-1" />
 
-            {/* Mermaid Template Button */}
-            <button
-              type="button"
-              onClick={handleInsertMermaid}
-              title="Insert Mermaid Diagram"
-              className="flex items-center gap-1 px-2 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 rounded-md text-xs font-medium transition-colors"
-            >
-              <GitGraph size={14} className="text-purple-600" />
-              <span>Mermaid</span>
-            </button>
+              {/* Mermaid Template Button */}
+              <button
+                type="button"
+                onClick={handleInsertMermaid}
+                title="Insert Mermaid Diagram"
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 rounded-md text-xs font-medium transition-colors"
+              >
+                <GitGraph size={14} className="text-neutral-700" />
+                <span>Mermaid</span>
+              </button>
+            </div>
 
-            {/* Upload Image Button */}
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              title="Upload & insert image"
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-all ${
-                uploadSuccess
-                  ? "bg-emerald-100 text-emerald-800"
-                  : uploading
-                  ? "bg-neutral-200 text-neutral-500 cursor-not-allowed"
-                  : "bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs"
-              }`}
-            >
-              {uploading ? (
-                <>
-                  <Loader2 size={13} className="animate-spin" />
-                  <span>Uploading...</span>
-                </>
-              ) : uploadSuccess ? (
-                <>
-                  <Check size={13} />
-                  <span>Inserted!</span>
-                </>
-              ) : (
-                <>
-                  <UploadCloud size={13} />
-                  <span>Upload Image</span>
-                </>
-              )}
-            </button>
-
-            {/* Hidden file input */}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileInputChange}
-            />
-          </div>
+            {/* Right Action: Upload Image */}
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileInputChange}
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                title="Upload image from device"
+                className="flex items-center gap-1.5 px-3 py-1 bg-neutral-900 text-white rounded-md text-xs font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <>
+                    <Loader2 size={13} className="animate-spin" />
+                    <span>Uploading...</span>
+                  </>
+                ) : uploadSuccess ? (
+                  <>
+                    <Check size={13} className="text-white" />
+                    <span>Uploaded!</span>
+                  </>
+                ) : (
+                  <>
+                    <UploadCloud size={14} />
+                    <span>Upload Image</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </>
         )}
       </div>
 
-      {/* Editor Body */}
+      {/* Editor Body: Write or Preview */}
       {activeTab === "write" ? (
-        <div className="relative">
+        <div className="relative flex-1 min-h-0 flex flex-col">
           <textarea
             ref={textareaRef}
             value={value}
@@ -291,19 +289,19 @@ export function MarkdownEditor({
             onDragLeave={() => setIsDraggingOver(false)}
             placeholder={placeholder}
             style={{ minHeight }}
-            className={`w-full p-4 text-sm font-mono leading-relaxed bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none resize-y transition-colors ${
-              isDraggingOver ? "bg-cyan-50/50 border-2 border-dashed border-cyan-500" : ""
+            className={`w-full flex-1 min-h-0 p-4 text-sm font-mono leading-relaxed bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none resize-none custom-scrollbar overflow-y-auto transition-colors ${
+              isDraggingOver ? "bg-neutral-50 border-2 border-dashed border-neutral-900" : ""
             }`}
           />
           {isDraggingOver && (
-            <div className="absolute inset-0 bg-cyan-500/10 pointer-events-none flex items-center justify-center">
-              <div className="p-3 rounded-xl bg-white shadow-lg border border-cyan-300 text-xs font-semibold text-cyan-700 flex items-center gap-2">
+            <div className="absolute inset-0 bg-neutral-900/5 pointer-events-none flex items-center justify-center">
+              <div className="p-3 rounded-xl bg-white shadow-lg border border-neutral-200 text-xs font-semibold text-neutral-900 flex items-center gap-2">
                 <ImageIcon size={18} />
                 <span>Drop image to upload and insert markdown</span>
               </div>
             </div>
           )}
-          <div className="px-4 py-2 border-t border-neutral-100 bg-neutral-50/50 text-[11px] text-neutral-500 flex justify-between items-center">
+          <div className="px-4 py-2 border-t border-neutral-100 bg-neutral-50/50 text-[11px] text-neutral-500 flex justify-between items-center flex-shrink-0">
             <span>Tip: Drag & drop images or paste from clipboard (Ctrl+V) directly.</span>
             <span>{value.length} characters</span>
           </div>
@@ -312,7 +310,7 @@ export function MarkdownEditor({
         /* Live Preview Tab */
         <div
           style={{ minHeight }}
-          className="p-5 overflow-y-auto bg-white text-sm leading-relaxed text-neutral-700"
+          className="flex-1 min-h-0 p-5 overflow-y-auto custom-scrollbar bg-white text-sm leading-relaxed text-neutral-700"
         >
           {value.trim() ? (
             <ReactMarkdown

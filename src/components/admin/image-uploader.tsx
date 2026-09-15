@@ -62,7 +62,7 @@ export function ImageUploader({ value, onChange, onRemove, bucket = "portfolio" 
         <label className="text-xs font-semibold text-neutral-500 uppercase">Project Image</label>
         
         {value ? (
-            <div className="relative w-full h-48 bg-neutral-100 rounded-xl overflow-hidden group border border-neutral-200">
+            <div className="relative w-full h-44 bg-neutral-100 rounded-xl overflow-hidden group border border-neutral-200">
                 <Image 
                     src={value} 
                     alt="Uploaded preview" 
@@ -80,16 +80,16 @@ export function ImageUploader({ value, onChange, onRemove, bucket = "portfolio" 
         ) : (
             <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full h-32 border-2 border-dashed border-neutral-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-brand-cyan/50 hover:bg-brand-cyan/5 transition-colors group"
+                className="w-full h-44 border-2 border-dashed border-neutral-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-neutral-400 hover:bg-neutral-50 transition-colors group"
             >
                 {uploading ? (
-                    <Loader2 size={24} className="text-brand-cyan animate-spin" />
+                    <Loader2 size={24} className="text-neutral-900 animate-spin" />
                 ) : (
                     <>
-                        <div className="p-3 bg-neutral-50 rounded-full text-neutral-400 group-hover:text-brand-cyan group-hover:bg-white transition-colors mb-2">
+                        <div className="p-3 bg-neutral-50 rounded-full text-neutral-400 group-hover:text-neutral-900 group-hover:bg-white transition-colors mb-2">
                             <Upload size={20} />
                         </div>
-                        <span className="text-sm font-medium text-neutral-500 group-hover:text-brand-cyan">Click to upload image</span>
+                        <span className="text-sm font-medium text-neutral-600 group-hover:text-neutral-900">Click to upload image</span>
                         <span className="text-xs text-neutral-400 mt-1">SVG, PNG, JPG (max 2MB)</span>
                     </>
                 )}
