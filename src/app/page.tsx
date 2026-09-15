@@ -17,6 +17,7 @@ import { AppleEmoji } from "@/components/ui/apple-emoji";
 import { TextReveal } from "@/components/motion/text-reveal";
 import { EASE_OUT } from "@/lib/ease";
 import ReactMarkdown from "react-markdown";
+import { MermaidDiagram } from "@/components/ui/mermaid-diagram";
 import { QuickAction } from "@/components/ui/quick-action";
 import { BackgroundCanvas } from "@/components/ui/background-canvas";
 import {
@@ -28,13 +29,20 @@ import {
 
 function formatProjectDescription(text: string): string {
   if (!text) return "";
-  // Convert unicode bullets (•, ·) at line starts to standard markdown list item "- "
-  let md = text.replace(/^[•·]\s*/gm, "- ");
-  // Ensure lists have a preceding blank line if preceded by normal text
-  md = md.replace(/([^\n])\n(- |\* |\+ |\d+\. )/g, "$1\n\n$2");
-  // Separate lines with double newlines so paragraphs don't collapse together
-  md = md.replace(/([^\n])\n([^\n\-*+\d•#>\s])/g, "$1\n\n$2");
-  return md;
+  // Preserve fenced code blocks (e.g. ```mermaid ... ```) untouched so their internal newlines aren't mangled
+  const parts = text.split(/(```[\s\S]*?```)/g);
+  return parts
+    .map((part) => {
+      if (part.startsWith("```")) return part;
+      // Convert unicode bullets (•, ·) at line starts to standard markdown list item "- "
+      let md = part.replace(/^[•·]\s*/gm, "- ");
+      // Ensure lists have a preceding blank line if preceded by normal text
+      md = md.replace(/([^\n])\n(- |\* |\+ |\d+\. )/g, "$1\n\n$2");
+      // Separate lines with double newlines so paragraphs don't collapse together
+      md = md.replace(/([^\n])\n([^\n\-*+\d•#>\s])/g, "$1\n\n$2");
+      return md;
+    })
+    .join("");
 }
 
 export default function Home() {
@@ -968,8 +976,23 @@ export default function Home() {
                                 {children}
                               </blockquote>
                             ),
+                            img: ({ src, alt }) => (
+                              <div className="my-4">
+                                <img
+                                  src={src}
+                                  alt={alt || "Project Image"}
+                                  className="w-full max-h-[420px] object-cover rounded-xl border border-neutral-200/80 shadow-xs"
+                                  loading="lazy"
+                                />
+                                {alt && <p className="text-xs text-neutral-500 text-center mt-1.5 italic">{alt}</p>}
+                              </div>
+                            ),
                             code: ({ children, className }) => {
                               const isInline = !className;
+                              const match = /language-(\w+)/.exec(className || "");
+                              if (!isInline && match && match[1] === "mermaid") {
+                                return <MermaidDiagram chart={String(children).replace(/\n$/, "")} />;
+                              }
                               return isInline ? (
                                 <code className="bg-neutral-100 text-neutral-800 text-xs px-1.5 py-0.5 rounded font-mono border border-neutral-200/80">
                                   {children}

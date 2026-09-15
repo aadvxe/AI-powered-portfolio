@@ -7,6 +7,7 @@ import { supabase } from "@/lib/supabase";
 import { Plus, Edit2, Trash2, Loader2, Save, X, Link as LinkIcon, Github, Star, Minus, PlusCircle, ArrowUp, ArrowDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageUploader } from "@/components/admin/image-uploader";
+import { MarkdownEditor } from "@/components/admin/markdown-editor";
 
 import { NotificationModal } from "@/components/admin/notification-modal";
 
@@ -311,13 +312,13 @@ export default function AdminProjects() {
                                 </div>
                             </div>
                             
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-neutral-500 uppercase">Description (Markdown Supported)</label>
-                                <textarea 
-                                    className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-cyan/50 min-h-[100px]"
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-neutral-500 uppercase">Description (Markdown, Images & Mermaid Supported)</label>
+                                <MarkdownEditor 
                                     value={currentProject.description || ""}
-                                    onChange={e => setCurrentProject({...currentProject, description: e.target.value})}
-                                    placeholder="Supports Markdown: # Headings, **bold**, - lists, [links](url)..."
+                                    onChange={(val) => setCurrentProject(prev => ({ ...prev, description: val }))}
+                                    placeholder="Supports Markdown: # Headings, **bold**, - lists, [links](url), image uploads, and ```mermaid diagrams..."
+                                    minHeight="200px"
                                 />
                             </div>
 
