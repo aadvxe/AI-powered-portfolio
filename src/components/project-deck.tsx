@@ -5,6 +5,7 @@ import { FolderGit2 } from "lucide-react";
 import Image from "next/image";
 import { ProjectData } from "@/hooks/use-content";
 import { LiquidGlass } from "@/components/ui/liquid-glass";
+import { stripMarkdown } from "@/lib/utils";
 
 export type Project = ProjectData;
 
@@ -153,7 +154,7 @@ export function ProjectDeck({ id: _id, projects, onSelect, filter }: ProjectDeck
                     {/* Description snippet */}
                     {project.description && (
                       <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed mb-2.5 font-normal">
-                        {project.description.replace(/^[•\-\*]\s+/gm, '')}
+                        {stripMarkdown(project.description)}
                       </p>
                     )}
                   </div>

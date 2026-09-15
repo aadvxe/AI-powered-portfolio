@@ -15,7 +15,16 @@ export function QuickAction({ icon: Icon, label, onClick, layoutId, compact }: Q
   return (
     <LiquidGlass
       layoutId={layoutId}
-      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors"
+      role="button"
+      tabIndex={0}
+      aria-label={label}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onClick();
+        }
+      }}
+      className="rounded-[1.5rem] cursor-pointer hover:bg-white/40 transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
       onClick={onClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}

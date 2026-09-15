@@ -426,6 +426,10 @@ export default function Home() {
               return (
                 <motion.div
                   key={item.id}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={item.title}
+                  aria-pressed={isSelected}
                   drag
                   dragMomentum={false}
                   dragElastic={0}
@@ -458,15 +462,11 @@ export default function Home() {
                       const dx = e.clientX - pointerDownPosRef.current.x;
                       const dy = e.clientY - pointerDownPosRef.current.y;
                       const dist = Math.hypot(dx, dy);
-                      const dt = Date.now() - pointerDownPosRef.current.time;
-                      pointerDownPosRef.current = null;
-
-                      // If tapped without dragging (< 12px jitter and < 500ms)
-                      if (!didActuallyDragRef.current && dist < 12 && dt < 500) {
-                        if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                          handleItemAction();
-                        }
+                      if (dist >= 12) {
+                        didActuallyDragRef.current = true;
                       }
+                      pointerDownPosRef.current = null;
+                      // Tap actions are dispatched by onClick below; pointerup only records pointer state.
                     }
                   }}
                   onClick={(e) => {
@@ -484,7 +484,21 @@ export default function Home() {
                     if (didActuallyDragRef.current || isDraggingRef.current) return;
                     handleItemAction();
                   }}
-                  className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-pointer group touch-none"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      bringToFront(item.id);
+                      setSelectedDesktopId(item.id);
+                      handleItemAction();
+                    } else if (e.key === "Escape") {
+                      setSelectedDesktopId(null);
+                    }
+                  }}
+                  onFocus={() => {
+                    bringToFront(item.id);
+                    setSelectedDesktopId(item.id);
+                  }}
+                  className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-pointer group touch-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-2xl"
                   style={{
                     '--item-x': `${item.x}%`,
                     '--item-y': `${item.y}%`,
@@ -559,9 +573,11 @@ export default function Home() {
           >
             {/* About Badge Callout */}
             <motion.div className="mb-3 sm:mb-4 pointer-events-auto">
-              <div
+              <button
+                type="button"
+                aria-label="About this Portfolio"
                 onClick={() => setShowPortfolioInfo(true)}
-                className="cursor-pointer transform hover:scale-105 transition-transform"
+                className="cursor-pointer transform hover:scale-105 transition-transform bg-transparent border-none p-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-full"
               >
                 <LiquidGlass type="button" className="rounded-full px-4 py-2.5 sm:px-4 sm:py-1.5 border border-white/80 shadow-md hover:bg-white/60 transition-colors">
                   <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-stone-800">
@@ -569,7 +585,7 @@ export default function Home() {
                     <span>About this Portfolio</span>
                   </div>
                 </LiquidGlass>
-              </div>
+              </button>
             </motion.div>
 
             {/* Main Hero Title Line */}
@@ -599,9 +615,11 @@ export default function Home() {
 
             {/* Center Folder Graphic */}
             <div className="relative my-2.5 sm:my-4 transition-all duration-300 z-20 pointer-events-auto flex items-center justify-center">
-              <div
+              <button
+                type="button"
+                aria-label="View projects"
                 onClick={() => handleStartChat("Show me your projects")}
-                className="cursor-pointer group flex flex-col items-center justify-center transform hover:scale-105 transition-all duration-300"
+                className="cursor-pointer group flex flex-col items-center justify-center transform hover:scale-105 transition-all duration-300 bg-transparent border-none p-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-2xl"
                 title="Click to view projects"
               >
                 <MacOSFolderIcon className="w-20 h-auto sm:w-28 sm:h-auto md:w-36 md:h-auto drop-shadow-2xl transition-transform group-hover:rotate-1" />
@@ -612,7 +630,7 @@ export default function Home() {
                     <path d="M3 3L10.07 19.97L13.58 13.58L19.97 10.07L3 3Z" />
                   </svg>
                 </div>
-              </div>
+              </button>
             </div>
 
             {/* Sub-headline Text */}

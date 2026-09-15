@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -17,7 +16,7 @@
   --color-brand-cyan: var(--electric-cyan);
   --color-brand-purple: var(--deep-purple);
 
-  --font-sans: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: var(--font-poppins), -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
@@ -28,7 +27,7 @@ html {
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
+  font-family: var(--font-poppins), -apple-system, BlinkMacSystemFont, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji";
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }

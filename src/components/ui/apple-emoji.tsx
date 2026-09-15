@@ -1,12 +1,14 @@
 "use client";
 
 import React from "react";
+import { cn } from "@/lib/utils";
 
 interface AppleEmojiProps {
   emoji: string;
   className?: string;
   size?: number | string;
   alt?: string;
+  style?: React.CSSProperties;
 }
 
 /**
@@ -18,6 +20,7 @@ export function AppleEmoji({
   className = "",
   size,
   alt = emoji,
+  style,
 }: AppleEmojiProps) {
   // Convert unicode emoji characters to hex sequence (e.g. "👋" -> "1f44b")
   const codePoints = Array.from(emoji)
@@ -31,11 +34,19 @@ export function AppleEmoji({
     <img
       src={emojiUrl}
       alt={alt}
-      className={`inline-block align-middle select-none pointer-events-none ${className}`}
+      className={cn(
+        "inline-block align-middle select-none pointer-events-none w-[1.15em] h-[1.15em]",
+        className
+      )}
       style={{
-        width: size ? (typeof size === "number" ? `${size}px` : size) : "1.15em",
-        height: size ? (typeof size === "number" ? `${size}px` : size) : "1.15em",
         verticalAlign: "-0.18em",
+        ...(size
+          ? {
+              width: typeof size === "number" ? `${size}px` : size,
+              height: typeof size === "number" ? `${size}px` : size,
+            }
+          : {}),
+        ...style,
       }}
       loading="lazy"
       onError={(e) => {
