@@ -245,10 +245,20 @@ export default function Home() {
 
   const resolveDesktopIconPositions = useCallback(() => {
     if (typeof window === 'undefined') return;
+    if (viewState !== 'landing') return;
+
+    if (typeof document !== 'undefined') {
+      const activeTag = document.activeElement?.tagName?.toLowerCase();
+      if (activeTag === 'input' || activeTag === 'textarea') return;
+    }
+
     const vw = window.innerWidth;
     const vh = window.innerHeight;
     const isMobile = vw < 640;
     const isSmallMobile = vw < 420 || vh < 720;
+
+    // On mobile viewports, if vh is compressed by the virtual keyboard, ignore recalculation
+    if (isMobile && vh < 520) return;
 
     // 1. Gather all obstacle bounding boxes (content headings, buttons, folder, etc.)
     const obstacles: { left: number; top: number; right: number; bottom: number }[] = [];
@@ -448,7 +458,7 @@ export default function Home() {
       });
       return finalPositions;
     });
-  }, []);
+  }, [viewState]);
 
   // Track if initial landing entrance has completed once on first load (skip if already loaded from back button)
   const hasInitializedLandingRef = useRef(!!savedLayoutRef.current);
@@ -471,6 +481,8 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [viewState]);
 
+  const lastWidthRef = useRef(typeof window !== 'undefined' ? window.innerWidth : 0);
+
   // 2. Once the mid section is ready and settled, resolve non-overlapping positions and handle resize
   useEffect(() => {
     if (!midSectionReady) return;
@@ -479,6 +491,27 @@ export default function Home() {
 
     let resizeTimer: NodeJS.Timeout | null = null;
     const handleResize = () => {
+      if (typeof window === 'undefined') return;
+
+      const currentWidth = window.innerWidth;
+      const currentHeight = window.innerHeight;
+      const isMobile = currentWidth < 640;
+      const widthChanged = Math.abs(currentWidth - lastWidthRef.current) > 10;
+
+      // On mobile viewports, the virtual keyboard popping up shrinks only innerHeight, NOT innerWidth.
+      // Ignore keyboard show/hide resizes to keep desktop icons rock-solid and prevent scrambling.
+      if (isMobile && (!widthChanged || currentHeight < 520)) {
+        return;
+      }
+
+      // If an input or textarea is currently focused, do not recalculate background icons
+      if (typeof document !== 'undefined') {
+        const tag = document.activeElement?.tagName?.toLowerCase();
+        if (tag === 'input' || tag === 'textarea') return;
+      }
+
+      lastWidthRef.current = currentWidth;
+
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(resolveDesktopIconPositions, 150);
     };
@@ -817,7 +850,7 @@ export default function Home() {
           opacity: viewState === "landing" && midSectionReady ? 1 : 0,
         }}
         transition={{ duration: 0.3 }}
-        className={`absolute inset-0 z-30 pointer-events-none transition-[visibility] duration-300 ${
+        className={`fixed inset-0 z-30 pointer-events-none transition-[visibility] duration-300 h-[100lvh] sm:h-full w-full ${
           viewState === "landing" && midSectionReady ? "visible" : "invisible"
         }`}
       >
