@@ -276,7 +276,7 @@ export default function Home() {
           top: initialBox.top - 4,
           bottom: initialBox.bottom + 4,
         });
-        newPositions[item.id] = { x: x0, y: y0 };
+        // Clean default position: no pixel override needed, fluid CSS percentages remain in effect
         continue;
       }
 
@@ -343,53 +343,49 @@ export default function Home() {
 
     setResolvedDesktopPositions((prev) => {
       let changed = false;
-      for (const id in newPositions) {
-        if (!prev[id] || Math.abs(prev[id].x - newPositions[id].x) > 1 || Math.abs(prev[id].y - newPositions[id].y) > 1) {
-          changed = true;
-          break;
+      const prevKeys = Object.keys(prev);
+      const newKeys = Object.keys(newPositions);
+      if (prevKeys.length !== newKeys.length) {
+        changed = true;
+      } else {
+        for (const id in newPositions) {
+          if (!prev[id] || Math.abs(prev[id].x - newPositions[id].x) > 1 || Math.abs(prev[id].y - newPositions[id].y) > 1) {
+            changed = true;
+            break;
+          }
         }
       }
-      return changed ? { ...prev, ...newPositions } : prev;
+      return changed ? newPositions : prev;
     });
   }, []);
 
   useEffect(() => {
     if (viewState !== 'landing') return;
 
-    resolveDesktopIconPositions();
-    const rafId = requestAnimationFrame(resolveDesktopIconPositions);
-    const t1 = setTimeout(resolveDesktopIconPositions, 80);
-    const t2 = setTimeout(resolveDesktopIconPositions, 250);
-    const t3 = setTimeout(resolveDesktopIconPositions, 500);
-    const t4 = setTimeout(resolveDesktopIconPositions, 900);
+    // Run overlap resolution once AFTER entrance animations have fully settled (~700ms).
+    // This prevents any mid-animation layout measurements, scale glitches, or jittery re-renders.
+    let resizeTimer: NodeJS.Timeout | null = null;
+    const settleTimer = setTimeout(() => {
+      resolveDesktopIconPositions();
+    }, 700);
 
     if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready.then(resolveDesktopIconPositions).catch(() => {});
+      document.fonts.ready.then(() => {
+        setTimeout(resolveDesktopIconPositions, 700);
+      }).catch(() => {});
     }
 
     const handleResize = () => {
-      resolveDesktopIconPositions();
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resolveDesktopIconPositions, 150);
     };
 
     window.addEventListener('resize', handleResize);
 
-    const landingContainer = document.querySelector('.landing-container');
-    let resizeObserver: ResizeObserver | null = null;
-    if (typeof ResizeObserver !== 'undefined' && landingContainer) {
-      resizeObserver = new ResizeObserver(() => {
-        resolveDesktopIconPositions();
-      });
-      resizeObserver.observe(landingContainer);
-    }
-
     return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
+      clearTimeout(settleTimer);
+      if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
-      if (resizeObserver) resizeObserver.disconnect();
     };
   }, [viewState, resolveDesktopIconPositions]);
 
@@ -661,7 +657,13 @@ export default function Home() {
       {/* Floating Desktop Items (Landing Mode) */}
       <AnimatePresence>
         {viewState === "landing" && (
-          <div className="absolute inset-0 pointer-events-none z-30">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="absolute inset-0 pointer-events-none z-30"
+          >
             {FIXED_DESKTOP_ITEMS.map((item) => {
               const isSelected = selectedDesktopId === item.id;
               const itemZIndex = zIndices[item.id] ?? 1;
@@ -816,7 +818,7 @@ export default function Home() {
                 </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
 
