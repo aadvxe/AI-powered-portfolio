@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, Send, Sparkles, Briefcase, FileText, User, Search, MoreHorizontal, ArrowRight, Smile, Layers, Trash2, X, ExternalLink, Github, FolderGit2 } from "lucide-react";
 import Image from "next/image";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { ProjectDeck } from "@/components/project-deck";
 import { useContent, ProjectData } from "@/hooks/use-content";
 import { LiquidGlass } from "@/components/ui/liquid-glass";
@@ -45,6 +45,111 @@ function formatProjectDescription(text: string): string {
     .join("");
 }
 
+interface DesktopItem {
+  id: string;
+  type: 'app' | 'folder' | 'image';
+  title: string;
+  icon?: 'vscode' | 'python' | 'tensorflow';
+  imageUrl?: string;
+  orientation?: 'portrait' | 'landscape';
+  action?: 'about-portfolio' | 'open-project';
+  prompt?: string;
+  x: number;
+  y: number;
+  mobileX?: number;
+  mobileY?: number;
+}
+
+const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
+  {
+    id: 'app-vscode',
+    type: 'app' as const,
+    title: 'VS Code',
+    icon: 'vscode' as const,
+    prompt: 'Show me your projects and code',
+    x: 20,
+    y: 12,
+    mobileX: 13,
+    mobileY: 8,
+  },
+  {
+    id: 'folder-projects',
+    type: 'folder' as const,
+    title: 'projects',
+    prompt: 'Show me your projects',
+    x: 9,
+    y: 18,
+    mobileX: 13,
+    mobileY: 41,
+  },
+  {
+    id: 'img-aide',
+    type: 'image' as const,
+    title: 'aid-e.jpg',
+    imageUrl: '/aid-e-thumb.jpg',
+    orientation: 'landscape' as const,
+    prompt: 'Show me your projects',
+    x: 8,
+    y: 74,
+    mobileX: 13,
+    mobileY: 80,
+  },
+  {
+    id: 'app-python',
+    type: 'app' as const,
+    title: 'Python',
+    icon: 'python' as const,
+    prompt: 'Tell me about your Python and AI experience',
+    x: 20,
+    y: 84,
+    mobileX: 38,
+    mobileY: 83,
+  },
+  {
+    id: 'img-profile',
+    type: 'image' as const,
+    title: 'profile-pic.jpg',
+    imageUrl: '/profile-pic-thumb.jpg',
+    orientation: 'portrait' as const,
+    prompt: 'Tell me about yourself',
+    x: 76,
+    y: 14,
+    mobileX: 87,
+    mobileY: 8,
+  },
+  {
+    id: 'folder-social',
+    type: 'folder' as const,
+    title: 'skills & stack',
+    prompt: 'What are your skills?',
+    x: 89,
+    y: 18,
+    mobileX: 87,
+    mobileY: 41,
+  },
+  {
+    id: 'app-tensorflow',
+    type: 'app' as const,
+    title: 'TensorFlow',
+    icon: 'tensorflow' as const,
+    prompt: 'What are your skills?',
+    x: 90,
+    y: 52,
+    mobileX: 62,
+    mobileY: 83,
+  },
+  {
+    id: 'folder-contact',
+    type: 'folder' as const,
+    title: 'contact',
+    prompt: 'How can I contact you?',
+    x: 84,
+    y: 82,
+    mobileX: 87,
+    mobileY: 80,
+  },
+];
+
 export default function Home() {
   const [viewState, setViewState] = useState<"landing" | "chat">("landing");
   const [input, setInput] = useState("");
@@ -55,6 +160,238 @@ export default function Home() {
   const didActuallyDragRef = useRef(false);
   const [zIndices, setZIndices] = useState<Record<string, number>>({});
   const topZRef = useRef(1);
+
+  // Track which desktop items have been manually dragged by the user
+  const draggedDesktopIdsRef = useRef<Set<string>>(new Set());
+  // Resolved non-overlapping pixel coordinates for un-dragged desktop items
+  const [resolvedDesktopPositions, setResolvedDesktopPositions] = useState<Record<string, { x: number; y: number }>>({});
+
+  const resolveDesktopIconPositions = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const isMobile = vw < 640;
+    const isSmallMobile = vw < 420 || vh < 720;
+
+    // 1. Gather all obstacle bounding boxes (content headings, buttons, folder, etc.)
+    const obstacles: { left: number; top: number; right: number; bottom: number }[] = [];
+    const BUFFER = isSmallMobile ? 8 : 12;
+
+    document.querySelectorAll('.landing-obstacle').forEach((el) => {
+      const r = el.getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) {
+        obstacles.push({
+          left: r.left - BUFFER,
+          top: r.top - BUFFER,
+          right: r.right + BUFFER,
+          bottom: r.bottom + BUFFER,
+        });
+      }
+    });
+
+    // 2. Bottom search bar obstacle
+    const searchBar = document.querySelector('.landing-search-bar');
+    let maxAllowedY = vh - 80;
+    if (searchBar) {
+      const sr = searchBar.getBoundingClientRect();
+      maxAllowedY = sr.top - (isSmallMobile ? 8 : 14);
+      obstacles.push({
+        left: 0,
+        top: sr.top - 8,
+        right: vw,
+        bottom: vh,
+      });
+    }
+
+    const ICON_HALF_W = isSmallMobile ? 36 : (isMobile ? 38 : 42);
+    const ICON_HALF_H = isSmallMobile ? 34 : (isMobile ? 36 : 40);
+    const PAD_X = isSmallMobile ? 10 : 16;
+    const PAD_Y = isSmallMobile ? 10 : 16;
+
+    const minX = PAD_X + ICON_HALF_W;
+    const maxX = vw - PAD_X - ICON_HALF_W;
+    const minY = PAD_Y + ICON_HALF_H;
+    const maxY = maxAllowedY - ICON_HALF_H;
+
+    const collidesWith = (box: { left: number; top: number; right: number; bottom: number }, list: typeof obstacles) => {
+      for (const obs of list) {
+        if (box.left < obs.right && box.right > obs.left && box.top < obs.bottom && box.bottom > obs.top) {
+          return true;
+        }
+      }
+      return false;
+    };
+
+    const placedBoxes: typeof obstacles = [];
+    const newPositions: Record<string, { x: number; y: number }> = {};
+
+    // Order of placement: outer corners first, then middle items
+    const orderedItems = [
+      ...FIXED_DESKTOP_ITEMS.filter((i) => i.id === 'app-vscode' || i.id === 'img-profile'),
+      ...FIXED_DESKTOP_ITEMS.filter((i) => i.id === 'app-python' || i.id === 'folder-contact'),
+      ...FIXED_DESKTOP_ITEMS.filter((i) => i.id === 'folder-projects' || i.id === 'folder-social'),
+      ...FIXED_DESKTOP_ITEMS.filter((i) => i.id === 'img-aide' || i.id === 'app-tensorflow'),
+    ];
+
+    const testBoxAt = (cx: number, cy: number) => ({
+      left: cx - ICON_HALF_W,
+      right: cx + ICON_HALF_W,
+      top: cy - ICON_HALF_H,
+      bottom: cy + ICON_HALF_H,
+    });
+
+    for (const item of orderedItems) {
+      // "except after the user drag it": preserve user-dragged items exactly
+      if (draggedDesktopIdsRef.current.has(item.id)) {
+        const el = document.querySelector(`[data-desktop-id="${item.id}"]`);
+        if (el) {
+          const r = el.getBoundingClientRect();
+          placedBoxes.push({
+            left: r.left - 4,
+            right: r.right + 4,
+            top: r.top - 4,
+            bottom: r.bottom + 4,
+          });
+        }
+        continue;
+      }
+
+      const defXPercent = isMobile ? (item.mobileX ?? item.x) : item.x;
+      const defYPercent = isMobile ? (item.mobileY ?? item.y) : item.y;
+      const x0 = Math.round((defXPercent / 100) * vw);
+      const y0 = Math.round((defYPercent / 100) * vh);
+      const isLeft = defXPercent < 50;
+
+      const initialBox = testBoxAt(x0, y0);
+      const inBounds0 =
+        initialBox.left >= PAD_X &&
+        initialBox.right <= vw - PAD_X &&
+        initialBox.top >= PAD_Y &&
+        initialBox.bottom <= maxAllowedY;
+
+      if (inBounds0 && !collidesWith(initialBox, obstacles) && !collidesWith(initialBox, placedBoxes)) {
+        placedBoxes.push({
+          left: initialBox.left - 4,
+          right: initialBox.right + 4,
+          top: initialBox.top - 4,
+          bottom: initialBox.bottom + 4,
+        });
+        newPositions[item.id] = { x: x0, y: y0 };
+        continue;
+      }
+
+      // Overlap detected: search outward for the closest non-overlapping point
+      let bestPos: { x: number; y: number } | null = null;
+      let minCost = Infinity;
+      const maxRadius = Math.max(vw, vh);
+
+      for (let r = 6; r <= maxRadius && !bestPos; r += 6) {
+        const numSteps = Math.max(12, Math.floor((2 * Math.PI * r) / 12));
+        for (let s = 0; s < numSteps; s++) {
+          const angle = (s * 2 * Math.PI) / numSteps;
+          const candX = Math.round(x0 + Math.cos(angle) * r);
+          const candY = Math.round(y0 + Math.sin(angle) * r);
+
+          if (candX < minX || candX > maxX || candY < minY || candY > maxY) continue;
+
+          const candBox = testBoxAt(candX, candY);
+          if (collidesWith(candBox, obstacles)) continue;
+          if (collidesWith(candBox, placedBoxes)) continue;
+
+          // Prefer staying on the same side, but allow crossing if necessary
+          const wrongSidePenalty = (isLeft && candX > vw * 0.55) || (!isLeft && candX < vw * 0.45) ? 50 : 0;
+          const cost = r + wrongSidePenalty;
+
+          if (cost < minCost) {
+            minCost = cost;
+            bestPos = { x: candX, y: candY };
+          }
+        }
+      }
+
+      // Guaranteed Fallback: Full screen grid scan if radial search didn't find a spot
+      if (!bestPos) {
+        const stepX = 12;
+        const stepY = 12;
+        for (let gy = minY; gy <= maxY; gy += stepY) {
+          for (let gx = minX; gx <= maxX; gx += stepX) {
+            const candBox = testBoxAt(gx, gy);
+            if (collidesWith(candBox, obstacles)) continue;
+            if (collidesWith(candBox, placedBoxes)) continue;
+
+            const dist = Math.hypot(gx - x0, gy - y0);
+            const wrongSidePenalty = (isLeft && gx > vw * 0.55) || (!isLeft && gx < vw * 0.45) ? 70 : 0;
+            const cost = dist + wrongSidePenalty;
+            if (cost < minCost) {
+              minCost = cost;
+              bestPos = { x: gx, y: gy };
+            }
+          }
+        }
+      }
+
+      if (bestPos) {
+        placedBoxes.push({
+          left: bestPos.x - ICON_HALF_W - 4,
+          right: bestPos.x + ICON_HALF_W + 4,
+          top: bestPos.y - ICON_HALF_H - 4,
+          bottom: bestPos.y + ICON_HALF_H + 4,
+        });
+        newPositions[item.id] = bestPos;
+      }
+    }
+
+    setResolvedDesktopPositions((prev) => {
+      let changed = false;
+      for (const id in newPositions) {
+        if (!prev[id] || Math.abs(prev[id].x - newPositions[id].x) > 1 || Math.abs(prev[id].y - newPositions[id].y) > 1) {
+          changed = true;
+          break;
+        }
+      }
+      return changed ? { ...prev, ...newPositions } : prev;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (viewState !== 'landing') return;
+
+    resolveDesktopIconPositions();
+    const rafId = requestAnimationFrame(resolveDesktopIconPositions);
+    const t1 = setTimeout(resolveDesktopIconPositions, 80);
+    const t2 = setTimeout(resolveDesktopIconPositions, 250);
+    const t3 = setTimeout(resolveDesktopIconPositions, 500);
+    const t4 = setTimeout(resolveDesktopIconPositions, 900);
+
+    if (typeof document !== 'undefined' && document.fonts) {
+      document.fonts.ready.then(resolveDesktopIconPositions).catch(() => {});
+    }
+
+    const handleResize = () => {
+      resolveDesktopIconPositions();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    const landingContainer = document.querySelector('.landing-container');
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== 'undefined' && landingContainer) {
+      resizeObserver = new ResizeObserver(() => {
+        resolveDesktopIconPositions();
+      });
+      resizeObserver.observe(landingContainer);
+    }
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(t4);
+      window.removeEventListener('resize', handleResize);
+      if (resizeObserver) resizeObserver.disconnect();
+    };
+  }, [viewState, resolveDesktopIconPositions]);
 
   const bringToFront = (id: string) => {
     topZRef.current += 1;
@@ -76,6 +413,17 @@ export default function Home() {
   // Modal State
   const [selectedProject, setSelectedProject] = useState<{ project: ProjectData; deckId: string } | null>(null);
   const [showPortfolioInfo, setShowPortfolioInfo] = useState(false);
+
+  // Body scroll lock management when project modal is open
+  useEffect(() => {
+    if (selectedProject) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [selectedProject]);
 
   // Auto-scroll handler: scroll to component top if deck is rendered, otherwise bottom
   useEffect(() => {
@@ -293,111 +641,6 @@ export default function Home() {
       </span>
     ));
 
-  interface DesktopItem {
-    id: string;
-    type: 'app' | 'folder' | 'image';
-    title: string;
-    icon?: 'vscode' | 'python' | 'tensorflow';
-    imageUrl?: string;
-    orientation?: 'portrait' | 'landscape';
-    action?: 'about-portfolio' | 'open-project';
-    prompt?: string;
-    x: number;
-    y: number;
-    mobileX?: number;
-    mobileY?: number;
-  }
-
-  const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
-    {
-      id: 'app-vscode',
-      type: 'app' as const,
-      title: 'VS Code',
-      icon: 'vscode' as const,
-      prompt: 'Show me your projects and code',
-      x: 20,
-      y: 12,
-      mobileX: 14,
-      mobileY: 8,
-    },
-    {
-      id: 'folder-projects',
-      type: 'folder' as const,
-      title: 'projects',
-      prompt: 'Show me your projects',
-      x: 9,
-      y: 18,
-      mobileX: 14,
-      mobileY: 20,
-    },
-    {
-      id: 'img-aide',
-      type: 'image' as const,
-      title: 'aid-e.jpg',
-      imageUrl: '/aid-e-thumb.jpg',
-      orientation: 'landscape' as const,
-      prompt: 'Show me your projects',
-      x: 8,
-      y: 74,
-      mobileX: 14,
-      mobileY: 74,
-    },
-    {
-      id: 'app-python',
-      type: 'app' as const,
-      title: 'Python',
-      icon: 'python' as const,
-      prompt: 'Tell me about your Python and AI experience',
-      x: 20,
-      y: 84,
-      mobileX: 14,
-      mobileY: 86,
-    },
-    {
-      id: 'img-profile',
-      type: 'image' as const,
-      title: 'profile-pic.jpg',
-      imageUrl: '/profile-pic-thumb.jpg',
-      orientation: 'portrait' as const,
-      prompt: 'Tell me about yourself',
-      x: 76,
-      y: 14,
-      mobileX: 84,
-      mobileY: 8,
-    },
-    {
-      id: 'folder-social',
-      type: 'folder' as const,
-      title: 'skills & stack',
-      prompt: 'What are your skills?',
-      x: 89,
-      y: 18,
-      mobileX: 84,
-      mobileY: 20,
-    },
-    {
-      id: 'app-tensorflow',
-      type: 'app' as const,
-      title: 'TensorFlow',
-      icon: 'tensorflow' as const,
-      prompt: 'What are your skills?',
-      x: 90,
-      y: 52,
-      mobileX: 84,
-      mobileY: 74,
-    },
-    {
-      id: 'folder-contact',
-      type: 'folder' as const,
-      title: 'contact',
-      prompt: 'How can I contact you?',
-      x: 84,
-      y: 82,
-      mobileX: 84,
-      mobileY: 86,
-    },
-  ];
-
   return (
     <motion.main
       onClick={() => setSelectedDesktopId(null)}
@@ -422,6 +665,7 @@ export default function Home() {
             {FIXED_DESKTOP_ITEMS.map((item) => {
               const isSelected = selectedDesktopId === item.id;
               const itemZIndex = zIndices[item.id] ?? 1;
+              const resolvedPos = resolvedDesktopPositions[item.id];
 
               const handleItemAction = () => {
                 if ('action' in item && item.action === 'about-portfolio') {
@@ -434,6 +678,7 @@ export default function Home() {
               return (
                 <motion.div
                   key={item.id}
+                  data-desktop-id={item.id}
                   role="button"
                   tabIndex={0}
                   aria-label={item.title}
@@ -449,17 +694,20 @@ export default function Home() {
                     pointerDownPosRef.current = { x: e.clientX, y: e.clientY, time: Date.now() };
                     didActuallyDragRef.current = false;
                   }}
+                  onDragStart={() => {
+                    draggedDesktopIdsRef.current.add(item.id);
+                    bringToFront(item.id);
+                    setSelectedDesktopId(item.id);
+                  }}
                   onDrag={(e, info) => {
-                    if (Math.hypot(info.offset.x, info.offset.y) > 8) {
+                    if (Math.hypot(info.offset.x, info.offset.y) > 4) {
+                      draggedDesktopIdsRef.current.add(item.id);
                       didActuallyDragRef.current = true;
                       isDraggingRef.current = true;
                     }
                   }}
-                  onDragStart={() => {
-                    bringToFront(item.id);
-                    setSelectedDesktopId(item.id);
-                  }}
                   onDragEnd={() => {
+                    draggedDesktopIdsRef.current.add(item.id);
                     setTimeout(() => {
                       isDraggingRef.current = false;
                       didActuallyDragRef.current = false;
@@ -470,11 +718,11 @@ export default function Home() {
                       const dx = e.clientX - pointerDownPosRef.current.x;
                       const dy = e.clientY - pointerDownPosRef.current.y;
                       const dist = Math.hypot(dx, dy);
-                      if (dist >= 12) {
+                      if (dist >= 8) {
+                        draggedDesktopIdsRef.current.add(item.id);
                         didActuallyDragRef.current = true;
                       }
                       pointerDownPosRef.current = null;
-                      // Tap actions are dispatched by onClick below; pointerup only records pointer state.
                     }
                   }}
                   onClick={(e) => {
@@ -508,6 +756,8 @@ export default function Home() {
                   }}
                   className="desktop-icon-item pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center justify-center select-none cursor-pointer group touch-none focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-2xl"
                   style={{
+                    left: resolvedPos ? `${resolvedPos.x}px` : undefined,
+                    top: resolvedPos ? `${resolvedPos.y}px` : undefined,
                     '--item-x': `${item.x}%`,
                     '--item-y': `${item.y}%`,
                     '--item-x-mobile': `${item.mobileX ?? item.x}%`,
@@ -579,10 +829,10 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
             transition={{ duration: 0.4 }}
-            className="relative z-30 flex w-full max-w-3xl flex-1 flex-col items-center justify-center overflow-y-auto custom-scrollbar px-4 text-center pt-6 sm:pt-8 pb-32 sm:pb-28 pointer-events-none"
+            className="landing-container relative z-30 flex w-full max-w-3xl flex-1 flex-col items-center justify-center overflow-y-auto custom-scrollbar px-4 text-center pt-6 sm:pt-8 pb-32 sm:pb-28 pointer-events-none"
           >
             {/* About Badge Callout */}
-            <motion.div className="mb-3 sm:mb-4 pointer-events-auto">
+            <motion.div className="mb-3 sm:mb-4 pointer-events-auto landing-obstacle">
               <button
                 type="button"
                 aria-label="About this Portfolio"
@@ -600,7 +850,7 @@ export default function Home() {
 
             {/* Main Hero Title Line */}
             <div className="relative z-20 pointer-events-none w-full flex flex-col items-center">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold tracking-tight pb-1 leading-tight flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto">
+              <h1 className="landing-obstacle w-fit mx-auto text-xl sm:text-4xl md:text-5xl font-bold tracking-tight pb-1 leading-tight inline-flex items-center justify-center gap-1.5 sm:gap-2 pointer-events-auto">
                 <motion.span
                   className="inline-flex items-center gap-1.5 sm:gap-2 bg-gradient-to-b from-neutral-800 to-neutral-600 bg-clip-text text-transparent"
                   initial={{ opacity: 0, y: "0.5em", filter: "blur(6px)" }}
@@ -614,7 +864,7 @@ export default function Home() {
               <TextReveal
                 as="p"
                 text="Welcome to my interactive portfolio."
-                className="mt-1 text-xs sm:text-base md:text-lg font-medium text-neutral-600 max-w-xs sm:max-w-md md:max-w-xl pointer-events-auto"
+                className="landing-obstacle w-fit mx-auto mt-0.5 sm:mt-1 text-xs sm:text-base md:text-lg font-medium text-neutral-600 max-w-xs sm:max-w-md md:max-w-xl pointer-events-auto"
                 whileInView={false}
                 delay={0.325}
                 stagger={0.025}
@@ -624,15 +874,15 @@ export default function Home() {
             </div>
 
             {/* Center Folder Graphic */}
-            <div className="relative my-2.5 sm:my-4 transition-all duration-300 z-20 pointer-events-auto flex items-center justify-center">
+            <div className="relative my-1.5 sm:my-4 transition-all duration-300 z-20 pointer-events-auto flex items-center justify-center">
               <button
                 type="button"
                 aria-label="View projects"
                 onClick={() => handleStartChat("Show me your projects")}
-                className="cursor-pointer group flex flex-col items-center justify-center transform hover:scale-105 transition-all duration-300 bg-transparent border-none p-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-2xl"
+                className="landing-obstacle cursor-pointer group flex flex-col items-center justify-center transform hover:scale-105 transition-all duration-300 bg-transparent border-none p-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-2xl"
                 title="Click to view projects"
               >
-                <MacOSFolderIcon className="w-20 h-auto sm:w-28 sm:h-auto md:w-36 md:h-auto drop-shadow-2xl transition-transform group-hover:rotate-1" />
+                <MacOSFolderIcon className="w-16 h-auto sm:w-28 sm:h-auto md:w-36 md:h-auto drop-shadow-2xl transition-transform group-hover:rotate-1" />
 
                 {/* Pointer Cursor overlay */}
                 <div className="absolute -bottom-1.5 -right-1.5 sm:-bottom-3 sm:-right-3 pointer-events-none transform -rotate-12 drop-shadow-xl">
@@ -647,7 +897,7 @@ export default function Home() {
             <TextReveal
               as="p"
               text="Here, you can explore my projects, skills, and experience, and even ask the AI directly about my work."
-              className="mt-1.5 sm:mt-3 max-w-xs sm:max-w-md md:max-w-xl text-xs sm:text-base text-neutral-600 leading-relaxed font-medium px-2 pointer-events-auto"
+              className="landing-obstacle w-fit mx-auto mt-1 sm:mt-3 max-w-[260px] sm:max-w-md md:max-w-xl text-[11px] sm:text-base text-neutral-600 leading-relaxed font-medium px-2 pointer-events-auto"
               whileInView={false}
               delay={0.525}
               stagger={0.025}
@@ -656,7 +906,7 @@ export default function Home() {
             />
 
             {/* Quick Actions Grid (Landing) */}
-            <div className="mt-4 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl px-2 pointer-events-auto">
+            <div className="landing-obstacle mt-3 sm:mt-6 flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full max-w-4xl px-2 pointer-events-auto">
               {ACTION_ITEMS.map((item) => (
                 <QuickAction
                   key={item.label}
@@ -786,7 +1036,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="fixed bottom-3 sm:bottom-6 left-0 right-0 z-40 flex flex-col items-center gap-2 sm:gap-3 px-3 sm:px-4 pb-[env(safe-area-inset-bottom)]"
+            className="fixed bottom-3 sm:bottom-6 left-0 right-0 z-40 flex flex-col items-center gap-2 sm:gap-3 px-3 sm:px-4 pb-[env(safe-area-inset-bottom)] landing-search-bar"
           >
             {/* Quick Actions (Chat Mode) */}
             <AnimatePresence>
@@ -902,7 +1152,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="pointer-events-auto relative flex h-[90vh] sm:h-[84vh] max-h-[880px] w-full max-w-5xl lg:max-w-6xl flex-col overflow-y-auto md:overflow-hidden !border-neutral-200 !bg-white shadow-2xl !overflow-hidden rounded-3xl"
+                className="pointer-events-auto relative flex h-[90vh] sm:h-[84vh] max-h-[880px] w-full max-w-5xl lg:max-w-6xl flex-col overflow-hidden !border-neutral-200 !bg-white shadow-2xl rounded-3xl"
               >
                 {/* Close Button */}
                 <button
@@ -914,9 +1164,9 @@ export default function Home() {
                 </button>
 
                 {/* Content Container with matching rounded corners */}
-                <div className="flex flex-col md:flex-1 md:flex-row md:min-h-0 md:overflow-hidden rounded-3xl">
+                <div className="flex-1 flex flex-col md:flex-row min-h-0 overflow-y-auto overscroll-contain md:overflow-hidden rounded-3xl custom-scrollbar">
                   {/* Visual Side */}
-                  <div className={`relative w-full h-72 md:h-auto md:w-[46%] lg:w-[44%] ${selectedProject.project.gradient || 'bg-neutral-100'} shrink-0 overflow-hidden rounded-t-3xl md:rounded-tr-none md:rounded-l-3xl`}>
+                  <div className={`relative w-full h-56 sm:h-64 md:h-auto md:w-[46%] lg:w-[44%] ${selectedProject.project.gradient || 'bg-neutral-100'} shrink-0 overflow-hidden rounded-t-3xl md:rounded-tr-none md:rounded-l-3xl`}>
                     {selectedProject.project.image_url ? (
                       <>
                         <Image
@@ -935,7 +1185,7 @@ export default function Home() {
                   </div>
 
                   {/* Info Side */}
-                  <div className="flex w-full flex-col md:h-full md:w-[54%] lg:w-[56%] md:min-h-0 bg-white rounded-b-3xl md:rounded-bl-none md:rounded-r-3xl overflow-hidden">
+                  <div className="flex w-full flex-col md:h-full md:w-[54%] lg:w-[56%] md:min-h-0 bg-white rounded-b-3xl md:rounded-bl-none md:rounded-r-3xl md:overflow-hidden">
                     {/* Fixed Header */}
                     <div className="p-5 sm:p-6 pb-3.5 shrink-0 border-b border-neutral-100">
                       <h2 className="text-lg sm:text-xl font-bold text-neutral-900 pr-10 leading-snug">
@@ -949,7 +1199,7 @@ export default function Home() {
                     </div>
 
                     {/* Scrollable Content */}
-                    <div className="md:flex-1 md:overflow-y-auto custom-scrollbar p-5 sm:p-6 pt-5">
+                    <div className="p-5 sm:p-6 pt-5 md:flex-1 md:overflow-y-auto custom-scrollbar">
                       {/* Markdown formatted description */}
                       <div className="text-sm sm:text-base leading-relaxed text-neutral-600">
                         <ReactMarkdown
