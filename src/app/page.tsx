@@ -73,6 +73,18 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     mobileY: 8,
   },
   {
+    id: 'img-profile',
+    type: 'image' as const,
+    title: 'profile-pic.jpg',
+    imageUrl: '/profile-pic-thumb.jpg',
+    orientation: 'portrait' as const,
+    prompt: 'Tell me about yourself',
+    x: 76,
+    y: 14,
+    mobileX: 87,
+    mobileY: 8,
+  },
+  {
     id: 'folder-projects',
     type: 'folder' as const,
     title: 'projects',
@@ -80,6 +92,16 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     x: 9,
     y: 18,
     mobileX: 13,
+    mobileY: 41,
+  },
+  {
+    id: 'folder-social',
+    type: 'folder' as const,
+    title: 'skills & stack',
+    prompt: 'What are your skills?',
+    x: 89,
+    y: 18,
+    mobileX: 87,
     mobileY: 41,
   },
   {
@@ -106,28 +128,6 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     mobileY: 83,
   },
   {
-    id: 'img-profile',
-    type: 'image' as const,
-    title: 'profile-pic.jpg',
-    imageUrl: '/profile-pic-thumb.jpg',
-    orientation: 'portrait' as const,
-    prompt: 'Tell me about yourself',
-    x: 76,
-    y: 14,
-    mobileX: 87,
-    mobileY: 8,
-  },
-  {
-    id: 'folder-social',
-    type: 'folder' as const,
-    title: 'skills & stack',
-    prompt: 'What are your skills?',
-    x: 89,
-    y: 18,
-    mobileX: 87,
-    mobileY: 41,
-  },
-  {
     id: 'app-tensorflow',
     type: 'app' as const,
     title: 'TensorFlow',
@@ -150,6 +150,54 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
   },
 ];
 
+const STORAGE_KEY = 'portfolio_desktop_layout_v1';
+
+interface SavedLayout {
+  resolvedPositions: Record<string, { x: number; y: number }>;
+  draggedPositions: Record<string, { x: number; y: number }>;
+  draggedIds: string[];
+}
+
+const isPageReload = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const navEntries = performance.getEntriesByType('navigation');
+    if (navEntries.length > 0) {
+      return (navEntries[0] as PerformanceNavigationTiming).type === 'reload';
+    }
+    // Fallback for legacy Performance Navigation API
+    // @ts-ignore
+    return window.performance?.navigation?.type === 1;
+  } catch {
+    return false;
+  }
+};
+
+const getSavedLayout = (): SavedLayout | null => {
+  if (typeof window === 'undefined') return null;
+  // If it's a page reload / refresh, reset positions:
+  if (isPageReload()) {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch {}
+    return null;
+  }
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as SavedLayout;
+  } catch {
+    return null;
+  }
+};
+
+const saveLayout = (data: SavedLayout) => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {}
+};
+
 export default function Home() {
   const [viewState, setViewState] = useState<"landing" | "chat">("landing");
   const [input, setInput] = useState("");
@@ -161,10 +209,39 @@ export default function Home() {
   const [zIndices, setZIndices] = useState<Record<string, number>>({});
   const topZRef = useRef(1);
 
+  // Load saved positions from back button navigation (only reset on page refresh)
+  const savedLayoutRef = useRef<SavedLayout | null>(null);
+  if (typeof window !== 'undefined' && savedLayoutRef.current === null) {
+    savedLayoutRef.current = getSavedLayout();
+  }
+
   // Track which desktop items have been manually dragged by the user
-  const draggedDesktopIdsRef = useRef<Set<string>>(new Set());
-  // Resolved non-overlapping pixel coordinates for un-dragged desktop items
-  const [resolvedDesktopPositions, setResolvedDesktopPositions] = useState<Record<string, { x: number; y: number }>>({});
+  const draggedDesktopIdsRef = useRef<Set<string>>(
+    new Set(savedLayoutRef.current?.draggedIds ?? [])
+  );
+  // Track explicit pixel coordinates of manually dragged items
+  const draggedPositionsRef = useRef<Record<string, { x: number; y: number }>>(
+    savedLayoutRef.current?.draggedPositions ?? {}
+  );
+  // Resolved non-overlapping pixel coordinates for un-dragged and dragged desktop items
+  const [resolvedDesktopPositions, setResolvedDesktopPositions] = useState<Record<string, { x: number; y: number }>>(() => {
+    return {
+      ...(savedLayoutRef.current?.resolvedPositions ?? {}),
+      ...(savedLayoutRef.current?.draggedPositions ?? {}),
+    };
+  });
+  // Wait for the mid section to render/settle first before blooming desktop icons around it (skip on back button)
+  const [midSectionReady, setMidSectionReady] = useState(() => {
+    return !!savedLayoutRef.current;
+  });
+
+  const saveCurrentLayout = useCallback(() => {
+    saveLayout({
+      resolvedPositions: resolvedDesktopPositions,
+      draggedPositions: draggedPositionsRef.current,
+      draggedIds: Array.from(draggedDesktopIdsRef.current),
+    });
+  }, [resolvedDesktopPositions]);
 
   const resolveDesktopIconPositions = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -251,6 +328,14 @@ export default function Home() {
             right: r.right + 4,
             top: r.top - 4,
             bottom: r.bottom + 4,
+          });
+        } else if (draggedPositionsRef.current[item.id]) {
+          const dp = draggedPositionsRef.current[item.id];
+          placedBoxes.push({
+            left: dp.x - ICON_HALF_W - 4,
+            right: dp.x + ICON_HALF_W + 4,
+            top: dp.y - ICON_HALF_H - 4,
+            bottom: dp.y + ICON_HALF_H + 4,
           });
         }
         continue;
@@ -355,39 +440,55 @@ export default function Home() {
           }
         }
       }
-      return changed ? newPositions : prev;
+      const finalPositions = changed ? { ...prev, ...newPositions } : prev;
+      saveLayout({
+        resolvedPositions: finalPositions,
+        draggedPositions: draggedPositionsRef.current,
+        draggedIds: Array.from(draggedDesktopIdsRef.current),
+      });
+      return finalPositions;
     });
   }, []);
 
+  // Track if initial landing entrance has completed once on first load (skip if already loaded from back button)
+  const hasInitializedLandingRef = useRef(!!savedLayoutRef.current);
+
+  // 1. Render the mid section first. When it completes its entrance (~420ms), trigger desktop icons
   useEffect(() => {
-    if (viewState !== 'landing') return;
-
-    // Run overlap resolution once AFTER entrance animations have fully settled (~700ms).
-    // This prevents any mid-animation layout measurements, scale glitches, or jittery re-renders.
-    let resizeTimer: NodeJS.Timeout | null = null;
-    const settleTimer = setTimeout(() => {
-      resolveDesktopIconPositions();
-    }, 700);
-
-    if (typeof document !== 'undefined' && document.fonts) {
-      document.fonts.ready.then(() => {
-        setTimeout(resolveDesktopIconPositions, 700);
-      }).catch(() => {});
+    if (viewState !== 'landing') {
+      return;
     }
+    if (hasInitializedLandingRef.current) {
+      // Already completed initial entrance once: instantly ready when returning via "Back"
+      setMidSectionReady(true);
+      return;
+    }
+    // First-time page load: wait for mid section entrance to settle before showing icons
+    const timer = setTimeout(() => {
+      hasInitializedLandingRef.current = true;
+      setMidSectionReady(true);
+    }, 420);
+    return () => clearTimeout(timer);
+  }, [viewState]);
 
+  // 2. Once the mid section is ready and settled, resolve non-overlapping positions and handle resize
+  useEffect(() => {
+    if (!midSectionReady) return;
+
+    resolveDesktopIconPositions();
+
+    let resizeTimer: NodeJS.Timeout | null = null;
     const handleResize = () => {
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(resolveDesktopIconPositions, 150);
     };
 
     window.addEventListener('resize', handleResize);
-
     return () => {
-      clearTimeout(settleTimer);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [viewState, resolveDesktopIconPositions]);
+  }, [midSectionReady, resolveDesktopIconPositions]);
 
   const bringToFront = (id: string) => {
     topZRef.current += 1;
@@ -596,18 +697,73 @@ export default function Home() {
   };
 
   const handleStartChat = (initialQuery?: string) => {
+    if (typeof window !== 'undefined' && window.history.state?.view !== 'chat') {
+      window.history.pushState({ view: 'chat' }, '');
+    }
     setViewState("chat");
     if (initialQuery) {
       sendMessage(initialQuery);
     }
   };
 
-
-
   const handleBack = () => {
-    setViewState("landing");
-    setMessages([INITIAL_MESSAGE]);
+    if (typeof window !== 'undefined' && window.history.state?.view === 'chat') {
+      window.history.back();
+    } else {
+      setViewState("landing");
+      setMessages([INITIAL_MESSAGE]);
+    }
   };
+
+  const handleOpenProject = (project: ProjectData, deckId: string) => {
+    if (typeof window !== 'undefined' && window.history.state?.modal !== 'project') {
+      window.history.pushState({ modal: 'project' }, '');
+    }
+    setSelectedProject({ project, deckId });
+  };
+
+  const handleCloseProject = () => {
+    if (typeof window !== 'undefined' && window.history.state?.modal === 'project') {
+      window.history.back();
+    } else {
+      setSelectedProject(null);
+    }
+  };
+
+  const handleOpenPortfolioInfo = () => {
+    if (typeof window !== 'undefined' && window.history.state?.modal !== 'portfolio-info') {
+      window.history.pushState({ modal: 'portfolio-info' }, '');
+    }
+    setShowPortfolioInfo(true);
+  };
+
+  const handleClosePortfolioInfo = () => {
+    if (typeof window !== 'undefined' && window.history.state?.modal === 'portfolio-info') {
+      window.history.back();
+    } else {
+      setShowPortfolioInfo(false);
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (selectedProject) {
+        setSelectedProject(null);
+        return;
+      }
+      if (showPortfolioInfo) {
+        setShowPortfolioInfo(false);
+        return;
+      }
+      if (viewState === 'chat') {
+        setViewState('landing');
+        setMessages([INITIAL_MESSAGE]);
+        return;
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [selectedProject, showPortfolioInfo, viewState]);
 
   const handleClearChat = () => {
     setMessages([INITIAL_MESSAGE]);
@@ -650,28 +806,29 @@ export default function Home() {
 
       <AnimatePresence>
         {showPortfolioInfo && (
-          <PortfolioDetails onClose={() => setShowPortfolioInfo(false)} />
+          <PortfolioDetails onClose={handleClosePortfolioInfo} />
         )}
       </AnimatePresence>
 
-      {/* Floating Desktop Items (Landing Mode) */}
-      <AnimatePresence>
-        {viewState === "landing" && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            className="absolute inset-0 pointer-events-none z-30"
-          >
-            {FIXED_DESKTOP_ITEMS.map((item) => {
+      {/* Floating Desktop Items - Persists position across views, resets only on page reload */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity: viewState === "landing" && midSectionReady ? 1 : 0,
+        }}
+        transition={{ duration: 0.3 }}
+        className={`absolute inset-0 z-30 pointer-events-none transition-[visibility] duration-300 ${
+          viewState === "landing" && midSectionReady ? "visible" : "invisible"
+        }`}
+      >
+        {FIXED_DESKTOP_ITEMS.map((item, index) => {
               const isSelected = selectedDesktopId === item.id;
               const itemZIndex = zIndices[item.id] ?? 1;
               const resolvedPos = resolvedDesktopPositions[item.id];
 
               const handleItemAction = () => {
                 if ('action' in item && item.action === 'about-portfolio') {
-                  setShowPortfolioInfo(true);
+                  handleOpenPortfolioInfo();
                 } else if (item.prompt) {
                   handleStartChat(item.prompt);
                 }
@@ -714,6 +871,15 @@ export default function Home() {
                       isDraggingRef.current = false;
                       didActuallyDragRef.current = false;
                     }, 120);
+
+                    const el = document.querySelector(`[data-desktop-id="${item.id}"]`) as HTMLElement;
+                    if (el) {
+                      const r = el.getBoundingClientRect();
+                      const cx = Math.round(r.left + r.width / 2);
+                      const cy = Math.round(r.top + r.height / 2);
+                      draggedPositionsRef.current[item.id] = { x: cx, y: cy };
+                      saveCurrentLayout();
+                    }
                   }}
                   onPointerUp={(e) => {
                     if (pointerDownPosRef.current) {
@@ -767,60 +933,71 @@ export default function Home() {
                     zIndex: itemZIndex,
                   } as React.CSSProperties}
                 >
-                  {/* Icon Container with Selection Highlight Box */}
-                  <div className={`p-1 rounded-2xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
-                    ? 'bg-black/10 border-2 border-white/80 shadow-xs backdrop-blur-xs'
-                    : 'bg-transparent border-2 border-transparent'
-                    }`}>
-                    {/* ITEM TYPE: Folder */}
-                    {item.type === 'folder' && (
-                      <MacOSFolderIcon className="w-12 h-auto sm:w-14 sm:h-auto drop-shadow-md" />
-                    )}
+                  {/* Staggered Spring Pop Inner Visuals */}
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.65 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 24,
+                      delay: index * 0.04,
+                    }}
+                    className="flex flex-col items-center justify-center pointer-events-none"
+                  >
+                    {/* Icon Container with Selection Highlight Box */}
+                    <div className={`p-1 rounded-2xl flex items-center justify-center transition-all duration-150 pointer-events-none ${isSelected
+                      ? 'bg-black/10 border-2 border-white/80 shadow-xs'
+                      : 'bg-transparent border-2 border-transparent'
+                      }`}>
+                      {/* ITEM TYPE: Folder */}
+                      {item.type === 'folder' && (
+                        <MacOSFolderIcon className="w-12 h-auto sm:w-14 sm:h-auto drop-shadow-md" />
+                      )}
 
-                    {/* ITEM TYPE: App */}
-                    {item.type === 'app' && (
-                      <>
-                        {item.icon === 'vscode' && <VsCodeIcon className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-lg" />}
-                        {item.icon === 'python' && <PythonIcon className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-lg" />}
-                        {item.icon === 'tensorflow' && <TensorFlowIcon className="w-12 h-12 sm:w-14 sm:h-14" />}
-                      </>
-                    )}
+                      {/* ITEM TYPE: App */}
+                      {item.type === 'app' && (
+                        <>
+                          {item.icon === 'vscode' && <VsCodeIcon className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-lg" />}
+                          {item.icon === 'python' && <PythonIcon className="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-lg" />}
+                          {item.icon === 'tensorflow' && <TensorFlowIcon className="w-12 h-12 sm:w-14 sm:h-14" />}
+                        </>
+                      )}
 
-                    {/* ITEM TYPE: Image Preview */}
-                    {item.type === 'image' && (
-                      <div className={`rounded-xl overflow-hidden border-[1.5px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)] bg-white shrink-0 ${'orientation' in item && item.orientation === 'landscape'
-                        ? 'w-16 h-11 sm:w-18 sm:h-12'
-                        : 'w-11 h-14 sm:w-12 sm:h-16'
-                        }`}>
-                        <img
-                          src={item.imageUrl}
-                          alt={item.title}
-                          className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-[center_20%]'}`}
-                          draggable={false}
-                          loading="eager"
-                          decoding="async"
-                        />
-                      </div>
-                    )}
-                  </div>
+                      {/* ITEM TYPE: Image Preview */}
+                      {item.type === 'image' && (
+                        <div className={`rounded-xl overflow-hidden border-[1.5px] border-white shadow-[0_2px_6px_rgba(0,0,0,0.18)] bg-white shrink-0 ${'orientation' in item && item.orientation === 'landscape'
+                          ? 'w-16 h-11 sm:w-18 sm:h-12'
+                          : 'w-11 h-14 sm:w-12 sm:h-16'
+                          }`}>
+                          <img
+                            src={item.imageUrl}
+                            alt={item.title}
+                            className={`w-full h-full object-cover ${item.id === 'img-aide' ? 'object-[center_62%]' : 'object-[center_20%]'}`}
+                            draggable={false}
+                            loading="eager"
+                            decoding="async"
+                          />
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Selection Label Pill */}
-                  <div className="mt-1.5 flex justify-center pointer-events-none">
-                    <span
-                      className={`max-w-[86px] sm:max-w-[88px] whitespace-nowrap sm:whitespace-normal line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
-                        ? 'bg-[#007AFF] text-white shadow-xs'
-                        : 'text-neutral-800'
-                        }`}
-                    >
-                      {renderBreakableTitle(item.title)}
-                    </span>
-                  </div>
+                    {/* Selection Label Pill */}
+                    <div className="mt-1.5 flex justify-center pointer-events-none">
+                      <span
+                        className={`max-w-[86px] sm:max-w-[88px] whitespace-nowrap sm:whitespace-normal line-clamp-1 sm:line-clamp-2 text-[10px] sm:text-xs font-medium tracking-tight px-1.5 py-0.5 rounded-[5px] transition-colors text-center ${isSelected
+                          ? 'bg-[#007AFF] text-white shadow-xs'
+                          : 'text-neutral-800'
+                          }`}
+                      >
+                        {renderBreakableTitle(item.title)}
+                      </span>
+                    </div>
+                  </motion.div>
                 </motion.div>
               );
             })}
           </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Landing View */}
       <AnimatePresence mode="wait">
@@ -831,6 +1008,9 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
             transition={{ duration: 0.4 }}
+            onAnimationComplete={() => {
+              setMidSectionReady(true);
+            }}
             className="landing-container relative z-30 flex w-full max-w-3xl flex-1 flex-col items-center justify-center overflow-y-auto custom-scrollbar px-4 text-center pt-6 sm:pt-8 pb-32 sm:pb-28 pointer-events-none"
           >
             {/* About Badge Callout */}
@@ -838,7 +1018,7 @@ export default function Home() {
               <button
                 type="button"
                 aria-label="About this Portfolio"
-                onClick={() => setShowPortfolioInfo(true)}
+                onClick={handleOpenPortfolioInfo}
                 className="cursor-pointer transform hover:scale-105 transition-transform bg-transparent border-none p-0 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 rounded-full"
               >
                 <LiquidGlass type="button" className="rounded-full px-4 py-2.5 sm:px-4 sm:py-1.5 border border-white/80 shadow-md hover:bg-white/60 transition-colors">
@@ -998,7 +1178,7 @@ export default function Home() {
                               <ProjectDeck
                                 id={`deck-${i}`}
                                 projects={projects}
-                                onSelect={(project) => setSelectedProject({ project, deckId: `deck-${i}` })}
+                                onSelect={(project) => handleOpenProject(project, `deck-${i}`)}
                                 filter={msg.componentFilter}
                               />
                             </div>
@@ -1146,7 +1326,7 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedProject(null)}
+              onClick={handleCloseProject}
               className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
             />
             <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none p-3 sm:p-5 md:p-8 pb-[max(1rem,env(safe-area-inset-bottom))] pt-[max(1rem,env(safe-area-inset-top))]">
@@ -1158,7 +1338,7 @@ export default function Home() {
               >
                 {/* Close Button */}
                 <button
-                  onClick={() => setSelectedProject(null)}
+                  onClick={handleCloseProject}
                   className="absolute right-3.5 top-3.5 sm:right-5 sm:top-5 z-50 rounded-full bg-white/90 backdrop-blur-sm p-2 text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 shadow-sm transition-colors"
                   title="Close modal"
                 >
