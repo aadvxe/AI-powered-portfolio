@@ -114,7 +114,7 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     x: 8,
     y: 74,
     mobileX: 13,
-    mobileY: 80,
+    mobileY: 71,
   },
   {
     id: 'app-python',
@@ -125,7 +125,7 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     x: 16,
     y: 72,
     mobileX: 38,
-    mobileY: 83,
+    mobileY: 72,
   },
   {
     id: 'app-tensorflow',
@@ -136,7 +136,7 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     x: 90,
     y: 52,
     mobileX: 62,
-    mobileY: 83,
+    mobileY: 72,
   },
   {
     id: 'folder-contact',
@@ -146,7 +146,7 @@ const FIXED_DESKTOP_ITEMS: DesktopItem[] = [
     x: 84,
     y: 72,
     mobileX: 87,
-    mobileY: 80,
+    mobileY: 71,
   },
 ];
 
@@ -277,21 +277,34 @@ export default function Home() {
     });
 
     // 2. Bottom search bar obstacle
-    const searchBar = document.querySelector('.landing-search-bar');
-    let maxAllowedY = vh - 80;
+    // Compute resting top of the search bar independent of active entrance animations (translateY)
+    const searchBar = document.querySelector('.landing-search-bar') as HTMLElement | null;
+    const sbHeight = searchBar?.offsetHeight || (isMobile ? 54 : 58);
+    const sbMarginBottom = isMobile ? 12 : 24; // matches bottom-3 (12px) / sm:bottom-6 (24px)
+    // Account for Android/iOS safe-area-inset-bottom
+    const safeAreaBottom = isSmallMobile ? 18 : (isMobile ? 14 : 0);
+    const restingSbTop = vh - sbHeight - sbMarginBottom - safeAreaBottom;
+
+    // Use whichever is higher (more conservative): the calculated resting top or getBoundingClientRect if settled
+    let measuredSbTop = restingSbTop;
     if (searchBar) {
       const sr = searchBar.getBoundingClientRect();
-      maxAllowedY = sr.top - (isSmallMobile ? 8 : 14);
-      obstacles.push({
-        left: 0,
-        top: sr.top - 8,
-        right: vw,
-        bottom: vh,
-      });
+      if (sr.top > 0 && sr.top <= restingSbTop + 10) {
+        measuredSbTop = Math.min(restingSbTop, sr.top);
+      }
     }
 
-    const ICON_HALF_W = isSmallMobile ? 36 : (isMobile ? 38 : 42);
-    const ICON_HALF_H = isSmallMobile ? 34 : (isMobile ? 36 : 40);
+    const maxAllowedY = measuredSbTop - (isSmallMobile ? 12 : 16);
+    obstacles.push({
+      left: 0,
+      top: maxAllowedY,
+      right: vw,
+      bottom: vh,
+    });
+
+    // Realistic desktop icon dimensions including icon, border/padding, and label pill
+    const ICON_HALF_W = isSmallMobile ? 38 : (isMobile ? 40 : 44);
+    const ICON_HALF_H = isSmallMobile ? 38 : (isMobile ? 42 : 44);
     const PAD_X = isSmallMobile ? 10 : 16;
     const PAD_Y = isSmallMobile ? 10 : 16;
 
@@ -371,7 +384,7 @@ export default function Home() {
           top: initialBox.top - 4,
           bottom: initialBox.bottom + 4,
         });
-        // Clean default position: no pixel override needed, fluid CSS percentages remain in effect
+        newPositions[item.id] = { x: x0, y: y0 };
         continue;
       }
 
@@ -482,12 +495,18 @@ export default function Home() {
   }, [viewState]);
 
   const lastWidthRef = useRef(typeof window !== 'undefined' ? window.innerWidth : 0);
+  const lastHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 0);
 
   // 2. Once the mid section is ready and settled, resolve non-overlapping positions and handle resize
   useEffect(() => {
     if (!midSectionReady) return;
 
     resolveDesktopIconPositions();
+
+    // Re-verify positions once framer-motion entrance animations have fully settled
+    const settleTimer = setTimeout(() => {
+      resolveDesktopIconPositions();
+    }, 600);
 
     let resizeTimer: NodeJS.Timeout | null = null;
     const handleResize = () => {
@@ -497,10 +516,11 @@ export default function Home() {
       const currentHeight = window.innerHeight;
       const isMobile = currentWidth < 640;
       const widthChanged = Math.abs(currentWidth - lastWidthRef.current) > 10;
+      const heightChanged = Math.abs(currentHeight - lastHeightRef.current) > 40;
 
       // On mobile viewports, the virtual keyboard popping up shrinks only innerHeight, NOT innerWidth.
       // Ignore keyboard show/hide resizes to keep desktop icons rock-solid and prevent scrambling.
-      if (isMobile && (!widthChanged || currentHeight < 520)) {
+      if (isMobile && (!widthChanged && (!heightChanged || currentHeight < 520))) {
         return;
       }
 
@@ -511,6 +531,7 @@ export default function Home() {
       }
 
       lastWidthRef.current = currentWidth;
+      lastHeightRef.current = currentHeight;
 
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(resolveDesktopIconPositions, 150);
@@ -518,6 +539,7 @@ export default function Home() {
 
     window.addEventListener('resize', handleResize);
     return () => {
+      clearTimeout(settleTimer);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
@@ -850,7 +872,7 @@ export default function Home() {
           opacity: viewState === "landing" && midSectionReady ? 1 : 0,
         }}
         transition={{ duration: 0.3 }}
-        className={`fixed inset-0 z-30 pointer-events-none transition-[visibility] duration-300 h-[100lvh] sm:h-full w-full ${
+        className={`fixed inset-0 z-30 pointer-events-none transition-[visibility] duration-300 h-[100dvh] sm:h-full w-full ${
           viewState === "landing" && midSectionReady ? "visible" : "invisible"
         }`}
       >
