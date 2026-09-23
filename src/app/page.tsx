@@ -243,9 +243,14 @@ export default function Home() {
     });
   }, [resolvedDesktopPositions]);
 
+  const viewStateRef = useRef(viewState);
+  useEffect(() => {
+    viewStateRef.current = viewState;
+  }, [viewState]);
+
   const resolveDesktopIconPositions = useCallback(() => {
     if (typeof window === 'undefined') return;
-    if (viewState !== 'landing') return;
+    if (viewStateRef.current !== 'landing') return;
 
     if (typeof document !== 'undefined') {
       const activeTag = document.activeElement?.tagName?.toLowerCase();
@@ -471,10 +476,14 @@ export default function Home() {
       });
       return finalPositions;
     });
-  }, [viewState]);
+  }, []);
 
   // Track if initial landing entrance has completed once on first load (skip if already loaded from back button)
   const hasInitializedLandingRef = useRef(!!savedLayoutRef.current);
+  // Track if initial desktop icon positions have been resolved
+  const hasResolvedInitialRef = useRef(false);
+  // Track whether screen was resized while user was in chat view
+  const needsRecalcOnLandingRef = useRef(false);
 
   // 1. Render the mid section first. When it completes its entrance (~420ms), trigger desktop icons
   useEffect(() => {
@@ -497,17 +506,35 @@ export default function Home() {
   const lastWidthRef = useRef(typeof window !== 'undefined' ? window.innerWidth : 0);
   const lastHeightRef = useRef(typeof window !== 'undefined' ? window.innerHeight : 0);
 
-  // 2. Once the mid section is ready and settled, resolve non-overlapping positions and handle resize
+  // 2. Resolve desktop icon positions ONCE on initial load
   useEffect(() => {
     if (!midSectionReady) return;
 
-    resolveDesktopIconPositions();
-
-    // Re-verify positions once framer-motion entrance animations have fully settled
-    const settleTimer = setTimeout(() => {
+    if (!hasResolvedInitialRef.current) {
+      hasResolvedInitialRef.current = true;
       resolveDesktopIconPositions();
-    }, 600);
 
+      // Settle check at 600ms on initial page load only
+      const settleTimer = setTimeout(() => {
+        resolveDesktopIconPositions();
+      }, 600);
+      return () => clearTimeout(settleTimer);
+    }
+  }, [midSectionReady, resolveDesktopIconPositions]);
+
+  // 3. If screen resized while user was in chat, resolve once after returning to landing
+  useEffect(() => {
+    if (viewState === 'landing' && needsRecalcOnLandingRef.current) {
+      const timer = setTimeout(() => {
+        needsRecalcOnLandingRef.current = false;
+        resolveDesktopIconPositions();
+      }, 450);
+      return () => clearTimeout(timer);
+    }
+  }, [viewState, resolveDesktopIconPositions]);
+
+  // 4. Handle resize (debounced)
+  useEffect(() => {
     let resizeTimer: NodeJS.Timeout | null = null;
     const handleResize = () => {
       if (typeof window === 'undefined') return;
@@ -533,17 +560,21 @@ export default function Home() {
       lastWidthRef.current = currentWidth;
       lastHeightRef.current = currentHeight;
 
+      if (viewStateRef.current !== 'landing') {
+        needsRecalcOnLandingRef.current = true;
+        return;
+      }
+
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(resolveDesktopIconPositions, 150);
     };
 
     window.addEventListener('resize', handleResize);
     return () => {
-      clearTimeout(settleTimer);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener('resize', handleResize);
     };
-  }, [midSectionReady, resolveDesktopIconPositions]);
+  }, [resolveDesktopIconPositions]);
 
   const bringToFront = (id: string) => {
     topZRef.current += 1;
@@ -762,6 +793,7 @@ export default function Home() {
   };
 
   const handleBack = () => {
+    setSelectedDesktopId(null);
     if (typeof window !== 'undefined' && window.history.state?.view === 'chat') {
       window.history.back();
     } else {
@@ -811,6 +843,7 @@ export default function Home() {
         return;
       }
       if (viewState === 'chat') {
+        setSelectedDesktopId(null);
         setViewState('landing');
         setMessages([INITIAL_MESSAGE]);
         return;
