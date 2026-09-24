@@ -46,16 +46,16 @@ export function AboutDeck({ profile, visibleSections }: AboutDeckProps) {
 
             {/* Biography container */}
             <GlassCard className="flex-1 p-5 sm:p-8 flex flex-col justify-center">
-                <div className="mb-4 sm:mb-6">
-                    <h3 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-2 flex items-center gap-2">
-                        <span>Hi, I&apos;m {profile?.name || "Your Name"}</span>
-                        <AppleEmoji emoji="👋" className="w-[0.9em] h-[0.9em]" />
+                <div className="mb-3.5 sm:mb-5">
+                    <h3 className="text-2xl sm:text-3xl font-bold text-neutral-800 tracking-tight leading-snug mb-2.5">
+                        <span>Hi, I&apos;m {profile?.name || "Your Name"}</span>{" "}
+                        <AppleEmoji emoji="👋" className="inline-block w-[0.85em] h-[0.85em] align-[-0.1em] ml-0.5" />
                     </h3>
                     <div className="inline-block px-3 py-1 bg-neutral-100 border border-neutral-200/80 rounded-full text-neutral-700 text-xs sm:text-sm font-semibold">
                         {profile?.role || "Creative Developer"}
                     </div>
                 </div>
-                <p className="text-sm sm:text-base text-neutral-600 leading-relaxed pr-2">
+                <p className="text-sm sm:text-base text-neutral-600 leading-relaxed">
                     {profile?.bio || "I am a passionate Creative Technologist with a knack for building fluid, intuitive, and beautiful web experiences. I bridge the gap between design and engineering."}
                 </p>
                 {/* Downloadable CV */}
