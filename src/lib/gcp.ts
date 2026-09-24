@@ -132,3 +132,36 @@ export async function streamChatCompletion(params: {
     config,
   });
 }
+
+/**
+ * Generates structured content using Gemini with JSON output format.
+ */
+export async function generateStructuredCompletion<T>(params: {
+  prompt: string;
+  systemInstruction?: string;
+  temperature?: number;
+  model?: string;
+}): Promise<T> {
+  const client = getGCPClient();
+  const model = params.model || CHAT_MODEL;
+
+  const config: GenerateContentConfig = {
+    temperature: params.temperature ?? 0.2,
+    responseMimeType: "application/json",
+  };
+
+  if (params.systemInstruction) {
+    config.systemInstruction = params.systemInstruction;
+  }
+
+  const response = await client.models.generateContent({
+    model,
+    contents: params.prompt,
+    config,
+  });
+
+  const rawText = response.text?.trim() || "{}";
+  const cleaned = rawText.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
+  return JSON.parse(cleaned) as T;
+}
+

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useContent, ProjectData } from "@/hooks/use-content";
 import { GlassCard } from "@/components/ui/glass-card";
 import { supabase } from "@/lib/supabase";
-import { Plus, Edit2, Trash2, Loader2, Save, X, Link as LinkIcon, Github, Star, Minus, PlusCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Edit2, Trash2, Loader2, Save, X, Link as LinkIcon, Github, Star, Minus, PlusCircle, ArrowUp, ArrowDown, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { MarkdownEditor } from "@/components/admin/markdown-editor";
@@ -17,6 +17,7 @@ export default function AdminProjects() {
   const [isEditing, setIsEditing] = useState(false);
   const [currentProject, setCurrentProject] = useState<Partial<ProjectData>>({});
   const [saving, setSaving] = useState(false);
+  const [isAutofillingTags, setIsAutofillingTags] = useState(false);
   const [tagsString, setTagsString] = useState("");
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
@@ -46,6 +47,64 @@ export default function AdminProjects() {
     });
     setTagsString("");
     setIsEditing(true);
+  };
+
+  const handleAutofillTags = async () => {
+    if (!currentProject.title && !currentProject.description) {
+      setNotification({ message: "Please provide a project title or description first.", type: "error" });
+      return;
+    }
+
+    setIsAutofillingTags(true);
+    try {
+      const res = await fetch("/api/admin/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "project-tags",
+          data: {
+            title: currentProject.title || "",
+            category: currentProject.category || "",
+            description: currentProject.description || "",
+          },
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to generate tags");
+      }
+
+      const generatedTags: string[] = json.tags || [];
+      if (generatedTags.length === 0) {
+        setNotification({ message: "No tags could be detected from this description.", type: "error" });
+        return;
+      }
+
+      // Merge with existing tags (case-insensitive deduplication)
+      const existingTags = currentProject.tags || [];
+      const lowerExisting = new Set(existingTags.map(t => t.toLowerCase()));
+      const newUniqueTags = generatedTags.filter(t => !lowerExisting.has(t.toLowerCase()));
+      const mergedTags = [...existingTags, ...newUniqueTags];
+
+      setTagsString(mergedTags.join(", "));
+      setCurrentProject(prev => ({
+        ...prev,
+        tags: mergedTags,
+      }));
+
+      setNotification({
+        message: newUniqueTags.length > 0 
+          ? `Added ${newUniqueTags.length} tag${newUniqueTags.length === 1 ? "" : "s"} with AI!` 
+          : "All suggested tags are already present.",
+        type: "success",
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error generating tags";
+      setNotification({ message, type: "error" });
+    } finally {
+      setIsAutofillingTags(false);
+    }
   };
 
   const addCustomLink = () => {
@@ -311,7 +370,23 @@ export default function AdminProjects() {
 
                                     {/* Tags */}
                                     <div className="space-y-1">
-                                        <label className="text-xs font-semibold text-neutral-500 uppercase">Tags</label>
+                                        <div className="flex items-center justify-between">
+                                            <label className="text-xs font-semibold text-neutral-500 uppercase">Tags</label>
+                                            <button
+                                                type="button"
+                                                onClick={handleAutofillTags}
+                                                disabled={isAutofillingTags || (!currentProject.title && !currentProject.description)}
+                                                title="Autofill tags based on title, category, and description using AI"
+                                                className="text-xs flex items-center gap-1.5 text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200 px-2.5 py-0.5 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium cursor-pointer"
+                                            >
+                                                {isAutofillingTags ? (
+                                                    <Loader2 size={12} className="animate-spin text-purple-600" />
+                                                ) : (
+                                                    <Sparkles size={12} className="text-purple-600" />
+                                                )}
+                                                <span>{isAutofillingTags ? "Generating..." : "Auto-fill Tags"}</span>
+                                            </button>
+                                        </div>
                                         <input 
                                             className="w-full p-2 bg-neutral-50 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-800/30 text-sm"
                                             value={tagsString}
@@ -322,7 +397,7 @@ export default function AdminProjects() {
                                                     tags: e.target.value.split(",").map(s => s.trim()).filter(Boolean)
                                                 }));
                                             }}
-                                            placeholder="React, Next.js, Tailwind"
+                                            placeholder="React, Next.js, Tailwind (comma separated)"
                                         />
                                     </div>
 

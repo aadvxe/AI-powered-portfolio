@@ -16,7 +16,8 @@ import {
   ArrowDown, 
   List, 
   Layers,
-  Award 
+  Award,
+  Sparkles 
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { ProfileData } from "@/hooks/use-content";
@@ -27,6 +28,7 @@ export default function AdminProfile() {
   const [profile, setProfile] = useState<Partial<ProfileData>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [autofillingSkillIndex, setAutofillingSkillIndex] = useState<number | null>(null);
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null);
 
   useEffect(() => {
@@ -132,6 +134,64 @@ export default function AdminProfile() {
           newSections[sectionIndex] = { ...currentSection, items: newItems };
           return { ...prev, custom_sections: newSections };
       });
+  };
+
+  // AI Autofill for Experience Skills
+  const handleAutofillSkills = async (index: number) => {
+    const exp = profile.experiences?.[index];
+    if (!exp) return;
+
+    if (!exp.role && !exp.description) {
+      setNotification({ message: "Please provide a role or description first.", type: "error" });
+      return;
+    }
+
+    setAutofillingSkillIndex(index);
+    try {
+      const res = await fetch("/api/admin/autofill", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "experience-skills",
+          data: {
+            role: exp.role || "",
+            company: exp.company || "",
+            description: exp.description || "",
+          },
+        }),
+      });
+
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.error || "Failed to generate skills");
+      }
+
+      const generatedSkills: string[] = json.skills || [];
+      if (generatedSkills.length === 0) {
+        setNotification({ message: "No skills could be detected from this description.", type: "error" });
+        return;
+      }
+
+      // Merge with existing skills (case-insensitive deduplication)
+      const existingSkills: string[] = String(exp.skills || "").split(",").map((s: string) => s.trim()).filter(Boolean);
+      const lowerExisting = new Set<string>(existingSkills.map((s: string) => s.toLowerCase()));
+      const newUniqueSkills = generatedSkills.filter((s: string) => !lowerExisting.has(s.toLowerCase()));
+      const mergedSkills = [...existingSkills, ...newUniqueSkills];
+
+      updateArrayItem('experiences', index, 'skills', mergedSkills.join(", "));
+
+      setNotification({
+        message: newUniqueSkills.length > 0 
+          ? `Added ${newUniqueSkills.length} skill${newUniqueSkills.length === 1 ? "" : "s"} with AI!` 
+          : "All suggested skills are already present.",
+        type: "success",
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Error generating skills";
+      setNotification({ message, type: "error" });
+    } finally {
+      setAutofillingSkillIndex(null);
+    }
   };
 
   // Toggle Visibility Helper
@@ -437,13 +497,32 @@ export default function AdminProfile() {
                   <div className="grid grid-cols-1 gap-4">
                     <input className="bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-sm text-neutral-500" value={exp.period} onChange={e => updateArrayItem('experiences', i, 'period', e.target.value)} placeholder="Period (e.g. 2023 - Present)" />
                     
-                    {/* Skills Field */}
-                    <input 
-                      className="bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-sm text-neutral-800 placeholder:text-neutral-400" 
-                      value={exp.skills || ""} 
-                      onChange={e => updateArrayItem('experiences', i, 'skills', e.target.value)} 
-                      placeholder="Skills Used (comma separated, e.g. React, Node.js)" 
-                    />
+                    {/* Skills Field with Autofill */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wide">Skills Used</label>
+                        <button
+                          type="button"
+                          onClick={() => handleAutofillSkills(i)}
+                          disabled={autofillingSkillIndex === i || (!exp.role && !exp.description)}
+                          title="Autofill skills based on role and description using AI"
+                          className="text-xs flex items-center gap-1.5 text-neutral-700 hover:text-neutral-900 bg-neutral-100 hover:bg-neutral-200/80 px-2.5 py-0.5 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium cursor-pointer"
+                        >
+                          {autofillingSkillIndex === i ? (
+                            <Loader2 size={12} className="animate-spin text-purple-600" />
+                          ) : (
+                            <Sparkles size={12} className="text-purple-600" />
+                          )}
+                          <span>{autofillingSkillIndex === i ? "Generating..." : "Auto-fill Skills"}</span>
+                        </button>
+                      </div>
+                      <input 
+                        className="w-full bg-transparent border-b border-neutral-200 focus:border-neutral-800 outline-none text-sm text-neutral-800 placeholder:text-neutral-400" 
+                        value={exp.skills || ""} 
+                        onChange={e => updateArrayItem('experiences', i, 'skills', e.target.value)} 
+                        placeholder="Skills Used (comma separated, e.g. React, Node.js)" 
+                      />
+                    </div>
 
                     <div className="relative">
                       <textarea 
