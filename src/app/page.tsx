@@ -1438,15 +1438,12 @@ export default function Home() {
                   {/* Visual Side */}
                   <div className={`relative w-full h-56 sm:h-64 md:h-auto md:w-[46%] lg:w-[44%] ${selectedProject.project.gradient || 'bg-neutral-100'} shrink-0 overflow-hidden rounded-t-3xl md:rounded-tr-none md:rounded-l-3xl`}>
                     {selectedProject.project.image_url ? (
-                      <>
-                        <Image
-                          src={selectedProject.project.image_url}
-                          alt={selectedProject.project.title}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-black/10" />
-                      </>
+                      <Image
+                        src={selectedProject.project.image_url}
+                        alt={selectedProject.project.title}
+                        fill
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="absolute inset-0 bg-white/10 backdrop-blur-[1px] flex items-center justify-center">
                         <FolderGit2 className="text-neutral-400/50 w-20 h-20" />
